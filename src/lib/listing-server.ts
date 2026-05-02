@@ -5,6 +5,7 @@ import { auth, pool } from './auth'
 import { db } from '../db'
 import { foodListings, type FoodListing } from '../db/schema'
 import { safeExpireOldListings } from './expiry-server'
+import { notifyFoodListingCreated } from './notification-server'
 import {
   ACTIVE_LISTING_STATUSES,
   CANCELABLE_LISTING_STATUSES,
@@ -381,6 +382,20 @@ export const createListingFn = createServerFn({ method: 'POST' })
         imageUrl: data.imageUrl,
       })
       .returning()
+
+    // Fire-and-forget notification fan-out to potential claimants. Errors
+    // are swallowed inside the notifier so a logging blip never blocks the
+    // restaurant's create flow.
+    void notifyFoodListingCreated({
+      id: row.id,
+      title: row.title,
+      quantity: Number(row.quantity),
+      quantityUnit: row.quantityUnit,
+      foodCategory: row.foodCategory,
+      pickupStartTime: row.pickupStartTime,
+      pickupEndTime: row.pickupEndTime,
+      restaurantId: row.restaurantId,
+    })
 
     return toListingRow(row)
   })

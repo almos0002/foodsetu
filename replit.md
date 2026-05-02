@@ -398,6 +398,62 @@ The DashboardShell header gains a small "Reports" link that routes to
 `/reports` so any logged-in user can find their report queue from any
 shell-wrapped page.
 
+### Notifications (SMS / WhatsApp placeholder)
+
+`src/lib/notification-server.ts` is a placeholder notification service —
+no real SMS / WhatsApp provider is wired up yet. Every "send" call writes
+a row into the existing `sms_logs` table (status=`SENT`, `sent_at=now()`)
+and prints a one-line trace to stdout (`[notify:sms] to=… purpose=… …`).
+When you're ready to plug in Twilio / Vonage / MSG91 / etc., swap the
+`dispatch()` internals for a real client call — every other module keeps
+working unchanged.
+
+**Channel encoding**: `sms_logs` has no dedicated channel column today,
+so the channel is encoded as a `[SMS]` / `[WhatsApp]` prefix on the
+stored body. Easy to grep, easy to migrate to a real column later.
+
+**Failure isolation**: every `notify*` and `send*Placeholder` call is
+wrapped in try/catch and returns a result object — they never throw.
+Callers use `void notify*()` so the main user flow (listing creation,
+claim accept, OTP issue, pickup verify) never blocks on or rolls back
+because of a logging blip. Notifications fire **after** the relevant
+DB transaction commits.
+
+| Primitive | Purpose |
+|-----------|---------|
+| `sendSmsPlaceholder(phone, message, opts?)` | Inserts one row into `sms_logs` with body `[SMS] <message>`. |
+| `sendWhatsAppPlaceholder(phone, message, opts?)` | Same but body `[WhatsApp] <message>`. |
+| `SendOptions` | `{ purpose?, relatedListingId?, relatedClaimId? }` — `purpose` maps to the `sms_purpose` enum (defaults to `GENERIC`). |
+
+The five spec'd events each have a high-level helper that resolves the
+recipient phone number(s) from the auth-managed `organization` table and
+fans out via **both** channels (SMS + WhatsApp), so once a real provider
+is wired in the user can be reached on whichever they prefer:
+
+| Event | Helper | Recipient | `sms_purpose` |
+|-------|--------|-----------|---------------|
+| 1. Food listing created | `notifyFoodListingCreated(listing)` | All verified `NGO` orgs (for `HUMAN_SAFE`) or `ANIMAL_RESCUE` orgs (for `ANIMAL_SAFE`) with a phone on file, capped at 100. Donor restaurant excluded. | `NEW_LISTING_ALERT` |
+| 2. Claim requested | `notifyClaimRequested(claim, listing)` | Donor restaurant org's phone | `GENERIC` |
+| 3. Claim accepted | `notifyClaimAccepted(claim, listing)` | Claimant org's phone — includes donor's contact info | `CLAIM_ACCEPTED` |
+| 4. OTP generated | `notifyOtpGenerated(claim, listing, otp)` | Claimant org's phone — includes the 6-digit OTP value | `OTP` |
+| 5. Pickup completed | `notifyPickupCompleted(claim, listing)` | Both donor and claimant orgs (separate sends) | `GENERIC` |
+
+Hook points (all are `void notify…(…)` after the relevant tx commits, so
+nothing in the user's request path can be rolled back by a notification
+failure):
+
+| Server fn | Event(s) fired |
+|-----------|----------------|
+| `createListingFn` (`src/lib/listing-server.ts`) | `notifyFoodListingCreated` |
+| `createClaimForKind` (`src/lib/claim-server.ts`, used by both `createClaimFn` + `createAnimalClaimFn`) | `notifyClaimRequested` |
+| `acceptClaimFn` (`src/lib/claim-server.ts`) | `notifyClaimAccepted` + `notifyOtpGenerated` (the OTP value is captured via a closure inside the tx — it still never reaches the donor-side response) |
+| `verifyPickupFn` (`src/lib/claim-server.ts`) | `notifyPickupCompleted` |
+
+**Note on OTP storage in `sms_logs`**: the OTP value is currently saved
+to `sms_logs.body` so the placeholder can render the full would-be
+message. When you wire a real provider, consider redacting the body and
+only sending the cleartext OTP to the carrier API.
+
 ### Listing expiry sweep (`src/lib/expiry-server.ts`)
 
 Listings carry an `expiry_time`. There is no cron yet, so the sweep is

@@ -7,6 +7,12 @@ import { db } from '../db'
 import { claims, foodListings, type Claim } from '../db/schema'
 import { safeExpireOldListings } from './expiry-server'
 import {
+  notifyClaimAccepted,
+  notifyClaimRequested,
+  notifyOtpGenerated,
+  notifyPickupCompleted,
+} from './notification-server'
+import {
   ACTIVE_CLAIM_STATUSES,
   HISTORY_CLAIM_STATUSES,
   type ClaimStatus,
@@ -462,7 +468,7 @@ async function createClaimForKind(
 ): Promise<Claim> {
   const org = await requireVerifiedClaimantOrg(user, kind)
 
-  return await db.transaction(async (tx) => {
+  const result = await db.transaction(async (tx) => {
     // Temporal guards (`pickup_end_time > NOW()`, `expiry_time > NOW()`)
     // protect against claiming stale-but-still-AVAILABLE rows if the
     // background EXPIRED sweep is delayed or hasn't been built yet.
@@ -518,20 +524,37 @@ async function createClaimForKind(
           status: 'PENDING',
         })
         .returning()
-      return claim as Claim
+      return { claim: claim as Claim, listing }
     } catch (e) {
       // Unique-violation on claims_listing_active_uq = a concurrent claim won.
       // The transaction will roll back the listing status change.
       if (
         e &&
-        typeof e === 'object' &&
-        (e as { code?: string }).code === '23505'
+        typeof e === 'object'
+        && (e as { code?: string }).code === '23505'
       ) {
         throw new Error('This listing is no longer available to claim')
       }
       throw e
     }
   })
+
+  // Fire-and-forget notification to the donor restaurant. Runs after the
+  // commit so a logging blip never rolls back the claim.
+  void notifyClaimRequested(
+    {
+      id: result.claim.id,
+      foodListingId: result.listing.id,
+      claimantOrgId: org.id,
+    },
+    {
+      id: result.listing.id,
+      title: result.listing.title,
+      restaurantId: result.listing.restaurantId,
+    },
+  )
+
+  return result.claim
 }
 
 // ---------------------------------------------------------------------------
@@ -759,12 +782,25 @@ export const acceptClaimFn = createServerFn({ method: 'POST' })
     const user = await requireSessionUser()
     const org = await requireVerifiedRestaurantOrg(user)
 
-    return await db.transaction(async (tx) => {
+    // Capture the OTP + listing/claim info via closure so the post-commit
+    // notifier can include them. The values never reach the client — the
+    // function's return shape is still the donor-safe `{ ok, id, status }`.
+    let issuedOtp: string | null = null
+    let listingForNotify: {
+      id: string
+      title: string
+      restaurantId: string
+      claimantOrgId: string
+    } | null = null
+
+    const result = await db.transaction(async (tx) => {
       // 1. Look up the claim + listing, verify ownership and status.
       const [row] = await tx
         .select({
           claimStatus: claims.status,
+          claimantOrgId: claims.claimantOrgId,
           listingId: foodListings.id,
+          listingTitle: foodListings.title,
           listingStatus: foodListings.status,
           restaurantId: foodListings.restaurantId,
         })
@@ -829,6 +865,7 @@ export const acceptClaimFn = createServerFn({ method: 'POST' })
             throw new Error('This claim was just modified — please refresh')
           }
           claimRow = c as Claim
+          issuedOtp = otp
           break
         } catch (e) {
           // Only retry on the OTP-specific unique constraint to avoid
@@ -852,10 +889,42 @@ export const acceptClaimFn = createServerFn({ method: 'POST' })
           : new Error('Failed to issue OTP — please try again')
       }
 
+      listingForNotify = {
+        id: row.listingId,
+        title: row.listingTitle,
+        restaurantId: row.restaurantId,
+        claimantOrgId: row.claimantOrgId,
+      }
+
       // Donor-safe response: NEVER include `otpCode` or any other field that
       // would leak the OTP to the restaurant client.
       return { ok: true as const, id: claimRow.id, status: claimRow.status }
     })
+
+    // Post-commit notifications. Two separate events so the audit trail in
+    // sms_logs can distinguish "claim accepted" notices from "OTP" sends.
+    if (listingForNotify && issuedOtp) {
+      const lf = listingForNotify as {
+        id: string
+        title: string
+        restaurantId: string
+        claimantOrgId: string
+      }
+      const claimRef = {
+        id: result.id,
+        foodListingId: lf.id,
+        claimantOrgId: lf.claimantOrgId,
+      }
+      const listingRef = {
+        id: lf.id,
+        title: lf.title,
+        restaurantId: lf.restaurantId,
+      }
+      void notifyClaimAccepted(claimRef, listingRef)
+      void notifyOtpGenerated(claimRef, listingRef, issuedOtp)
+    }
+
+    return result
   })
 
 /**
@@ -1006,13 +1075,24 @@ export const verifyPickupFn = createServerFn({ method: 'POST' })
     const user = await requireSessionUser()
     const org = await requireVerifiedRestaurantOrg(user)
 
-    return await db.transaction(async (tx) => {
+    // Captured via closure for the post-commit notification (the function's
+    // return shape stays the donor-safe `{ ok, id, status }`).
+    let listingForNotify: {
+      id: string
+      title: string
+      restaurantId: string
+      claimantOrgId: string
+    } | null = null
+
+    const result = await db.transaction(async (tx) => {
       // 1. Look up the claim + listing, verify ownership, status, and OTP.
       const [row] = await tx
         .select({
           claimStatus: claims.status,
+          claimantOrgId: claims.claimantOrgId,
           otpCode: claims.otpCode,
           listingId: foodListings.id,
+          listingTitle: foodListings.title,
           listingStatus: foodListings.status,
           restaurantId: foodListings.restaurantId,
         })
@@ -1045,6 +1125,13 @@ export const verifyPickupFn = createServerFn({ method: 'POST' })
       }
       if (!otpEquals(data.otp, row.otpCode)) {
         throw new Error('Incorrect OTP — please try again')
+      }
+
+      listingForNotify = {
+        id: row.listingId,
+        title: row.listingTitle,
+        restaurantId: row.restaurantId,
+        claimantOrgId: row.claimantOrgId,
       }
 
       // 2. Move claim ACCEPTED → COMPLETED, status-gated.
@@ -1086,4 +1173,24 @@ export const verifyPickupFn = createServerFn({ method: 'POST' })
       // OTP to the restaurant client.
       return { ok: true as const, id: claimRow.id, status: claimRow.status }
     })
+
+    // Post-commit: notify both parties that pickup completed.
+    if (listingForNotify) {
+      const lf = listingForNotify as {
+        id: string
+        title: string
+        restaurantId: string
+        claimantOrgId: string
+      }
+      void notifyPickupCompleted(
+        {
+          id: result.id,
+          foodListingId: lf.id,
+          claimantOrgId: lf.claimantOrgId,
+        },
+        { id: lf.id, title: lf.title, restaurantId: lf.restaurantId },
+      )
+    }
+
+    return result
   })
