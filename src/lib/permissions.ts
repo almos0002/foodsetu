@@ -83,6 +83,21 @@ export function canClaimAnimalFood(u: AuthUser, org?: AuthOrganization): boolean
   return roleAndVerified(u, org ?? null, ['ANIMAL_RESCUE'])
 }
 
+// Stricter than canClaimHumanFood: caller must actually own an NGO org
+// (admins included). Mirrors `requireVerifiedNgoOrg` server-side, so the claim
+// UI never appears for an admin who has no NGO org to act on.
+export function canManageNgoClaims(
+  u: AuthUser,
+  org?: AuthOrganization,
+): boolean {
+  const r = roleOf(u)
+  if (!r) return false
+  if (!org || org.type !== 'NGO') return false
+  if (r === 'ADMIN') return true
+  if (r !== 'NGO') return false
+  return isOrgVerified(org)
+}
+
 // True if a non-admin user must have a verified org to act on the platform.
 // (ADMIN doesn't need an org at all.)
 export function requiresOrganization(u: AuthUser): boolean {
@@ -244,6 +259,65 @@ export const QUANTITY_UNITS = [
   'boxes',
 ] as const
 export type QuantityUnit = (typeof QUANTITY_UNITS)[number]
+
+// ---------------------------------------------------------------------------
+// Claims
+// ---------------------------------------------------------------------------
+
+export const CLAIM_STATUSES = [
+  'PENDING',
+  'ACCEPTED',
+  'REJECTED',
+  'CANCELLED',
+  'PICKED_UP',
+  'COMPLETED',
+] as const
+export type ClaimStatus = (typeof CLAIM_STATUSES)[number]
+
+export const CLAIM_STATUS_LABELS: Record<ClaimStatus, string> = {
+  PENDING: 'Pending',
+  ACCEPTED: 'Accepted',
+  REJECTED: 'Rejected',
+  CANCELLED: 'Cancelled',
+  PICKED_UP: 'Picked up',
+  COMPLETED: 'Completed',
+}
+
+export const CLAIM_STATUS_BADGE_CLASSES: Record<ClaimStatus, string> = {
+  PENDING: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+  ACCEPTED: 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
+  REJECTED: 'bg-red-100 text-red-800 ring-1 ring-red-200',
+  CANCELLED: 'bg-gray-200 text-gray-700 ring-1 ring-gray-300',
+  PICKED_UP: 'bg-purple-100 text-purple-800 ring-1 ring-purple-200',
+  COMPLETED: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
+}
+
+export const ACTIVE_CLAIM_STATUSES: readonly ClaimStatus[] = [
+  'PENDING',
+  'ACCEPTED',
+  'PICKED_UP',
+]
+export const HISTORY_CLAIM_STATUSES: readonly ClaimStatus[] = [
+  'REJECTED',
+  'CANCELLED',
+  'COMPLETED',
+]
+
+// A claimant may withdraw a claim only while it has not yet been picked up.
+export const CANCELABLE_CLAIM_STATUSES: readonly ClaimStatus[] = [
+  'PENDING',
+  'ACCEPTED',
+]
+
+export function isClaimActive(status: string | null | undefined): boolean {
+  return (ACTIVE_CLAIM_STATUSES as readonly string[]).includes(status ?? '')
+}
+
+export function isClaimCancelable(status: string | null | undefined): boolean {
+  return (CANCELABLE_CLAIM_STATUSES as readonly string[]).includes(
+    status ?? '',
+  )
+}
 
 // Restrict post-login `?redirect=` to internal paths to prevent open-redirect.
 // Accepted: starts with a single "/" and contains no scheme or protocol-relative prefix.

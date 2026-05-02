@@ -16,6 +16,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthedRestaurantDashboardRouteImport } from './routes/_authed/restaurant/dashboard'
 import { Route as AuthedOnboardingOrganizationRouteImport } from './routes/_authed/onboarding/organization'
+import { Route as AuthedNgoNearbyFoodRouteImport } from './routes/_authed/ngo/nearby-food'
+import { Route as AuthedNgoMyClaimsRouteImport } from './routes/_authed/ngo/my-claims'
 import { Route as AuthedNgoDashboardRouteImport } from './routes/_authed/ngo/dashboard'
 import { Route as AuthedAnimalDashboardRouteImport } from './routes/_authed/animal/dashboard'
 import { Route as AuthedAdminOrganizationsRouteImport } from './routes/_authed/admin/organizations'
@@ -61,6 +63,16 @@ const AuthedOnboardingOrganizationRoute =
     path: '/onboarding/organization',
     getParentRoute: () => AuthedRoute,
   } as any)
+const AuthedNgoNearbyFoodRoute = AuthedNgoNearbyFoodRouteImport.update({
+  id: '/ngo/nearby-food',
+  path: '/ngo/nearby-food',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedNgoMyClaimsRoute = AuthedNgoMyClaimsRouteImport.update({
+  id: '/ngo/my-claims',
+  path: '/ngo/my-claims',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedNgoDashboardRoute = AuthedNgoDashboardRouteImport.update({
   id: '/ngo/dashboard',
   path: '/ngo/dashboard',
@@ -115,6 +127,8 @@ export interface FileRoutesByFullPath {
   '/admin/organizations': typeof AuthedAdminOrganizationsRoute
   '/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/ngo/dashboard': typeof AuthedNgoDashboardRoute
+  '/ngo/my-claims': typeof AuthedNgoMyClaimsRoute
+  '/ngo/nearby-food': typeof AuthedNgoNearbyFoodRoute
   '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -131,6 +145,8 @@ export interface FileRoutesByTo {
   '/admin/organizations': typeof AuthedAdminOrganizationsRoute
   '/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/ngo/dashboard': typeof AuthedNgoDashboardRoute
+  '/ngo/my-claims': typeof AuthedNgoMyClaimsRoute
+  '/ngo/nearby-food': typeof AuthedNgoNearbyFoodRoute
   '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -149,6 +165,8 @@ export interface FileRoutesById {
   '/_authed/admin/organizations': typeof AuthedAdminOrganizationsRoute
   '/_authed/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/_authed/ngo/dashboard': typeof AuthedNgoDashboardRoute
+  '/_authed/ngo/my-claims': typeof AuthedNgoMyClaimsRoute
+  '/_authed/ngo/nearby-food': typeof AuthedNgoNearbyFoodRoute
   '/_authed/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/_authed/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -167,6 +185,8 @@ export interface FileRouteTypes {
     | '/admin/organizations'
     | '/animal/dashboard'
     | '/ngo/dashboard'
+    | '/ngo/my-claims'
+    | '/ngo/nearby-food'
     | '/onboarding/organization'
     | '/restaurant/dashboard'
     | '/api/auth/$'
@@ -183,6 +203,8 @@ export interface FileRouteTypes {
     | '/admin/organizations'
     | '/animal/dashboard'
     | '/ngo/dashboard'
+    | '/ngo/my-claims'
+    | '/ngo/nearby-food'
     | '/onboarding/organization'
     | '/restaurant/dashboard'
     | '/api/auth/$'
@@ -200,6 +222,8 @@ export interface FileRouteTypes {
     | '/_authed/admin/organizations'
     | '/_authed/animal/dashboard'
     | '/_authed/ngo/dashboard'
+    | '/_authed/ngo/my-claims'
+    | '/_authed/ngo/nearby-food'
     | '/_authed/onboarding/organization'
     | '/_authed/restaurant/dashboard'
     | '/api/auth/$'
@@ -268,6 +292,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedOnboardingOrganizationRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/ngo/nearby-food': {
+      id: '/_authed/ngo/nearby-food'
+      path: '/ngo/nearby-food'
+      fullPath: '/ngo/nearby-food'
+      preLoaderRoute: typeof AuthedNgoNearbyFoodRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/ngo/my-claims': {
+      id: '/_authed/ngo/my-claims'
+      path: '/ngo/my-claims'
+      fullPath: '/ngo/my-claims'
+      preLoaderRoute: typeof AuthedNgoMyClaimsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/ngo/dashboard': {
       id: '/_authed/ngo/dashboard'
       path: '/ngo/dashboard'
@@ -332,6 +370,8 @@ interface AuthedRouteChildren {
   AuthedAdminOrganizationsRoute: typeof AuthedAdminOrganizationsRoute
   AuthedAnimalDashboardRoute: typeof AuthedAnimalDashboardRoute
   AuthedNgoDashboardRoute: typeof AuthedNgoDashboardRoute
+  AuthedNgoMyClaimsRoute: typeof AuthedNgoMyClaimsRoute
+  AuthedNgoNearbyFoodRoute: typeof AuthedNgoNearbyFoodRoute
   AuthedOnboardingOrganizationRoute: typeof AuthedOnboardingOrganizationRoute
   AuthedRestaurantDashboardRoute: typeof AuthedRestaurantDashboardRoute
   AuthedRestaurantListingsNewRoute: typeof AuthedRestaurantListingsNewRoute
@@ -345,6 +385,8 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedAdminOrganizationsRoute: AuthedAdminOrganizationsRoute,
   AuthedAnimalDashboardRoute: AuthedAnimalDashboardRoute,
   AuthedNgoDashboardRoute: AuthedNgoDashboardRoute,
+  AuthedNgoMyClaimsRoute: AuthedNgoMyClaimsRoute,
+  AuthedNgoNearbyFoodRoute: AuthedNgoNearbyFoodRoute,
   AuthedOnboardingOrganizationRoute: AuthedOnboardingOrganizationRoute,
   AuthedRestaurantDashboardRoute: AuthedRestaurantDashboardRoute,
   AuthedRestaurantListingsNewRoute: AuthedRestaurantListingsNewRoute,

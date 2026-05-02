@@ -179,6 +179,40 @@ Editable / cancelable status sets live in `src/lib/permissions.ts`:
 - `ACTIVE_LISTING_STATUSES = ['DRAFT', 'AVAILABLE', 'CLAIM_REQUESTED', 'CLAIMED']`
 - `HISTORY_LISTING_STATUSES = ['PICKED_UP', 'EXPIRED', 'CANCELLED', 'REPORTED']`
 
+### NGO claiming
+
+Routes (under `src/routes/_authed/ngo/`):
+
+| Route | Purpose |
+|-------|---------|
+| `/ngo/dashboard` | Stat cards (nearby/active/total claims) + quick actions + previews of nearby food and active claims |
+| `/ngo/nearby-food` | Card grid of HUMAN_SAFE + AVAILABLE listings with distance/pickup/expiry; Claim button per card |
+| `/ngo/my-claims` | Active/history tabbed cards; restaurant phone revealed only after claim is `ACCEPTED` or `PICKED_UP` |
+
+All NGO routes use a plain role check (`NGO|ADMIN`) in `beforeLoad`. The verification gate is checked inside the page render (via `canManageNgoClaims`) — same pattern as restaurant routes, to avoid redirect loops.
+
+Server fns live in `src/lib/claim-server.ts`:
+
+| Function | Auth | Purpose |
+|----------|------|---------|
+| `listNearbyHumanFoodFn()` | session | Returns `[]` for non-NGO or non-verified callers. SQL filters `food_category='HUMAN_SAFE' AND status='AVAILABLE' AND expiry_time > NOW() AND pickup_end_time > NOW()` (LIMIT 200). **Restaurant phone is intentionally NOT selected — contact info is gated behind an accepted claim.** Distance is computed in TS via `haversineKm`. Sorted by distance asc (nulls last) then `expiryTime` asc; returns top 100. |
+| `listMyClaimsFn()` | session | NGO's own claims (newest first), with denormalized listing + restaurant info; returns `[]` for non-NGO callers. **`restaurantPhone` is server-side redacted to `null` unless claim status is `ACCEPTED` or `PICKED_UP`** — the value never reaches the client before then, regardless of UI logic. |
+| `createClaimFn({id})` | verified NGO | Atomic Drizzle `db.transaction`: (1) `UPDATE food_listings SET status='CLAIM_REQUESTED' WHERE id=? AND status='AVAILABLE' AND food_category='HUMAN_SAFE' AND pickup_end_time > NOW() AND expiry_time > NOW()` returning row — primary race guard + temporal guard for stale-but-still-AVAILABLE rows; (2) `INSERT INTO claims (..., status='PENDING')` — secondary guard via partial unique index `claims_listing_active_uq`. Throws user-friendly errors (`Listing not found` / `Only human-safe food can be claimed by NGOs` / `This listing has expired` / `This listing is no longer available to claim`). |
+
+`requireVerifiedNgoOrg`: ADMIN bypasses the verification check but still needs to own an NGO org (mirrors restaurant pattern — no magic claimantOrgId for admins).
+
+`haversineKm(lat1, lng1, lat2, lng2)`: great-circle distance in km, exported from `claim-server.ts`. Pure TS — no PostGIS dependency.
+
+Claim status sets live in `src/lib/permissions.ts`:
+- `ACTIVE_CLAIM_STATUSES = ['PENDING', 'ACCEPTED', 'PICKED_UP']`
+- `HISTORY_CLAIM_STATUSES = ['REJECTED', 'CANCELLED', 'COMPLETED']`
+- `CANCELABLE_CLAIM_STATUSES = ['PENDING', 'ACCEPTED']`
+- `CLAIM_STATUS_LABELS` / `CLAIM_STATUS_BADGE_CLASSES` for UI rendering
+
+`canManageNgoClaims(user, org)`: stricter than `canClaimHumanFood` — caller must actually own an NGO org (admins included). Mirrors `requireVerifiedNgoOrg` server-side so the claim UI never appears for an admin who has no NGO org to act on.
+
+`fetchOrgForUser` (in `src/lib/org-server.ts`) is scoped to `member.role = 'owner'` so the route context's organization is always the user's owned org. This keeps UI gates and server-side `requireVerified*Org` mutation gates aligned even if a future invitation flow introduces non-owner memberships.
+
 ### Org server functions (`src/lib/org-server.ts`)
 
 | Function | Auth | Purpose |

@@ -59,10 +59,16 @@ async function requireAdmin() {
 }
 
 async function fetchOrgForUser(userId: string): Promise<OrganizationRow | null> {
+  // Scoped to owner role: the entire app currently models a user as owning at
+  // most one org (enforced by the `member_one_owner_per_user_uq` partial
+  // unique index). Filtering on `m.role = 'owner'` keeps the route context's
+  // organization aligned with what the server-side `requireVerified*Org`
+  // gates accept, so UI gates never disagree with mutation gates if a future
+  // invitation flow adds non-owner memberships.
   const { rows } = await pool.query(
     `SELECT o.* FROM "organization" o
        JOIN "member" m ON m."organizationId" = o.id
-      WHERE m."userId" = $1
+      WHERE m."userId" = $1 AND m.role = 'owner'
       ORDER BY o."createdAt" ASC
       LIMIT 1`,
     [userId],
