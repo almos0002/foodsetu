@@ -13,6 +13,8 @@ FoodSetu connects restaurants/hotels/bakeries that have surplus food with verifi
 - **Styling**: Tailwind CSS v4 via `@tailwindcss/vite` (CSS-first config in `src/styles.css`)
 - **Icons**: `lucide-react` (e.g. `import { Heart } from 'lucide-react'`)
 - **Font**: Poppins (loaded from Google Fonts, set as default `font-sans` via Tailwind v4 `@theme`)
+- **Database**: Replit-managed PostgreSQL (connection via `DATABASE_URL` + `PG*` env vars)
+- **Auth**: Better Auth with email/password + organization plugin (`pg.Pool` adapter)
 - **Language**: TypeScript
 - **Package Manager**: npm
 
@@ -20,13 +22,35 @@ FoodSetu connects restaurants/hotels/bakeries that have surplus food with verifi
 
 ```
 src/
+  lib/
+    auth.ts          - Better Auth server config (pg.Pool, plugins)
+    auth-client.ts   - Better Auth React client
   routes/
-    __root.tsx    - Root layout with head/shell
-    index.tsx     - Home page route
-  router.tsx      - Router configuration
-  styles.css      - Global styles (Tailwind import)
-public/           - Static assets
+    __root.tsx       - Root layout with head/shell
+    index.tsx        - Home page route
+    api/
+      auth/
+        $.ts         - Catch-all Better Auth handler (/api/auth/*)
+  router.tsx         - Router configuration
+  styles.css         - Global styles (Tailwind import)
+public/              - Static assets
 ```
+
+## Database & Auth
+
+- **Provisioned**: Replit-managed Postgres. `DATABASE_URL` is auto-set.
+- **Schema**: Better Auth tables (`user`, `session`, `account`, `verification`, `organization`, `member`, `invitation`) created via `npx @better-auth/cli@latest migrate`.
+- **Re-run migrations** after editing `src/lib/auth.ts` (e.g. adding plugins).
+- **Health check**: `GET /api/auth/ok` should return `{"ok":true}`.
+- **Custom user fields**: `role` (defaults to `donor`) — see `additionalFields` in `src/lib/auth.ts`.
+
+### Required env vars
+
+| Var | Purpose |
+|-----|---------|
+| `DATABASE_URL` | Postgres connection (auto-set by Replit) |
+| `BETTER_AUTH_SECRET` | 32+ char secret for cookie signing |
+| `BETTER_AUTH_URL` | (optional) Base URL override; otherwise inferred from `REPLIT_DEV_DOMAIN` / `REPLIT_DOMAINS` |
 
 ## Development
 
