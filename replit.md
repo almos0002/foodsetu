@@ -110,8 +110,13 @@ Each dashboard route adds its own `beforeLoad` doing a plain role check (NOT the
 
 | Route | Allowed roles | Notes |
 |-------|---------------|-------|
-| `/admin/dashboard` | ADMIN | links to `/admin/organizations` |
+| `/admin/dashboard` | ADMIN | 9-stat overview + sidebar nav |
+| `/admin/users` | ADMIN | searchable user table, role filter chips |
 | `/admin/organizations` | ADMIN | review table; verify / reject / suspend / reset |
+| `/admin/listings` | ADMIN | all food listings + admin-cancel |
+| `/admin/claims` | ADMIN | all claims across the platform |
+| `/admin/reports` | ADMIN | report queue: review / resolve / dismiss |
+| `/admin/cities` | ADMIN | create / edit / enable / disable cities |
 | `/restaurant/dashboard` | RESTAURANT, ADMIN | gated by org verification for actions |
 | `/ngo/dashboard` | NGO, ADMIN | gated by org verification for actions |
 | `/animal/dashboard` | ANIMAL_RESCUE, ADMIN | gated by org verification for actions |
@@ -275,6 +280,48 @@ Claim status sets live in `src/lib/permissions.ts`:
 `canManageNgoClaims(user, org)` / `canManageAnimalClaims(user, org)`: stricter than `canClaim*Food` — caller must actually own an org of the matching type (admins included). Mirrors the server-side `requireVerifiedClaimantOrg` so the claim UI never appears for an admin who has no matching org to act on.
 
 `fetchOrgForUser` (in `src/lib/org-server.ts`) is scoped to `member.role = 'owner'` so the route context's organization is always the user's owned org. This keeps UI gates and server-side `requireVerified*Org` mutation gates aligned even if a future invitation flow introduces non-owner memberships.
+
+### Admin dashboard (`/admin/*`)
+
+All admin routes live under `src/routes/_authed/admin/` and gate via
+`canAccessAdmin(user)` in `beforeLoad` (non-admins are redirected to their
+own role dashboard via `roleToDashboard`). They share three reusable
+building blocks in `src/components/admin/`:
+
+| Component | Purpose |
+|-----------|---------|
+| `AdminShell` | Wraps `DashboardShell` (passes `organization={null}` because admins never own one) and adds a left sidebar nav highlighting the active route. Single source of truth for the 7 nav items. |
+| `StatCard` | Icon + label + big value + optional hint + optional `to` link + tone (`default`/`success`/`warning`/`danger`). Used on the dashboard grid. |
+| `AdminTable<T,F>` | Generic table that takes `rows`, `columns: Column<T>[]`, optional `filters: FilterChip<F>[]` + `searchKeys`. Renders the chip row, the search box (in-memory filter), the table itself, and an `N of M` count footer. |
+| `StatusPill` | Tiny rounded badge — used wherever a status string + colour ring needs rendering. |
+
+Server functions live in `src/lib/admin-server.ts`. Every one calls
+`requireAdmin()` first (rejects with `UNAUTHORIZED` / `FORBIDDEN`):
+
+| Function | Returns |
+|----------|---------|
+| `getAdminStatsFn()` | `{ totalUsers, totalRestaurants, totalNgos, totalAnimalRescues, activeListings, completedPickups, expiredListings, pendingVerificationRequests, rescuedFoodByUnit[] }` — all counts in parallel via `Promise.all`. Org-type counts come from `"organization" GROUP BY type`. `rescuedFoodByUnit` is `SUM(quantity) GROUP BY quantity_unit WHERE status='PICKED_UP'`. |
+| `listUsersForAdminFn()` | `[{ id, name, email, role, emailVerified, createdAt, orgId, orgName, orgType, orgVerificationStatus }]` via lateral join to the user's owner-membership (LIMIT 500). |
+| `listListingsForAdminFn()` | All listings + restaurant/city joins (LIMIT 500). |
+| `listClaimsForAdminFn()` | All claims + listing + restaurant + claimant joins (LIMIT 500). |
+| `listReportsForAdminFn()` | All reports + listing + reporter user/org joins (LIMIT 500). |
+| `setReportStatusFn({ id, status })` | Atomic `UPDATE reports SET status, resolved_at = (NOW if RESOLVED/DISMISSED else NULL)`. Returns `{ ok, id, status }`. |
+| `adminCancelListingFn({ id })` | Transactional: `SELECT … FOR UPDATE` → reject if status not in `DRAFT/AVAILABLE/CLAIM_REQUESTED/CLAIMED/REPORTED` → `UPDATE claims SET status='CANCELLED' WHERE listing_id = $ AND status IN ('PENDING','ACCEPTED','PICKED_UP')` (frees `claims_listing_active_uq`) → `UPDATE food_listings SET status='CANCELLED', accepted_claim_id=NULL`. |
+| `listCitiesForAdminFn()` | All cities (active + inactive) ordered by state, name. |
+| `createCityFn({ name, state, country, latitude?, longitude?, isActive })` | INSERT with auto-slug `<name>-<state>-<6-hex>`. |
+| `updateCityFn({ id, … })` | Same fields as create; preserves slug (slug isn't user-facing). |
+| `toggleCityActiveFn({ id, isActive })` | Flips `is_active`. Disabled cities stay referenced by existing orgs/listings but disappear from new sign-up dropdowns (the public `listCitiesFn` filters `is_active = true`). |
+
+The dashboard's "rescued food" stat is heterogeneous on purpose — quantities
+are recorded in different units (`kg`, `meals`, `plates`, …) so the card
+shows the top three units side by side rather than a misleading single
+total.
+
+`adminCancelListingFn` mirrors the restaurant-side cancel atomicity but
+with a wider allowed status set (a restaurant can only cancel `DRAFT` /
+`AVAILABLE`; an admin can additionally cancel `CLAIM_REQUESTED` /
+`CLAIMED` / `REPORTED` for unsafe-food situations and frees any active
+claim row in the same transaction so the claimant doesn't get stuck).
 
 ### Org server functions (`src/lib/org-server.ts`)
 

@@ -22,8 +22,13 @@ import { Route as AuthedNgoDashboardRouteImport } from './routes/_authed/ngo/das
 import { Route as AuthedAnimalNearbyFoodRouteImport } from './routes/_authed/animal/nearby-food'
 import { Route as AuthedAnimalMyClaimsRouteImport } from './routes/_authed/animal/my-claims'
 import { Route as AuthedAnimalDashboardRouteImport } from './routes/_authed/animal/dashboard'
+import { Route as AuthedAdminUsersRouteImport } from './routes/_authed/admin/users'
+import { Route as AuthedAdminReportsRouteImport } from './routes/_authed/admin/reports'
 import { Route as AuthedAdminOrganizationsRouteImport } from './routes/_authed/admin/organizations'
+import { Route as AuthedAdminListingsRouteImport } from './routes/_authed/admin/listings'
 import { Route as AuthedAdminDashboardRouteImport } from './routes/_authed/admin/dashboard'
+import { Route as AuthedAdminClaimsRouteImport } from './routes/_authed/admin/claims'
+import { Route as AuthedAdminCitiesRouteImport } from './routes/_authed/admin/cities'
 import { Route as AuthedRestaurantListingsIndexRouteImport } from './routes/_authed/restaurant/listings/index'
 import { Route as AuthedRestaurantClaimsIndexRouteImport } from './routes/_authed/restaurant/claims/index'
 import { Route as AuthedRestaurantListingsNewRouteImport } from './routes/_authed/restaurant/listings/new'
@@ -97,15 +102,40 @@ const AuthedAnimalDashboardRoute = AuthedAnimalDashboardRouteImport.update({
   path: '/animal/dashboard',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedAdminUsersRoute = AuthedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAdminReportsRoute = AuthedAdminReportsRouteImport.update({
+  id: '/admin/reports',
+  path: '/admin/reports',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedAdminOrganizationsRoute =
   AuthedAdminOrganizationsRouteImport.update({
     id: '/admin/organizations',
     path: '/admin/organizations',
     getParentRoute: () => AuthedRoute,
   } as any)
+const AuthedAdminListingsRoute = AuthedAdminListingsRouteImport.update({
+  id: '/admin/listings',
+  path: '/admin/listings',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedAdminDashboardRoute = AuthedAdminDashboardRouteImport.update({
   id: '/admin/dashboard',
   path: '/admin/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAdminClaimsRoute = AuthedAdminClaimsRouteImport.update({
+  id: '/admin/claims',
+  path: '/admin/claims',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAdminCitiesRoute = AuthedAdminCitiesRouteImport.update({
+  id: '/admin/cities',
+  path: '/admin/cities',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedRestaurantListingsIndexRoute =
@@ -149,8 +179,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/admin/cities': typeof AuthedAdminCitiesRoute
+  '/admin/claims': typeof AuthedAdminClaimsRoute
   '/admin/dashboard': typeof AuthedAdminDashboardRoute
+  '/admin/listings': typeof AuthedAdminListingsRoute
   '/admin/organizations': typeof AuthedAdminOrganizationsRoute
+  '/admin/reports': typeof AuthedAdminReportsRoute
+  '/admin/users': typeof AuthedAdminUsersRoute
   '/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/animal/my-claims': typeof AuthedAnimalMyClaimsRoute
   '/animal/nearby-food': typeof AuthedAnimalNearbyFoodRoute
@@ -171,8 +206,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/admin/cities': typeof AuthedAdminCitiesRoute
+  '/admin/claims': typeof AuthedAdminClaimsRoute
   '/admin/dashboard': typeof AuthedAdminDashboardRoute
+  '/admin/listings': typeof AuthedAdminListingsRoute
   '/admin/organizations': typeof AuthedAdminOrganizationsRoute
+  '/admin/reports': typeof AuthedAdminReportsRoute
+  '/admin/users': typeof AuthedAdminUsersRoute
   '/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/animal/my-claims': typeof AuthedAnimalMyClaimsRoute
   '/animal/nearby-food': typeof AuthedAnimalNearbyFoodRoute
@@ -195,8 +235,13 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_authed/admin/cities': typeof AuthedAdminCitiesRoute
+  '/_authed/admin/claims': typeof AuthedAdminClaimsRoute
   '/_authed/admin/dashboard': typeof AuthedAdminDashboardRoute
+  '/_authed/admin/listings': typeof AuthedAdminListingsRoute
   '/_authed/admin/organizations': typeof AuthedAdminOrganizationsRoute
+  '/_authed/admin/reports': typeof AuthedAdminReportsRoute
+  '/_authed/admin/users': typeof AuthedAdminUsersRoute
   '/_authed/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/_authed/animal/my-claims': typeof AuthedAnimalMyClaimsRoute
   '/_authed/animal/nearby-food': typeof AuthedAnimalNearbyFoodRoute
@@ -219,8 +264,13 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/admin/cities'
+    | '/admin/claims'
     | '/admin/dashboard'
+    | '/admin/listings'
     | '/admin/organizations'
+    | '/admin/reports'
+    | '/admin/users'
     | '/animal/dashboard'
     | '/animal/my-claims'
     | '/animal/nearby-food'
@@ -241,8 +291,13 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/admin/cities'
+    | '/admin/claims'
     | '/admin/dashboard'
+    | '/admin/listings'
     | '/admin/organizations'
+    | '/admin/reports'
+    | '/admin/users'
     | '/animal/dashboard'
     | '/animal/my-claims'
     | '/animal/nearby-food'
@@ -264,8 +319,13 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/login'
     | '/register'
+    | '/_authed/admin/cities'
+    | '/_authed/admin/claims'
     | '/_authed/admin/dashboard'
+    | '/_authed/admin/listings'
     | '/_authed/admin/organizations'
+    | '/_authed/admin/reports'
+    | '/_authed/admin/users'
     | '/_authed/animal/dashboard'
     | '/_authed/animal/my-claims'
     | '/_authed/animal/nearby-food'
@@ -384,6 +444,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAnimalDashboardRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/admin/users': {
+      id: '/_authed/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthedAdminUsersRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admin/reports': {
+      id: '/_authed/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AuthedAdminReportsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/admin/organizations': {
       id: '/_authed/admin/organizations'
       path: '/admin/organizations'
@@ -391,11 +465,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAdminOrganizationsRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/admin/listings': {
+      id: '/_authed/admin/listings'
+      path: '/admin/listings'
+      fullPath: '/admin/listings'
+      preLoaderRoute: typeof AuthedAdminListingsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/admin/dashboard': {
       id: '/_authed/admin/dashboard'
       path: '/admin/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AuthedAdminDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admin/claims': {
+      id: '/_authed/admin/claims'
+      path: '/admin/claims'
+      fullPath: '/admin/claims'
+      preLoaderRoute: typeof AuthedAdminClaimsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admin/cities': {
+      id: '/_authed/admin/cities'
+      path: '/admin/cities'
+      fullPath: '/admin/cities'
+      preLoaderRoute: typeof AuthedAdminCitiesRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/restaurant/listings/': {
@@ -444,8 +539,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedAdminCitiesRoute: typeof AuthedAdminCitiesRoute
+  AuthedAdminClaimsRoute: typeof AuthedAdminClaimsRoute
   AuthedAdminDashboardRoute: typeof AuthedAdminDashboardRoute
+  AuthedAdminListingsRoute: typeof AuthedAdminListingsRoute
   AuthedAdminOrganizationsRoute: typeof AuthedAdminOrganizationsRoute
+  AuthedAdminReportsRoute: typeof AuthedAdminReportsRoute
+  AuthedAdminUsersRoute: typeof AuthedAdminUsersRoute
   AuthedAnimalDashboardRoute: typeof AuthedAnimalDashboardRoute
   AuthedAnimalMyClaimsRoute: typeof AuthedAnimalMyClaimsRoute
   AuthedAnimalNearbyFoodRoute: typeof AuthedAnimalNearbyFoodRoute
@@ -463,8 +563,13 @@ interface AuthedRouteChildren {
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedAdminCitiesRoute: AuthedAdminCitiesRoute,
+  AuthedAdminClaimsRoute: AuthedAdminClaimsRoute,
   AuthedAdminDashboardRoute: AuthedAdminDashboardRoute,
+  AuthedAdminListingsRoute: AuthedAdminListingsRoute,
   AuthedAdminOrganizationsRoute: AuthedAdminOrganizationsRoute,
+  AuthedAdminReportsRoute: AuthedAdminReportsRoute,
+  AuthedAdminUsersRoute: AuthedAdminUsersRoute,
   AuthedAnimalDashboardRoute: AuthedAnimalDashboardRoute,
   AuthedAnimalMyClaimsRoute: AuthedAnimalMyClaimsRoute,
   AuthedAnimalNearbyFoodRoute: AuthedAnimalNearbyFoodRoute,
