@@ -1,0 +1,1 @@
+ALTER TABLE "reports" ALTER COLUMN "food_listing_id" DROP NOT NULL;

@@ -204,9 +204,14 @@ export const reports = pgTable(
   'reports',
   {
     id: id(),
-    foodListingId: text('food_listing_id')
-      .notNull()
-      .references(() => foodListings.id, { onDelete: 'cascade' }),
+    // Nullable so reports about a "fake organization" or other generic
+    // platform issues can be filed without an associated listing. Most
+    // reports do reference a listing — the /reports/new form captures it
+    // from the `?listingId=` query param when the user opens the form
+    // from a listing-context surface (claim card, listing detail, etc).
+    foodListingId: text('food_listing_id').references(() => foodListings.id, {
+      onDelete: 'cascade',
+    }),
     claimId: text('claim_id').references(() => claims.id, {
       onDelete: 'set null',
     }),
