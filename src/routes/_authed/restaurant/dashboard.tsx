@@ -25,9 +25,7 @@ import {
   isOrgVerified,
   roleToDashboard,
 } from '../../../lib/permissions'
-
-const BANNER_IMG =
-  'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=900&auto=format&fit=crop&q=80'
+import { greeting, todayLabel } from '../../../lib/time'
 
 export const Route = createFileRoute('/_authed/restaurant/dashboard')({
   beforeLoad: ({ context }) => {
@@ -49,14 +47,6 @@ export const Route = createFileRoute('/_authed/restaurant/dashboard')({
   component: RestaurantDashboard,
 })
 
-function todayLabel(): string {
-  return new Date().toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  })
-}
-
 function RestaurantDashboard() {
   const { active, history, activeClaims } = Route.useLoaderData()
   const { user, organization } = Route.useRouteContext()
@@ -65,12 +55,6 @@ function RestaurantDashboard() {
   const recent = active.slice(0, 4)
   const pendingClaims = activeClaims.filter((c) => c.status === 'PENDING')
   const acceptedClaims = activeClaims.length - pendingClaims.length
-  const greeting = (() => {
-    const h = new Date().getHours()
-    if (h < 12) return 'Good morning'
-    if (h < 18) return 'Good afternoon'
-    return 'Good evening'
-  })()
   const orgName = organization?.name ?? user.name ?? 'there'
 
   return (
@@ -82,9 +66,8 @@ function RestaurantDashboard() {
     >
       <DashboardWelcomeBanner
         eyebrow="Restaurant workspace"
-        title={`${greeting}, ${orgName}`}
+        title={`${greeting()}, ${orgName}`}
         description="Surplus food, claims, and pickups at a glance. Post fresh listings the moment your kitchen has extra."
-        image={BANNER_IMG}
         chips={[
           { label: todayLabel(), icon: <Calendar className="h-3.5 w-3.5" /> },
         ]}
@@ -148,20 +131,20 @@ function RestaurantDashboard() {
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-3">
-        {/* Recent listings as photo cards */}
+        {/* Recent listings */}
         <div className="lg:col-span-2">
           <div className="flex items-end justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+              <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--color-ink)]">
                 Recent listings
               </h2>
-              <p className="mt-0.5 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-[var(--color-ink-2)]">
                 The latest surplus posted by your kitchen
               </p>
             </div>
             <Link
               to="/restaurant/listings"
-              className="inline-flex items-center gap-1 text-sm font-semibold text-gray-900 underline-offset-4 hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-bold text-[var(--color-ink)] hover:text-[var(--color-coral)]"
             >
               View all
               <ArrowRight className="h-4 w-4" />
@@ -169,7 +152,7 @@ function RestaurantDashboard() {
           </div>
 
           {recent.length === 0 ? (
-            <div className="mt-4 rounded-2xl border border-dashed border-gray-300 bg-gray-50">
+            <div className="dotgrid mt-4 rounded-[28px] border-[1.5px] border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)]">
               <EmptyState
                 bare
                 icon={Utensils}
@@ -223,15 +206,15 @@ function RestaurantDashboard() {
           <QuickActionsPanel canPost={canPost} />
 
           {pendingClaims.length > 0 ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+            <div className="rounded-[28px] border-[1.5px] border-[var(--color-sun)] bg-[var(--color-sun-soft)] p-6">
+              <div className="flex h-11 w-11 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-sun)] text-[var(--color-ink)]">
                 <Inbox className="h-5 w-5" />
               </div>
-              <div className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-amber-700">
+              <div className="tiny-cap mt-4 text-[var(--color-sun-ink)]">
                 Needs your attention
               </div>
-              <p className="mt-1 text-sm text-amber-900">
-                <span className="text-2xl font-semibold tabular-nums">
+              <p className="mt-2 text-sm text-[var(--color-ink-2)]">
+                <span className="font-display text-3xl font-bold tabular-nums text-[var(--color-ink)]">
                   {pendingClaims.length}
                 </span>{' '}
                 new claim request
@@ -239,21 +222,21 @@ function RestaurantDashboard() {
               </p>
               <Link
                 to="/restaurant/claims"
-                className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-amber-800 underline-offset-4 hover:underline"
+                className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-[var(--color-sun-ink)] hover:underline"
               >
                 Review now
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           ) : (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+            <div className="rounded-[28px] border-[1.5px] border-[var(--color-mint)] bg-[var(--color-mint-soft)] p-6">
+              <div className="flex h-11 w-11 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-mint)] text-white">
                 <ListChecks className="h-5 w-5" />
               </div>
-              <div className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
+              <div className="tiny-cap mt-4 text-[var(--color-mint-ink)]">
                 All caught up
               </div>
-              <p className="mt-1 text-sm text-emerald-900">
+              <p className="mt-2 text-sm text-[var(--color-ink-2)]">
                 No pending claim requests right now.
               </p>
             </div>
@@ -266,30 +249,34 @@ function RestaurantDashboard() {
 
 function QuickActionsPanel({ canPost }: { canPost: boolean }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-        Quick actions
-      </div>
-      <div className="mt-3 grid grid-cols-2 gap-2">
+    <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white p-6">
+      <div className="tiny-cap text-[var(--color-ink-3)]">Quick actions</div>
+      <div className="mt-3 grid grid-cols-2 gap-2.5">
         {canPost ? (
           <ActionTile
             to="/restaurant/listings/new"
             icon={Plus}
             label="New listing"
-            tone="bg-orange-50 text-orange-700"
+            bg="bg-[var(--color-coral-soft)]"
+            fg="text-[var(--color-coral-ink)]"
+            border="border-[var(--color-coral)]"
           />
         ) : null}
         <ActionTile
           to="/restaurant/claims"
           icon={ClipboardList}
           label="Claim requests"
-          tone="bg-blue-50 text-blue-700"
+          bg="bg-[var(--color-sky-soft)]"
+          fg="text-[var(--color-sky-ink)]"
+          border="border-[var(--color-sky)]"
         />
         <ActionTile
           to="/restaurant/listings"
           icon={ShoppingBag}
           label="All listings"
-          tone="bg-emerald-50 text-emerald-700"
+          bg="bg-[var(--color-mint-soft)]"
+          fg="text-[var(--color-mint-ink)]"
+          border="border-[var(--color-mint)]"
         />
       </div>
     </div>
@@ -300,24 +287,28 @@ function ActionTile({
   to,
   icon: Icon,
   label,
-  tone,
+  bg,
+  fg,
+  border,
 }: {
   to: string
   icon: typeof Plus
   label: string
-  tone: string
+  bg: string
+  fg: string
+  border: string
 }) {
   return (
     <Link
       to={to}
-      className="group flex flex-col items-start gap-2 rounded-xl border border-gray-200 bg-white p-3 transition-all hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+      className="group flex flex-col items-start gap-2 rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white p-3 transition-transform hover:-translate-y-0.5 hover:border-[var(--color-line-strong)]"
     >
       <div
-        className={`flex h-9 w-9 items-center justify-center rounded-lg ${tone}`}
+        className={`flex h-9 w-9 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] ${border} ${bg} ${fg}`}
       >
         <Icon className="h-4 w-4" />
       </div>
-      <span className="text-xs font-medium text-gray-900">{label}</span>
+      <span className="text-xs font-bold text-[var(--color-ink)]">{label}</span>
     </Link>
   )
 }

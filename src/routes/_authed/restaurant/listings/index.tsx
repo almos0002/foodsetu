@@ -20,6 +20,7 @@ import {
   isOrgVerified,
   roleToDashboard,
 } from '../../../../lib/permissions'
+import { dateTime } from '../../../../lib/time'
 
 type Tab = 'active' | 'history'
 
@@ -66,7 +67,7 @@ function RestaurantListings() {
               </Button>
             </Link>
           ) : (
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-[var(--color-ink-3)]">
               Verify your organization to start posting listings.
             </span>
           )
@@ -122,19 +123,19 @@ function RestaurantListings() {
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="overflow-hidden rounded-[24px] border-[1.5px] border-[var(--color-line)] bg-white">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <table className="min-w-full text-sm">
+              <thead className="border-b-[1.5px] border-[var(--color-line)] bg-[var(--color-cream)] text-left">
                 <tr>
-                  <th className="px-4 py-3">Title</th>
-                  <th className="px-4 py-3">Quantity</th>
-                  <th className="px-4 py-3">Pickup window</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Open</th>
+                  <Th>Title</Th>
+                  <Th>Quantity</Th>
+                  <Th>Pickup window</Th>
+                  <Th>Status</Th>
+                  <Th align="right">Open</Th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y-[1.5px] divide-[var(--color-line)]">
                 {rows.map((row) => (
                   <ListingRowEl key={row.id} row={row} />
                 ))}
@@ -147,21 +148,37 @@ function RestaurantListings() {
   )
 }
 
+function Th({
+  children,
+  align,
+}: {
+  children: React.ReactNode
+  align?: 'right'
+}) {
+  return (
+    <th
+      className={`tiny-cap px-4 py-3 text-[var(--color-ink-3)] ${align === 'right' ? 'text-right' : ''}`}
+    >
+      {children}
+    </th>
+  )
+}
+
 function ListingRowEl({ row }: { row: ListingRow }) {
   const status = row.status
   return (
-    <tr className="hover:bg-gray-50">
+    <tr className="transition-colors hover:bg-[var(--color-cream)]">
       <td className="px-4 py-3">
-        <div className="font-medium text-gray-900">{row.title}</div>
-        <div className="text-xs text-gray-500">{row.foodType}</div>
+        <div className="font-bold text-[var(--color-ink)]">{row.title}</div>
+        <div className="text-xs text-[var(--color-ink-3)]">{row.foodType}</div>
       </td>
-      <td className="px-4 py-3 text-gray-700">
+      <td className="px-4 py-3 text-[var(--color-ink-2)]">
         {row.quantity} {row.quantityUnit}
       </td>
-      <td className="px-4 py-3 text-xs text-gray-600">
-        <div>{new Date(row.pickupStartTime).toLocaleString()}</div>
-        <div className="text-gray-400">
-          → {new Date(row.pickupEndTime).toLocaleString()}
+      <td className="px-4 py-3 text-xs text-[var(--color-ink-2)]">
+        <div>{dateTime(row.pickupStartTime)}</div>
+        <div className="text-[var(--color-ink-3)]">
+          → {dateTime(row.pickupEndTime)}
         </div>
       </td>
       <td className="px-4 py-3">
@@ -171,7 +188,7 @@ function ListingRowEl({ row }: { row: ListingRow }) {
         <Link
           to="/restaurant/listings/$id"
           params={{ id: row.id }}
-          className="inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-700"
+          className="inline-flex items-center gap-1 text-sm font-bold text-[var(--color-coral)] hover:text-[var(--color-coral-2)]"
         >
           Open
           <ChevronRight className="h-4 w-4" />

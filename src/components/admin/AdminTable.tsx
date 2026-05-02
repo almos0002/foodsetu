@@ -73,7 +73,7 @@ export function AdminTable<T, TFilter extends string>({
   const showSearch = searchPlaceholder && searchKeys && searchKeys.length > 0
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {(showSearch || filters) && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {filters ? (
@@ -85,17 +85,17 @@ export function AdminTable<T, TFilter extends string>({
                     key={f.value}
                     type="button"
                     onClick={() => onFilterChange?.(f.value)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition-colors ${
+                    className={`rounded-full border-[1.5px] px-3.5 py-1.5 text-xs font-bold transition-colors ${
                       active
-                        ? 'bg-orange-600 text-white ring-orange-600'
-                        : 'bg-white text-gray-700 ring-gray-300 hover:bg-gray-50'
+                        ? 'border-[var(--color-coral)] bg-[var(--color-coral)] text-white'
+                        : 'border-[var(--color-line)] bg-white text-[var(--color-ink-2)] hover:border-[var(--color-line-strong)] hover:text-[var(--color-ink)]'
                     }`}
                   >
                     {f.label}
                     {typeof f.count === 'number' ? (
                       <span
-                        className={`ml-1.5 text-[10px] ${
-                          active ? 'opacity-90' : 'text-gray-500'
+                        className={`ml-1.5 text-[10px] tabular-nums ${
+                          active ? 'opacity-90' : 'text-[var(--color-ink-3)]'
                         }`}
                       >
                         {f.count}
@@ -110,23 +110,23 @@ export function AdminTable<T, TFilter extends string>({
           )}
           {showSearch ? (
             <div className="relative w-full sm:w-72">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-ink-3)]" />
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full rounded-md border border-gray-300 bg-white py-1.5 pl-8 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
+                className="w-full rounded-full border-[1.5px] border-[var(--color-line)] bg-white py-2 pl-9 pr-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none"
               />
             </div>
           ) : null}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div className="overflow-hidden rounded-[24px] border-[1.5px] border-[var(--color-line)] bg-white">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <table className="min-w-full text-sm">
+            <thead className="bg-[var(--color-cream)] text-xs font-bold uppercase tracking-wider text-[var(--color-ink-2)]">
               <tr>
                 {columns.map((c) => (
                   <th
@@ -138,12 +138,12 @@ export function AdminTable<T, TFilter extends string>({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y-[1.5px] divide-dashed divide-[var(--color-line)]">
               {visible.length === 0 ? (
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="px-4 py-12 text-center text-sm text-gray-500"
+                    className="px-4 py-12 text-center text-sm text-[var(--color-ink-2)]"
                   >
                     {query.trim()
                       ? `No results for "${query.trim()}".`
@@ -152,7 +152,10 @@ export function AdminTable<T, TFilter extends string>({
                 </tr>
               ) : (
                 visible.map((row) => (
-                  <tr key={rowKey(row)} className="hover:bg-gray-50">
+                  <tr
+                    key={rowKey(row)}
+                    className="transition-colors hover:bg-[var(--color-cream)]"
+                  >
                     {columns.map((c) => (
                       <td
                         key={c.key}
@@ -169,7 +172,7 @@ export function AdminTable<T, TFilter extends string>({
         </div>
       </div>
 
-      <div className="text-right text-xs text-gray-500">
+      <div className="text-right text-xs font-medium text-[var(--color-ink-2)]">
         {visible.length} of {rows.length}
       </div>
     </div>

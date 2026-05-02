@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { Building2, LogOut, Utensils } from 'lucide-react'
+import { Building2, LogOut } from 'lucide-react'
 import { signOut } from '../../../lib/auth-client'
 import {
   createMyOrganizationFn,
@@ -75,12 +75,14 @@ function OnboardingOrganization() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-white">
+    <div className="min-h-screen bg-[var(--color-cream)]">
+      <header className="border-b-[1.5px] border-[var(--color-line)] bg-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-2 text-orange-600">
-            <Utensils className="h-5 w-5" />
-            <span className="text-base font-semibold">FoodSetu</span>
+          <div className="flex items-center gap-2.5">
+            <BrandMark />
+            <span className="font-display text-lg font-bold tracking-tight text-[var(--color-ink)]">
+              FoodSetu
+            </span>
           </div>
           <Button
             variant="outline"
@@ -93,25 +95,30 @@ function OnboardingOrganization() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-orange-50 text-orange-600">
+      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+        <div className="mb-8 flex items-start gap-4">
+          <div className="flex h-12 w-12 -rotate-3 flex-shrink-0 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-coral)] text-white">
             <Building2 className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">
+            <div className="tiny-cap text-[var(--color-coral)]">
+              Almost there
+            </div>
+            <h1 className="font-display mt-2 text-3xl font-bold tracking-tight text-[var(--color-ink)] sm:text-4xl">
               Set up your organization
             </h1>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-[var(--color-ink-2)] sm:text-base">
               Welcome, {user.name ?? user.email}. Tell us about your{' '}
-              <span className="font-medium text-gray-800">{roleLabel}</span> so
-              an admin can verify it.
+              <span className="font-semibold text-[var(--color-ink)]">
+                {roleLabel}
+              </span>{' '}
+              so an admin can verify it.
             </p>
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-          <Alert tone="warning" className="mb-5">
+        <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white p-6 sm:p-8">
+          <Alert tone="warning" className="mb-6">
             Your organization will be reviewed by an admin. You can sign in and
             view your dashboard immediately, but you won&apos;t be able to{' '}
             {user.role === 'RESTAURANT' ? 'post listings' : 'claim food'} until
@@ -131,9 +138,9 @@ function OnboardingOrganization() {
             </Field>
 
             <Field label="Type">
-              <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+              <div className="rounded-2xl border-[1.5px] border-[var(--color-line)] bg-[var(--color-cream)] px-4 py-3 text-sm text-[var(--color-ink)]">
                 {expectedType || '—'}
-                <span className="ml-2 text-xs text-gray-500">
+                <span className="ml-2 text-xs text-[var(--color-ink-3)]">
                   (matches your account role)
                 </span>
               </div>
@@ -175,7 +182,7 @@ function OnboardingOrganization() {
                     ))}
                   </select>
                 ) : (
-                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500">
+                  <div className="rounded-2xl border-[1.5px] border-[var(--color-line)] bg-[var(--color-cream)] px-4 py-3 text-sm text-[var(--color-ink-3)]">
                     No cities seeded yet — leave blank for now.
                   </div>
                 )}
@@ -232,7 +239,7 @@ function OnboardingOrganization() {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500'
+  'w-full rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none'
 
 function Field({
   label,
@@ -245,11 +252,38 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-gray-700">
+      <span className="mb-1.5 block text-sm font-semibold text-[var(--color-ink)]">
         {label}
-        {required ? <span className="ml-0.5 text-red-500">*</span> : null}
+        {required ? (
+          <span className="ml-0.5 text-[var(--color-coral)]">*</span>
+        ) : null}
       </span>
       {children}
     </label>
+  )
+}
+
+function BrandMark() {
+  return (
+    <div className="relative flex h-9 w-9 -rotate-6 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-coral)]">
+      <svg viewBox="0 0 32 32" className="h-5 w-5" aria-hidden>
+        <path
+          d="M5 16 Q 5 24 16 25 Q 27 24 27 16 Z"
+          fill="white"
+          stroke="#1a1f2e"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+        <circle cx="13" cy="19" r="1.4" fill="#1a1f2e" />
+        <circle cx="19" cy="19" r="1.4" fill="#1a1f2e" />
+        <path
+          d="M14 22 Q 16 23.5 18 22"
+          fill="none"
+          stroke="#1a1f2e"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+      </svg>
+    </div>
   )
 }

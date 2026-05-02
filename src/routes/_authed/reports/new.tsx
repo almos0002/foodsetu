@@ -131,20 +131,25 @@ function NewReportPage() {
         <button
           type="button"
           onClick={() => router.history.back()}
-          className="mb-4 inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
+          className="mb-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-ink-2)] hover:text-[var(--color-ink)]"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
         </button>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+        <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white p-6 sm:p-8">
           <div className="flex items-start gap-3">
-            <Flag className="mt-0.5 h-5 w-5 text-red-600" />
+            <div className="flex h-10 w-10 -rotate-3 flex-shrink-0 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-coral)] text-white">
+              <Flag className="h-4 w-4" />
+            </div>
             <div>
-              <h2 className="text-base font-semibold text-gray-900">
+              <div className="tiny-cap text-[var(--color-coral)]">
+                File a report
+              </div>
+              <h2 className="font-display mt-1.5 text-2xl font-bold tracking-tight text-[var(--color-ink)]">
                 Tell us what went wrong
               </h2>
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-[var(--color-ink-2)]">
                 Reports are reviewed by FoodSetu admins. Please be specific so
                 they can act quickly.
               </p>
@@ -152,11 +157,11 @@ function NewReportPage() {
           </div>
 
           {search.listingId || search.claimId ? (
-            <div className="mt-4 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600">
-              <div className="font-medium uppercase tracking-wide text-gray-500">
+            <div className="mt-5 rounded-2xl border-[1.5px] border-[var(--color-line)] bg-[var(--color-cream)] px-4 py-3 text-xs text-[var(--color-ink-2)]">
+              <div className="tiny-cap text-[var(--color-ink-3)]">
                 Linked context
               </div>
-              <div className="mt-1 space-y-0.5 font-mono text-[11px] text-gray-700">
+              <div className="mt-2 space-y-0.5 font-mono text-[11px] text-[var(--color-ink)]">
                 {search.listingId ? (
                   <div>Listing · {search.listingId}</div>
                 ) : null}
@@ -167,17 +172,17 @@ function NewReportPage() {
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             <fieldset>
-              <legend className="text-sm font-semibold text-gray-900">
+              <legend className="text-sm font-semibold text-[var(--color-ink)]">
                 Reason
               </legend>
-              <div className="mt-2 space-y-2">
+              <div className="mt-3 space-y-2">
                 {REPORT_REASONS.map((r) => (
                   <label
                     key={r}
-                    className={`flex cursor-pointer items-start gap-3 rounded-md border px-3 py-2 transition-colors ${
+                    className={`flex cursor-pointer items-start gap-3 rounded-2xl border-[1.5px] px-4 py-3 transition-colors ${
                       reason === r
-                        ? 'border-orange-300 bg-orange-50'
-                        : 'border-gray-200 bg-white hover:border-gray-300'
+                        ? 'border-[var(--color-coral)] bg-[var(--color-coral-soft)]'
+                        : 'border-[var(--color-line)] bg-white hover:border-[var(--color-line-strong)]'
                     }`}
                   >
                     <input
@@ -186,13 +191,13 @@ function NewReportPage() {
                       value={r}
                       checked={reason === r}
                       onChange={() => setReason(r)}
-                      className="mt-0.5 h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
+                      className="mt-0.5 h-4 w-4 accent-[var(--color-coral)]"
                     />
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-bold text-[var(--color-ink)]">
                         {REPORT_REASON_LABELS[r]}
                       </div>
-                      <div className="mt-0.5 text-xs text-gray-600">
+                      <div className="mt-0.5 text-xs text-[var(--color-ink-2)]">
                         {REPORT_REASON_HINTS[r]}
                       </div>
                     </div>
@@ -204,10 +209,10 @@ function NewReportPage() {
             <div>
               <label
                 htmlFor="description"
-                className="block text-sm font-semibold text-gray-900"
+                className="block text-sm font-semibold text-[var(--color-ink)]"
               >
                 Description{' '}
-                <span className="font-normal text-gray-500">
+                <span className="font-normal text-[var(--color-ink-3)]">
                   ({reason === 'OTHER' ? 'required' : 'optional'})
                 </span>
               </label>
@@ -219,9 +224,9 @@ function NewReportPage() {
                 placeholder="Add any details that will help an admin investigate."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
+                className="mt-1.5 w-full rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none"
               />
-              <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500">
+              <div className="mt-1.5 flex items-center justify-between text-[11px] text-[var(--color-ink-3)]">
                 <span>{description.length} / 2000</span>
               </div>
             </div>

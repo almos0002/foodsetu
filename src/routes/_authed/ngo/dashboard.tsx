@@ -27,9 +27,7 @@ import {
   roleToDashboard,
 } from '../../../lib/permissions'
 import type { ClaimStatus } from '../../../lib/permissions'
-
-const BANNER_IMG =
-  'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900&auto=format&fit=crop&q=80'
+import { greeting, todayLabel } from '../../../lib/time'
 
 export const Route = createFileRoute('/_authed/ngo/dashboard')({
   beforeLoad: ({ context }) => {
@@ -48,14 +46,6 @@ export const Route = createFileRoute('/_authed/ngo/dashboard')({
   component: NgoDashboard,
 })
 
-function todayLabel(): string {
-  return new Date().toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  })
-}
-
 function NgoDashboard() {
   const { nearby, myClaims } = Route.useLoaderData()
   const { user, organization } = Route.useRouteContext()
@@ -63,12 +53,6 @@ function NgoDashboard() {
   const activeClaims = myClaims.filter((c) => isClaimActive(c.status))
   const recentNearby = nearby.slice(0, 4)
   const orgName = organization?.name ?? user.name ?? 'there'
-  const greeting = (() => {
-    const h = new Date().getHours()
-    if (h < 12) return 'Good morning'
-    if (h < 18) return 'Good afternoon'
-    return 'Good evening'
-  })()
 
   return (
     <DashboardShell
@@ -80,9 +64,8 @@ function NgoDashboard() {
       <DashboardWelcomeBanner
         tone="rose"
         eyebrow="NGO workspace"
-        title={`${greeting}, ${orgName}`}
+        title={`${greeting()}, ${orgName}`}
         description="Find and claim nearby surplus food in real time. Reach families and shelters with fresh meals every day."
-        image={BANNER_IMG}
         chips={[
           { label: todayLabel(), icon: <Calendar className="h-3.5 w-3.5" /> },
         ]}
@@ -144,23 +127,23 @@ function NgoDashboard() {
           <div className="lg:col-span-2">
             <div className="flex items-end justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+                <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--color-ink)]">
                   Nearby right now
                 </h2>
-                <p className="mt-0.5 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-[var(--color-ink-2)]">
                   Fresh listings sorted by distance
                 </p>
               </div>
               <Link
                 to="/ngo/nearby-food"
-                className="inline-flex items-center gap-1 text-sm font-semibold text-gray-900 underline-offset-4 hover:underline"
+                className="inline-flex items-center gap-1 text-sm font-bold text-[var(--color-ink)] hover:text-[var(--color-coral)]"
               >
                 View all
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
             {recentNearby.length === 0 ? (
-              <div className="mt-4 rounded-2xl border border-dashed border-gray-300 bg-gray-50">
+              <div className="dotgrid mt-4 rounded-[28px] border-[1.5px] border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)]">
                 <EmptyState
                   bare
                   icon={Utensils}
@@ -190,50 +173,54 @@ function NgoDashboard() {
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-2xl border border-gray-200 bg-white p-5">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+            <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white p-6">
+              <div className="tiny-cap text-[var(--color-ink-3)]">
                 Quick actions
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="mt-3 grid grid-cols-2 gap-2.5">
                 <ActionTile
                   to="/ngo/nearby-food"
                   icon={MapPin}
                   label="Nearby food"
-                  tone="bg-orange-50 text-orange-700"
+                  bg="bg-[var(--color-coral-soft)]"
+                  fg="text-[var(--color-coral-ink)]"
+                  border="border-[var(--color-coral)]"
                 />
                 <ActionTile
                   to="/ngo/my-claims"
                   icon={ShoppingBag}
                   label="My claims"
-                  tone="bg-blue-50 text-blue-700"
+                  bg="bg-[var(--color-sky-soft)]"
+                  fg="text-[var(--color-sky-ink)]"
+                  border="border-[var(--color-sky)]"
                 />
               </div>
             </div>
 
             {activeClaims.length > 0 ? (
-              <div className="rounded-2xl border border-gray-200 bg-white">
-                <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-5 py-3.5">
-                  <h3 className="text-sm font-semibold text-gray-900">
+              <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white">
+                <div className="flex items-center justify-between gap-2 border-b-[1.5px] border-[var(--color-line)] px-6 py-4">
+                  <h3 className="font-display text-base font-bold text-[var(--color-ink)]">
                     Active claims
                   </h3>
                   <Link
                     to="/ngo/my-claims"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-gray-900 underline-offset-4 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-ink)] hover:text-[var(--color-coral)]"
                   >
                     All
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
-                <ul className="divide-y divide-gray-100">
+                <ul className="divide-y-[1.5px] divide-[var(--color-line)]">
                   {activeClaims.slice(0, 4).map((claim) => {
                     const status = claim.status as ClaimStatus
                     return (
                       <li
                         key={claim.id}
-                        className="flex items-center gap-2 px-5 py-3"
+                        className="flex items-center gap-2 px-6 py-3"
                       >
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-xs font-medium text-gray-900">
+                          <div className="truncate text-xs font-semibold text-[var(--color-ink)]">
                             {claim.listing.title}
                           </div>
                         </div>
@@ -255,24 +242,28 @@ function ActionTile({
   to,
   icon: Icon,
   label,
-  tone,
+  bg,
+  fg,
+  border,
 }: {
   to: string
   icon: typeof MapPin
   label: string
-  tone: string
+  bg: string
+  fg: string
+  border: string
 }) {
   return (
     <Link
       to={to}
-      className="group flex flex-col items-start gap-2 rounded-xl border border-gray-200 bg-white p-3 transition-all hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+      className="group flex flex-col items-start gap-2 rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white p-3 transition-transform hover:-translate-y-0.5 hover:border-[var(--color-line-strong)]"
     >
       <div
-        className={`flex h-9 w-9 items-center justify-center rounded-lg ${tone}`}
+        className={`flex h-9 w-9 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] ${border} ${bg} ${fg}`}
       >
         <Icon className="h-4 w-4" />
       </div>
-      <span className="text-xs font-medium text-gray-900">{label}</span>
+      <span className="text-xs font-bold text-[var(--color-ink)]">{label}</span>
     </Link>
   )
 }

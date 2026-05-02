@@ -5,31 +5,39 @@ type Tone = 'orange' | 'rose' | 'emerald' | 'gray'
 
 const TONES: Record<
   Tone,
-  { bg: string; eyebrow: string; ring: string; chip: string }
+  { bg: string; eyebrow: string; chip: string; titleColor: string; bodyColor: string; rotate: string }
 > = {
   orange: {
-    bg: 'bg-orange-50',
-    eyebrow: 'text-orange-700',
-    ring: 'ring-orange-100',
-    chip: 'bg-white text-orange-700',
+    bg: 'bg-[var(--color-coral-soft)]',
+    eyebrow: 'text-[var(--color-coral)]',
+    chip: 'bg-white text-[var(--color-coral-ink)] border-[var(--color-coral)]',
+    titleColor: 'text-[var(--color-ink)]',
+    bodyColor: 'text-[var(--color-ink-2)]',
+    rotate: '-rotate-1',
   },
   rose: {
-    bg: 'bg-rose-50',
-    eyebrow: 'text-rose-700',
-    ring: 'ring-rose-100',
-    chip: 'bg-white text-rose-700',
+    bg: 'bg-[var(--color-berry-soft)]',
+    eyebrow: 'text-[var(--color-berry)]',
+    chip: 'bg-white text-[var(--color-berry-ink)] border-[var(--color-berry)]',
+    titleColor: 'text-[var(--color-ink)]',
+    bodyColor: 'text-[var(--color-ink-2)]',
+    rotate: 'rotate-1',
   },
   emerald: {
-    bg: 'bg-emerald-50',
-    eyebrow: 'text-emerald-700',
-    ring: 'ring-emerald-100',
-    chip: 'bg-white text-emerald-700',
+    bg: 'bg-[var(--color-mint-soft)]',
+    eyebrow: 'text-[var(--color-mint-ink)]',
+    chip: 'bg-white text-[var(--color-mint-ink)] border-[var(--color-mint)]',
+    titleColor: 'text-[var(--color-ink)]',
+    bodyColor: 'text-[var(--color-ink-2)]',
+    rotate: '-rotate-1',
   },
   gray: {
-    bg: 'bg-gray-900',
-    eyebrow: 'text-orange-300',
-    ring: 'ring-gray-700',
-    chip: 'bg-white/10 text-white',
+    bg: 'bg-[var(--color-ink)]',
+    eyebrow: 'text-[var(--color-sun)]',
+    chip: 'bg-white/10 text-white border-white/20',
+    titleColor: 'text-white',
+    bodyColor: 'text-white/85',
+    rotate: 'rotate-1',
   },
 }
 
@@ -57,53 +65,38 @@ export function DashboardWelcomeBanner({
   className,
 }: Props) {
   const t = TONES[tone]
-  const dark = tone === 'gray'
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-gray-200',
+        'relative overflow-hidden rounded-[32px] border-[1.5px] border-[var(--color-line-strong)]',
         t.bg,
-        dark && 'border-gray-800',
         className,
       )}
     >
       <div className="grid gap-0 lg:grid-cols-[1fr_320px]">
-        <div className="p-6 sm:p-8">
-          <div
-            className={cn(
-              'text-[11px] font-semibold uppercase tracking-wider',
-              t.eyebrow,
-            )}
-          >
-            {eyebrow}
-          </div>
+        <div className="p-7 sm:p-9">
+          <div className={cn('tiny-cap', t.eyebrow)}>{eyebrow}</div>
           <h1
             className={cn(
-              'mt-2 text-2xl font-semibold tracking-tight sm:text-[28px]',
-              dark ? 'text-white' : 'text-gray-900',
+              'font-display mt-3 text-3xl font-bold tracking-tight sm:text-[36px]',
+              t.titleColor,
             )}
           >
             {title}
           </h1>
           {description ? (
-            <p
-              className={cn(
-                'mt-2 max-w-xl text-sm sm:text-base',
-                dark ? 'text-gray-300' : 'text-gray-600',
-              )}
-            >
+            <p className={cn('mt-3 max-w-xl text-sm sm:text-base', t.bodyColor)}>
               {description}
             </p>
           ) : null}
           {chips && chips.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-5 flex flex-wrap gap-2">
               {chips.map((chip) => (
                 <span
                   key={chip.label}
                   className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1',
+                    'inline-flex items-center gap-1.5 rounded-full border-[1.5px] px-3 py-1 text-xs font-semibold',
                     t.chip,
-                    t.ring,
                   )}
                 >
                   {chip.icon}
@@ -113,7 +106,7 @@ export function DashboardWelcomeBanner({
             </div>
           ) : null}
           {actions ? (
-            <div className="mt-5 flex flex-wrap items-center gap-2">
+            <div className="mt-6 flex flex-wrap items-center gap-2">
               {actions}
             </div>
           ) : null}

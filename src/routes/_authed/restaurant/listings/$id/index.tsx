@@ -41,6 +41,7 @@ import {
   roleToDashboard,
 } from '../../../../../lib/permissions'
 import type { FoodCategory, FoodType } from '../../../../../lib/permissions'
+import { fullDateTime } from '../../../../../lib/time'
 
 export const Route = createFileRoute('/_authed/restaurant/listings/$id/')({
   beforeLoad: ({ context }) => {
@@ -63,14 +64,16 @@ export const Route = createFileRoute('/_authed/restaurant/listings/$id/')({
   component: ListingDetail,
   notFoundComponent: () => (
     <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-      <h2 className="text-xl font-semibold text-gray-900">Listing not found</h2>
-      <p className="mt-2 text-sm text-gray-600">
+      <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+        Listing not found
+      </h2>
+      <p className="mt-2 text-sm text-[var(--color-ink-2)]">
         This listing doesn&apos;t exist or doesn&apos;t belong to your
         organization.
       </p>
       <Link
         to="/restaurant/listings"
-        className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-700"
+        className="mt-6 inline-flex items-center gap-1 text-sm font-bold text-[var(--color-coral)] hover:text-[var(--color-coral-2)]"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to listings
@@ -132,7 +135,7 @@ function ListingDetail() {
             <img
               src={listing.imageUrl}
               alt={listing.title}
-              className="h-64 w-full rounded-lg border border-gray-200 object-cover"
+              className="h-72 w-full rounded-[28px] border-[1.5px] border-[var(--color-line)] object-cover"
             />
           ) : null}
 
@@ -141,7 +144,7 @@ function ListingDetail() {
               <CardTitle>Description</CardTitle>
             </CardHeader>
             <CardBody>
-              <p className="whitespace-pre-line text-sm text-gray-800">
+              <p className="whitespace-pre-line text-sm text-[var(--color-ink-2)]">
                 {listing.description?.trim()
                   ? listing.description
                   : 'No description provided.'}
@@ -165,10 +168,10 @@ function ListingDetail() {
               label="Pickup window"
               value={
                 <>
-                  {new Date(listing.pickupStartTime).toLocaleString()}
+                  {fullDateTime(listing.pickupStartTime)}
                   <br />
-                  <span className="text-gray-500">
-                    → {new Date(listing.pickupEndTime).toLocaleString()}
+                  <span className="text-[var(--color-ink-3)]">
+                    → {fullDateTime(listing.pickupEndTime)}
                   </span>
                 </>
               }
@@ -176,7 +179,7 @@ function ListingDetail() {
             <DetailCard
               icon={<Clock className="h-3.5 w-3.5" />}
               label="Expires"
-              value={new Date(listing.expiryTime).toLocaleString()}
+              value={fullDateTime(listing.expiryTime)}
             />
             <DetailCard
               icon={<MapPin className="h-3.5 w-3.5" />}
@@ -186,7 +189,7 @@ function ListingDetail() {
             <DetailCard
               icon={<Clock className="h-3.5 w-3.5" />}
               label="Created"
-              value={new Date(listing.createdAt).toLocaleString()}
+              value={fullDateTime(listing.createdAt)}
             />
           </div>
         </div>
@@ -197,7 +200,7 @@ function ListingDetail() {
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardBody>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-[var(--color-ink-3)]">
                 {editable
                   ? 'You can edit this listing while it is still available.'
                   : 'This listing can no longer be edited.'}
@@ -266,23 +269,23 @@ function DetailCard({
   value: React.ReactNode
 }) {
   return (
-    <div className="rounded-md border border-gray-200 bg-white p-3">
-      <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+    <div className="rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white p-4">
+      <div className="tiny-cap flex items-center gap-1.5 text-[var(--color-ink-3)]">
         {icon}
         {label}
       </div>
-      <div className="mt-1 text-sm text-gray-900">{value}</div>
+      <div className="mt-1.5 text-sm font-semibold text-[var(--color-ink)]">
+        {value}
+      </div>
     </div>
   )
 }
 
 function ListingMeta({ listing }: { listing: ListingRow }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-500">
+    <div className="rounded-2xl border-[1.5px] border-[var(--color-line)] bg-[var(--color-cream)] p-4 text-xs text-[var(--color-ink-3)]">
       <div className="font-mono break-all">{listing.id}</div>
-      <div className="mt-1">
-        Updated {new Date(listing.updatedAt).toLocaleString()}
-      </div>
+      <div className="mt-1">Updated {fullDateTime(listing.updatedAt)}</div>
     </div>
   )
 }

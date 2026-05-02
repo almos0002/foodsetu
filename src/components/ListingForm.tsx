@@ -38,7 +38,7 @@ type Props = {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500'
+  'w-full rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none'
 
 // Convert an ISO string into the value format <input type="datetime-local">
 // expects (YYYY-MM-DDTHH:mm in *local* time, no timezone).
@@ -111,8 +111,6 @@ export function ListingForm({
     e.preventDefault()
     setError(null)
 
-    // Cheap client-side guards mirroring the server. The server is still the
-    // source of truth — these just give faster feedback.
     if (!pickupStart || !pickupEnd || !expiry) {
       setError('Pickup start/end time and expiry time are all required')
       return
@@ -325,9 +323,11 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-gray-700">
+      <span className="mb-1.5 block text-sm font-semibold text-[var(--color-ink)]">
         {label}
-        {required ? <span className="ml-0.5 text-red-500">*</span> : null}
+        {required ? (
+          <span className="ml-0.5 text-[var(--color-coral)]">*</span>
+        ) : null}
       </span>
       {children}
     </label>

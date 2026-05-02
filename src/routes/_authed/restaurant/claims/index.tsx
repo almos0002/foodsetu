@@ -108,7 +108,7 @@ function RestaurantClaimsPage() {
       />
 
       {!canManage ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-sm text-gray-700">
+        <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white p-8 text-sm text-[var(--color-ink-2)]">
           {!isRestaurantOrg
             ? 'You need to own a restaurant organization to manage claim requests.'
             : 'Your organization must be verified before you can manage claim requests. An admin will review your profile shortly.'}

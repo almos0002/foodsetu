@@ -3,11 +3,12 @@ import { useMemo, useState } from 'react'
 import {
   ArrowLeft,
   ArrowRight,
-  ArrowUpRight,
   Clock,
   LogIn,
   MapPin,
   PawPrint,
+  Salad,
+  ShieldCheck,
   Sparkles,
   Utensils,
 } from 'lucide-react'
@@ -15,8 +16,9 @@ import { useSession } from '../lib/auth-client'
 import { roleToDashboard } from '../lib/permissions'
 import { listPublicAvailableListingsFn } from '../lib/public-listings-server'
 import type { PublicListingRow } from '../lib/public-listings-server'
+import { BowlMascot } from './index'
 
-const FALLBACK_LISTING_IMG =
+const FALLBACK_IMG =
   'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80'
 
 type CategoryFilter = 'ALL' | 'HUMAN_SAFE' | 'ANIMAL_SAFE'
@@ -37,6 +39,7 @@ function BrowseListings() {
   const user = session?.user as
     | { name?: string | null; role?: string | null }
     | undefined
+
   const [filter, setFilter] = useState<CategoryFilter>('ALL')
 
   const ctaForUser = user ? destinationFor(user.role) : null
@@ -62,98 +65,87 @@ function BrowseListings() {
   )
 
   return (
-    <div className="paper-grain min-h-screen text-[var(--color-ink)] antialiased">
-      <header className="sticky top-0 z-30 border-b border-[var(--color-rule)] bg-[var(--color-paper)]/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-6 px-5 sm:h-[72px] sm:px-8 lg:px-14">
-          <Link to="/" className="flex items-center gap-3">
-            <BowlMark className="h-7 w-7 text-[var(--color-ember)]" />
-            <div className="leading-none">
-              <div className="font-display text-[22px] font-medium tracking-tight text-[var(--color-ink)]">
-                FoodSetu
-              </div>
-              <div className="eyebrow mt-1 text-[var(--color-ink-500)]">
-                The Ledger · Today
-              </div>
-            </div>
+    <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-ink)] antialiased">
+      <header className="sticky top-0 z-30 border-b-[1.5px] border-[var(--color-line)] bg-[var(--color-canvas)]/95 backdrop-blur">
+        <div className="mx-auto flex h-[68px] max-w-[1280px] items-center justify-between gap-6 px-5 sm:px-8">
+          <Link to="/" className="flex items-center gap-2.5">
+            <BowlMascot className="h-9 w-9" />
+            <span className="font-display text-[22px] font-bold tracking-tight">
+              FoodSetu
+            </span>
           </Link>
-          <nav className="ml-auto flex items-center gap-1 sm:gap-3">
-            <Link
-              to="/"
-              className="editorial-link hidden text-sm font-medium text-[var(--color-ink-700)] sm:inline-flex"
-            >
-              Home
-            </Link>
-            <span className="mx-2 hidden h-5 w-px bg-[var(--color-rule)] sm:block" />
+          <div className="flex items-center gap-2">
             {!isPending && user ? (
               <Link
-                to={roleToDashboard(user.role)}
-                className="inline-flex h-10 items-center gap-2 rounded-full bg-[var(--color-ink)] px-5 text-sm font-medium text-[var(--color-paper)] hover:bg-[var(--color-ember)]"
+                to={ctaForUser?.to ?? roleToDashboard(user.role)}
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-[var(--color-coral)] px-5 text-sm font-semibold text-white hover:bg-[var(--color-coral-2)]"
               >
-                Open dashboard
+                {ctaForUser?.label ?? 'Open dashboard'}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             ) : (
               <>
                 <Link
                   to="/login"
-                  className="inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-medium text-[var(--color-ink-700)] hover:bg-[var(--color-paper-200)]"
+                  className="hidden h-11 items-center gap-1.5 rounded-full px-4 text-sm font-semibold hover:bg-[var(--color-cream)] sm:inline-flex"
                 >
                   <LogIn className="h-4 w-4" />
                   Sign in
                 </Link>
                 <Link
                   to="/register"
-                  className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-5 text-sm font-medium text-[var(--color-paper)] hover:bg-[var(--color-ember)]"
+                  className="inline-flex h-11 items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-5 text-sm font-semibold text-white hover:bg-[var(--color-coral)]"
                 >
-                  Get started
+                  Sign up
                 </Link>
               </>
             )}
-          </nav>
+          </div>
         </div>
       </header>
 
-      {/* Editorial masthead for the ledger */}
-      <section className="border-b border-[var(--color-rule)]">
-        <div className="mx-auto max-w-[1400px] px-5 pb-10 pt-10 sm:px-8 lg:px-14 lg:pt-14">
+      {/* Page header — bright + warm, sticker-style */}
+      <section className="bg-[var(--color-cream)]">
+        <div className="mx-auto max-w-[1280px] px-5 pb-10 pt-10 sm:px-8 lg:pt-16">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-ink-500)] hover:text-[var(--color-ink)]"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-ink-2)] hover:text-[var(--color-coral)]"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back to the masthead
+            <ArrowLeft className="h-4 w-4" />
+            Back to home
           </Link>
           <div className="mt-5 grid gap-8 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-8">
-              <div className="eyebrow text-[var(--color-ink-500)]">
-                Today&rsquo;s ledger ·{' '}
-                <span className="tabular-nums">
-                  {String(listings.length).padStart(2, '0')}
-                </span>{' '}
-                live
-              </div>
-              <h1 className="font-display mt-4 text-[clamp(2.5rem,6vw,5rem)] font-light leading-[0.95] tracking-tight text-[var(--color-ink)]">
-                Surplus,{' '}
-                <span className="font-display-italic text-[var(--color-ember)]">
-                  plainly
-                </span>{' '}
-                listed.
+              <span className="bubble">
+                <span className="h-2 w-2 rounded-full bg-[var(--color-mint)]" />
+                {listings.length} live · {cities.size > 0 ? cities.size : 1}{' '}
+                {cities.size === 1 ? 'city' : 'cities'}
+              </span>
+              <h1 className="font-display mt-5 text-[clamp(2.25rem,5.5vw,4.5rem)] font-bold leading-[0.95] tracking-tight">
+                Pick a meal,
+                <br />
+                <span className="relative inline-block">
+                  <span className="relative z-10 text-[var(--color-coral)]">
+                    save a meal
+                  </span>
+                  <span
+                    className="absolute inset-x-0 bottom-2 z-0 h-3 bg-[var(--color-sun)]"
+                    aria-hidden="true"
+                  />
+                </span>
+                .
               </h1>
-              <p className="mt-5 max-w-xl text-base text-[var(--color-ink-700)]">
-                Live entries from partner kitchens across{' '}
-                <span className="font-medium text-[var(--color-ink)]">
-                  {cities.size > 0 ? cities.size : 1}
-                </span>{' '}
-                {cities.size === 1 ? 'city' : 'cities'}. Sign in as a verified
-                NGO or animal rescue to claim a pickup — restaurant phone
-                revealed only when your claim is accepted.
+              <p className="mt-5 max-w-xl text-[15px] text-[var(--color-ink-2)]">
+                Live entries from partner kitchens. Verified NGOs and animal
+                rescues can claim — restaurant phone is revealed only after the
+                claim is accepted.
               </p>
             </div>
             {!user ? (
               <div className="lg:col-span-4 lg:text-right">
                 <Link
                   to="/register"
-                  className="inline-flex h-12 items-center gap-2 rounded-full bg-[var(--color-ink)] px-6 text-sm font-medium text-[var(--color-paper)] hover:bg-[var(--color-ember)]"
+                  className="inline-flex h-12 items-center gap-2 rounded-full bg-[var(--color-coral)] px-6 text-sm font-semibold text-white transition-all hover:bg-[var(--color-coral-2)] hover:-translate-y-0.5"
                 >
                   <Sparkles className="h-4 w-4" />
                   Sign up to claim
@@ -162,45 +154,62 @@ function BrowseListings() {
             ) : null}
           </div>
         </div>
+        <div className="squiggle-mint" aria-hidden="true" />
       </section>
 
-      {/* Filter rail — chunky pills with counts, hairline-anchored */}
-      <section className="border-b border-[var(--color-rule)] bg-[var(--color-paper-200)]">
-        <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-2 px-5 py-4 sm:px-8 lg:px-14">
-          <span className="eyebrow mr-3 text-[var(--color-ink-500)]">
-            Filter
+      {/* Filter chips */}
+      <section className="bg-[var(--color-canvas)]">
+        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-2 px-5 py-6 sm:px-8">
+          <span className="tiny-cap mr-2 text-[var(--color-ink-3)]">
+            Showing
           </span>
           {(
             [
-              { key: 'ALL', label: 'All entries', icon: Utensils },
-              { key: 'HUMAN_SAFE', label: 'Human-safe', icon: Sparkles },
-              { key: 'ANIMAL_SAFE', label: 'Animal-safe', icon: PawPrint },
+              { key: 'ALL', label: 'Everything', icon: Utensils, tone: 'coral' },
+              {
+                key: 'HUMAN_SAFE',
+                label: 'Human-safe',
+                icon: Salad,
+                tone: 'mint',
+              },
+              {
+                key: 'ANIMAL_SAFE',
+                label: 'Animal-safe',
+                icon: PawPrint,
+                tone: 'sun',
+              },
             ] as const
           ).map((tab) => {
             const active = filter === tab.key
             const Icon = tab.icon
             const count = counts[tab.key]
+            const activeBg =
+              tab.tone === 'coral'
+                ? 'bg-[var(--color-coral)] text-white border-[var(--color-coral)]'
+                : tab.tone === 'mint'
+                  ? 'bg-[var(--color-mint)] text-white border-[var(--color-mint)]'
+                  : 'bg-[var(--color-sun)] text-[var(--color-sun-ink)] border-[var(--color-sun)]'
             return (
               <button
                 key={tab.key}
                 type="button"
                 onClick={() => setFilter(tab.key)}
-                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ember)] focus-visible:ring-offset-2 ${
+                className={`pill border-[1.5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-coral)] focus-visible:ring-offset-2 ${
                   active
-                    ? 'border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]'
-                    : 'border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink-700)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]'
+                    ? activeBg
+                    : 'border-[var(--color-line)] bg-white text-[var(--color-ink)] hover:border-[var(--color-line-strong)]'
                 }`}
               >
                 <Icon className="h-4 w-4" />
                 {tab.label}
                 <span
-                  className={`ml-1 rounded-full px-1.5 text-[11px] font-semibold tabular-nums ${
+                  className={`ml-1 inline-flex h-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums ${
                     active
-                      ? 'bg-[var(--color-ember)] text-[var(--color-paper)]'
-                      : 'bg-[var(--color-paper-300)] text-[var(--color-ink-700)]'
+                      ? 'bg-white/25 text-current'
+                      : 'bg-[var(--color-cream)] text-[var(--color-ink-2)]'
                   }`}
                 >
-                  {String(count).padStart(2, '0')}
+                  {count}
                 </span>
               </button>
             )
@@ -208,49 +217,46 @@ function BrowseListings() {
         </div>
       </section>
 
-      {/* The grid */}
-      <section className="bg-[var(--color-paper)]">
-        <div className="mx-auto max-w-[1400px] px-5 py-12 sm:px-8 lg:px-14">
+      {/* Grid */}
+      <section className="bg-[var(--color-canvas)]">
+        <div className="mx-auto max-w-[1280px] px-5 pb-20 sm:px-8">
           {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[var(--color-rule)] p-14 text-center">
-              <BowlMark className="mx-auto h-8 w-8 text-[var(--color-ember)]" />
-              <p className="font-display mt-4 text-2xl font-light text-[var(--color-ink)]">
-                Nothing under this category — yet.
+            <div className="rounded-[28px] border-[1.5px] border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)] p-14 text-center">
+              <div className="mx-auto h-16 w-16">
+                <BowlMascot className="h-full w-full" sleepy />
+              </div>
+              <p className="font-display mt-5 text-2xl font-bold tracking-tight">
+                Nothing in this category yet.
               </p>
-              <p className="mt-2 text-sm text-[var(--color-ink-500)]">
+              <p className="mt-2 text-sm text-[var(--color-ink-2)]">
                 New entries arrive throughout the day. Check back shortly.
               </p>
             </div>
           ) : (
-            <div className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filtered.map((l, i) => (
-                <PublicListingCard
-                  key={l.id}
-                  listing={l}
-                  index={i}
-                  ctaHref={ctaForUser}
-                />
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filtered.map((l) => (
+                <ListingCard key={l.id} listing={l} ctaHref={ctaForUser} />
               ))}
             </div>
           )}
         </div>
       </section>
 
-      <footer className="border-t border-[var(--color-rule)] bg-[var(--color-paper)]">
-        <div className="mx-auto flex max-w-[1400px] flex-col gap-3 px-5 py-8 text-sm text-[var(--color-ink-500)] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-14">
-          <div className="flex items-center gap-3">
-            <BowlMark className="h-5 w-5 text-[var(--color-ember)]" />
-            <span>© {new Date().getFullYear()} FoodSetu</span>
+      <footer className="border-t-[1.5px] border-[var(--color-line)] bg-[var(--color-canvas)]">
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-3 px-5 py-8 text-sm text-[var(--color-ink-2)] sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <div className="flex items-center gap-2.5">
+            <BowlMascot className="h-7 w-7" />
+            <span className="font-display text-base font-bold">FoodSetu</span>
           </div>
-          <div className="flex gap-6">
-            <Link to="/" className="editorial-link">
+          <div className="flex gap-5">
+            <Link to="/" className="wavey-link">
               Home
             </Link>
-            <Link to="/login" className="editorial-link">
+            <Link to="/login" className="wavey-link">
               Sign in
             </Link>
-            <Link to="/register" className="editorial-link">
-              Get started
+            <Link to="/register" className="wavey-link">
+              Sign up
             </Link>
           </div>
         </div>
@@ -277,133 +283,92 @@ function destinationFor(role: string | null | undefined): {
   }
 }
 
-function PublicListingCard({
+function ListingCard({
   listing,
-  index,
   ctaHref,
 }: {
   listing: PublicListingRow
-  index: number
   ctaHref: { to: string; label: string } | null
 }) {
   const isAnimal = listing.foodCategory === 'ANIMAL_SAFE'
-  const tag = isAnimal ? 'Animal-safe' : 'Human-safe'
   const pickup = formatPickup(listing.pickupStartTime, listing.pickupEndTime)
-  const subtitle =
-    listing.cityName ?? listing.orgName ?? 'Pickup confirmed on claim'
-
   return (
-    <article className="group flex flex-col gap-4">
-      <div className="relative overflow-hidden rounded-2xl border border-[var(--color-rule)] bg-[var(--color-paper-200)]">
+    <article className="group flex flex-col overflow-hidden rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white transition-all hover:-translate-y-1 hover:border-[var(--color-line-strong)]">
+      <div className="relative aspect-[5/4] overflow-hidden bg-[var(--color-cream-2)]">
         <img
-          src={listing.imageUrl ?? FALLBACK_LISTING_IMG}
+          src={listing.imageUrl ?? FALLBACK_IMG}
           alt={listing.title}
-          className="aspect-[4/5] h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-paper)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-ink)]">
-          <span
-            className={`h-1.5 w-1.5 rounded-full ${
-              isAnimal ? 'bg-[var(--color-ink)]' : 'bg-[var(--color-ember)]'
-            }`}
-          />
-          {tag}
-        </span>
-        <span className="font-display absolute right-3 top-2 text-[28px] font-light leading-none text-[var(--color-paper)] tabular-nums">
-          {String(index + 1).padStart(2, '0')}
+        <span
+          className={`sticker absolute left-3 top-3 rotate-[-3deg] ${
+            isAnimal
+              ? 'bg-[var(--color-sun-soft)]'
+              : 'bg-[var(--color-mint-soft)]'
+          }`}
+        >
+          {isAnimal ? (
+            <PawPrint className="h-3.5 w-3.5 text-[var(--color-sun-ink)]" />
+          ) : (
+            <ShieldCheck className="h-3.5 w-3.5 text-[var(--color-mint-ink)]" />
+          )}
+          {isAnimal ? 'Animal-safe' : 'Human-safe'}
         </span>
       </div>
-      <div className="flex flex-col gap-3">
-        <div>
-          <div className="eyebrow text-[var(--color-ink-500)]">
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {subtitle}
-            </span>
-          </div>
-          <h3 className="font-display mt-1.5 text-[22px] font-light leading-tight text-[var(--color-ink)] line-clamp-2">
-            {listing.title}
-          </h3>
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="font-display line-clamp-2 text-xl font-bold leading-tight tracking-tight">
+          {listing.title}
+        </h3>
+        <div className="mt-2 flex items-center gap-3 text-xs text-[var(--color-ink-2)]">
+          <span className="inline-flex items-center gap-1">
+            <MapPin className="h-3.5 w-3.5" />
+            {listing.cityName ?? listing.orgName ?? 'Pickup on claim'}
+          </span>
         </div>
-        <dl className="flex items-center gap-4 border-y border-[var(--color-rule)] py-3 text-sm">
+        <dl className="mt-4 grid grid-cols-2 gap-3 border-y-[1.5px] border-dashed border-[var(--color-line)] py-3 text-sm">
           <div>
-            <dt className="eyebrow text-[var(--color-ink-500)]">Qty</dt>
-            <dd className="mt-1 font-medium tabular-nums text-[var(--color-ink)]">
-              {listing.quantity} {listing.quantityUnit.toLowerCase()}
+            <dt className="tiny-cap text-[var(--color-ink-3)]">Quantity</dt>
+            <dd className="mt-1 font-semibold tabular-nums">
+              {listing.quantity}{' '}
+              <span className="font-normal text-[var(--color-ink-2)]">
+                {listing.quantityUnit.toLowerCase()}
+              </span>
             </dd>
           </div>
-          <span className="h-8 w-px bg-[var(--color-rule)]" />
-          <div className="min-w-0 flex-1">
-            <dt className="eyebrow inline-flex items-center gap-1 text-[var(--color-ink-500)]">
+          <div className="min-w-0">
+            <dt className="tiny-cap inline-flex items-center gap-1 text-[var(--color-ink-3)]">
               <Clock className="h-3 w-3" />
               Pickup
             </dt>
-            <dd className="mt-1 truncate text-sm font-medium tabular-nums text-[var(--color-ink)]">
+            <dd className="mt-1 truncate text-sm font-semibold tabular-nums">
               {pickup}
             </dd>
           </div>
         </dl>
-        {ctaHref ? (
-          <Link
-            to={ctaHref.to}
-            className="inline-flex h-11 items-center justify-between gap-2 rounded-full bg-[var(--color-ink)] px-5 text-sm font-medium text-[var(--color-paper)] transition-colors hover:bg-[var(--color-ember)]"
-          >
-            <span>{ctaHref.label}</span>
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
-        ) : (
-          <Link
-            to="/register"
-            className="editorial-link inline-flex items-center gap-1 text-sm font-medium text-[var(--color-ink)]"
-          >
-            Sign up to claim
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
-        )}
+        <div className="mt-4 flex items-center justify-between">
+          {ctaHref ? (
+            <Link
+              to={ctaHref.to}
+              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[var(--color-coral)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-coral-2)]"
+            >
+              {ctaHref.label}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <Link
+              to="/register"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full border-[1.5px] border-[var(--color-ink)] bg-white px-4 text-sm font-semibold transition-all hover:bg-[var(--color-coral)] hover:text-white hover:border-[var(--color-coral)]"
+            >
+              Sign up to claim
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
+        </div>
       </div>
     </article>
   )
 }
 
-/* Editorial bowl mark — same as homepage. */
-function BowlMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      fill="none"
-      className={className}
-      aria-hidden="true"
-    >
-      <path
-        d="M4 14.5h24c0 6.5-5.4 11.5-12 11.5S4 21 4 14.5z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M2 14.5h28"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M16 4c-1.4 1.6-1.4 3.4 0 5s1.4 3.4 0 5"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M11 6c-1 1.2-1 2.6 0 3.8M21 6c-1 1.2-1 2.6 0 3.8"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        opacity="0.7"
-      />
-    </svg>
-  )
-}
-
-// All times rendered in Asia/Kolkata so SSR (server TZ) and client (browser
-// TZ) produce identical strings — otherwise hydration mismatches.
 const TZ = 'Asia/Kolkata'
 const ymdInTz = (d: Date) =>
   new Intl.DateTimeFormat('en-CA', {

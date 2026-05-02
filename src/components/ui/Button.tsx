@@ -6,21 +6,21 @@ type Size = 'sm' | 'md' | 'lg'
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    'bg-orange-600 text-white hover:bg-orange-700 disabled:bg-gray-200 disabled:text-gray-400 border border-transparent',
+    'bg-[var(--color-coral)] text-white hover:bg-[var(--color-coral-2)] disabled:bg-[var(--color-line)] disabled:text-[var(--color-ink-3)] border-[1.5px] border-transparent',
   secondary:
-    'bg-gray-100 text-gray-900 hover:bg-gray-200 border border-transparent disabled:bg-gray-100 disabled:text-gray-400',
+    'bg-[var(--color-cream)] text-[var(--color-ink)] hover:bg-[var(--color-cream-2)] border-[1.5px] border-transparent disabled:bg-[var(--color-cream)] disabled:text-[var(--color-ink-3)]',
   outline:
-    'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:bg-gray-50 disabled:text-gray-400',
+    'border-[1.5px] border-[var(--color-line-strong)] bg-white text-[var(--color-ink)] hover:bg-[var(--color-cream)] disabled:bg-white disabled:text-[var(--color-ink-3)] disabled:border-[var(--color-line)]',
   ghost:
-    'border border-transparent bg-transparent text-gray-700 hover:bg-gray-100 disabled:text-gray-400',
+    'border-[1.5px] border-transparent bg-transparent text-[var(--color-ink)] hover:bg-[var(--color-cream)] disabled:text-[var(--color-ink-3)]',
   destructive:
-    'border border-red-200 bg-white text-red-700 hover:bg-red-50 disabled:border-gray-200 disabled:bg-white disabled:text-gray-400',
+    'border-[1.5px] border-transparent bg-[var(--color-coral)] text-white hover:bg-[var(--color-coral-2)] disabled:bg-[var(--color-line)] disabled:text-[var(--color-ink-3)]',
 }
 
 const SIZES: Record<Size, string> = {
-  sm: 'h-8 px-2.5 text-xs gap-1.5',
-  md: 'h-9 px-3 text-sm gap-1.5',
-  lg: 'h-10 px-4 text-sm gap-2',
+  sm: 'h-9 px-3 text-xs gap-1.5',
+  md: 'h-11 px-4 text-sm gap-1.5',
+  lg: 'h-12 px-5 text-sm gap-2',
 }
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -46,7 +46,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center rounded-full font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2 disabled:cursor-not-allowed',
         VARIANTS[variant],
         SIZES[size],
         fullWidth && 'w-full',

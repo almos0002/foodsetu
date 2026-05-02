@@ -19,9 +19,7 @@ import { DashboardStatsCard } from '../../../components/ui/DashboardStatsCard'
 import { DashboardWelcomeBanner } from '../../../components/ui/DashboardWelcomeBanner'
 import { getAdminStatsFn } from '../../../lib/admin-server'
 import { canAccessAdmin, roleToDashboard } from '../../../lib/permissions'
-
-const BANNER_IMG =
-  'https://images.unsplash.com/photo-1444723121867-7a241cacace9?w=900&auto=format&fit=crop&q=80'
+import { todayLabel } from '../../../lib/time'
 
 export const Route = createFileRoute('/_authed/admin/dashboard')({
   beforeLoad: ({ context }) => {
@@ -38,14 +36,6 @@ function formatCompact(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`
   return String(n)
-}
-
-function todayLabel(): string {
-  return new Date().toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  })
 }
 
 function AdminDashboard() {
@@ -70,7 +60,6 @@ function AdminDashboard() {
         eyebrow="Platform overview"
         title="Network health at a glance"
         description="Organizations, listings, pickups and verifications across every city FoodSetu operates in."
-        image={BANNER_IMG}
         chips={[
           { label: todayLabel(), icon: <Calendar className="h-3.5 w-3.5" /> },
           {
@@ -136,33 +125,39 @@ function AdminDashboard() {
 
       <div className="mt-6 grid gap-5 lg:grid-cols-3">
         {/* Org breakdown panel */}
-        <div className="rounded-2xl border border-gray-200 bg-white lg:col-span-2">
-          <div className="border-b border-gray-100 px-6 py-4">
-            <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+        <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white lg:col-span-2">
+          <div className="border-b-[1.5px] border-[var(--color-line)] px-6 py-5">
+            <h2 className="font-display text-xl font-bold tracking-tight text-[var(--color-ink)]">
               Organization breakdown
             </h2>
-            <p className="mt-0.5 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-[var(--color-ink-2)]">
               Verified and pending across each role
             </p>
           </div>
-          <div className="grid gap-px bg-gray-100 sm:grid-cols-3">
+          <div className="grid gap-px bg-[var(--color-line)] sm:grid-cols-3">
             <OrgStat
               label="Restaurants"
               value={stats.totalRestaurants}
               icon={ShoppingBag}
-              tone="bg-orange-50 text-orange-700"
+              chipBg="bg-[var(--color-coral-soft)]"
+              chipFg="text-[var(--color-coral-ink)]"
+              chipBorder="border-[var(--color-coral)]"
             />
             <OrgStat
               label="NGOs"
               value={stats.totalNgos}
               icon={Users}
-              tone="bg-blue-50 text-blue-700"
+              chipBg="bg-[var(--color-sky-soft)]"
+              chipFg="text-[var(--color-sky-ink)]"
+              chipBorder="border-[var(--color-sky)]"
             />
             <OrgStat
               label="Animal rescues"
               value={stats.totalAnimalRescues}
               icon={Leaf}
-              tone="bg-emerald-50 text-emerald-700"
+              chipBg="bg-[var(--color-mint-soft)]"
+              chipFg="text-[var(--color-mint-ink)]"
+              chipBorder="border-[var(--color-mint)]"
             />
           </div>
         </div>
@@ -170,22 +165,22 @@ function AdminDashboard() {
         {/* Action queue */}
         <div className="space-y-4">
           {stats.pendingVerificationRequests > 0 ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+            <div className="rounded-[28px] border-[1.5px] border-[var(--color-sun)] bg-[var(--color-sun-soft)] p-6">
+              <div className="flex h-11 w-11 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-sun)] text-[var(--color-ink)]">
                 <Clock className="h-5 w-5" />
               </div>
-              <div className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-amber-700">
+              <div className="tiny-cap mt-4 text-[var(--color-sun-ink)]">
                 Action required
               </div>
-              <div className="mt-1 text-3xl font-semibold tabular-nums tracking-tight text-amber-900">
+              <div className="font-display mt-2 text-4xl font-bold tracking-tight text-[var(--color-ink)]">
                 {stats.pendingVerificationRequests}
               </div>
-              <p className="mt-1 text-sm text-amber-900">
+              <p className="mt-1 text-sm text-[var(--color-ink-2)]">
                 organization
                 {stats.pendingVerificationRequests === 1 ? '' : 's'} awaiting
                 verification
               </p>
-              <Link to="/admin/organizations" className="mt-3 inline-block">
+              <Link to="/admin/organizations" className="mt-4 inline-block">
                 <Button
                   size="sm"
                   rightIcon={<ArrowRight className="h-3.5 w-3.5" />}
@@ -195,47 +190,55 @@ function AdminDashboard() {
               </Link>
             </div>
           ) : (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+            <div className="rounded-[28px] border-[1.5px] border-[var(--color-mint)] bg-[var(--color-mint-soft)] p-6">
+              <div className="flex h-11 w-11 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-mint)] text-white">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
-              <div className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
+              <div className="tiny-cap mt-4 text-[var(--color-mint-ink)]">
                 All caught up
               </div>
-              <p className="mt-1 text-sm text-emerald-900">
+              <p className="mt-2 text-sm text-[var(--color-ink-2)]">
                 No organizations are awaiting verification.
               </p>
             </div>
           )}
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-5">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+          <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white p-6">
+            <div className="tiny-cap text-[var(--color-ink-3)]">
               Quick links
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-3 grid grid-cols-2 gap-2.5">
               <ActionTile
                 to="/admin/organizations"
                 icon={Building2}
                 label="Organizations"
-                tone="bg-blue-50 text-blue-700"
+                bg="bg-[var(--color-sky-soft)]"
+                fg="text-[var(--color-sky-ink)]"
+                border="border-[var(--color-sky)]"
               />
               <ActionTile
                 to="/admin/reports"
                 icon={Flag}
                 label="Reports"
-                tone="bg-rose-50 text-rose-700"
+                bg="bg-[var(--color-berry-soft)]"
+                fg="text-[var(--color-berry-ink)]"
+                border="border-[var(--color-berry)]"
               />
               <ActionTile
                 to="/admin/claims"
                 icon={ClipboardList}
                 label="Claims"
-                tone="bg-orange-50 text-orange-700"
+                bg="bg-[var(--color-coral-soft)]"
+                fg="text-[var(--color-coral-ink)]"
+                border="border-[var(--color-coral)]"
               />
               <ActionTile
                 to="/admin/users"
                 icon={Users}
                 label="Users"
-                tone="bg-emerald-50 text-emerald-700"
+                bg="bg-[var(--color-mint-soft)]"
+                fg="text-[var(--color-mint-ink)]"
+                border="border-[var(--color-mint)]"
               />
             </div>
           </div>
@@ -277,26 +280,28 @@ function OrgStat({
   label,
   value,
   icon: Icon,
-  tone,
+  chipBg,
+  chipFg,
+  chipBorder,
 }: {
   label: string
   value: number
   icon: typeof Building2
-  tone: string
+  chipBg: string
+  chipFg: string
+  chipBorder: string
 }) {
   return (
-    <div className="bg-white px-6 py-5">
-      <div className="flex items-center gap-2">
+    <div className="bg-white px-6 py-6">
+      <div className="flex items-center gap-2.5">
         <div
-          className={`flex h-8 w-8 items-center justify-center rounded-lg ${tone}`}
+          className={`flex h-9 w-9 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] ${chipBorder} ${chipBg} ${chipFg}`}
         >
           <Icon className="h-4 w-4" />
         </div>
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-          {label}
-        </div>
+        <div className="tiny-cap text-[var(--color-ink-3)]">{label}</div>
       </div>
-      <div className="mt-3 text-3xl font-semibold tabular-nums tracking-tight text-gray-900">
+      <div className="font-display mt-3 text-4xl font-bold tabular-nums tracking-tight text-[var(--color-ink)]">
         {value}
       </div>
     </div>
@@ -307,24 +312,28 @@ function ActionTile({
   to,
   icon: Icon,
   label,
-  tone,
+  bg,
+  fg,
+  border,
 }: {
   to: string
   icon: typeof Building2
   label: string
-  tone: string
+  bg: string
+  fg: string
+  border: string
 }) {
   return (
     <Link
       to={to}
-      className="group flex flex-col items-start gap-2 rounded-xl border border-gray-200 bg-white p-3 transition-all hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+      className="group flex flex-col items-start gap-2 rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white p-3 transition-transform hover:-translate-y-0.5 hover:border-[var(--color-line-strong)]"
     >
       <div
-        className={`flex h-9 w-9 items-center justify-center rounded-lg ${tone}`}
+        className={`flex h-9 w-9 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] ${border} ${bg} ${fg}`}
       >
         <Icon className="h-4 w-4" />
       </div>
-      <span className="text-xs font-medium text-gray-900">{label}</span>
+      <span className="text-xs font-bold text-[var(--color-ink)]">{label}</span>
     </Link>
   )
 }

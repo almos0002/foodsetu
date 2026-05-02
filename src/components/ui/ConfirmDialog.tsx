@@ -48,35 +48,37 @@ export function ConfirmDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-gray-900/50 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--color-ink)]/55 p-0 sm:items-center sm:p-4"
       onClick={() => {
         if (!busy) onCancel()
       }}
     >
       <div
-        className="w-full max-w-md rounded-t-xl border border-gray-200 bg-white sm:rounded-xl"
+        className="w-full max-w-md rounded-t-3xl border-[1.5px] border-[var(--color-line-strong)] bg-white sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start gap-3 border-b border-gray-100 p-4 sm:p-5">
+        <div className="flex items-start gap-3 border-b-[1.5px] border-dashed border-[var(--color-line)] p-5">
           <div
             className={cn(
-              'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full',
+              'flex h-11 w-11 -rotate-3 flex-shrink-0 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)]',
               destructive
-                ? 'bg-red-50 text-red-600'
-                : 'bg-orange-50 text-orange-600',
+                ? 'bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]'
+                : 'bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]',
             )}
           >
-            <AlertTriangle className="h-4 w-4" />
+            <AlertTriangle className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <h2
               id="confirm-dialog-title"
-              className="text-sm font-semibold text-gray-900"
+              className="font-display text-lg font-bold tracking-tight text-[var(--color-ink)]"
             >
               {title}
             </h2>
             {description ? (
-              <div className="mt-1 text-xs text-gray-600">{description}</div>
+              <div className="mt-1 text-sm text-[var(--color-ink-2)]">
+                {description}
+              </div>
             ) : null}
           </div>
           <button
@@ -86,12 +88,12 @@ export function ConfirmDialog({
             }}
             disabled={busy}
             aria-label="Close"
-            className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-40"
+            className="rounded-full p-1.5 text-[var(--color-ink-3)] hover:bg-[var(--color-cream)] hover:text-[var(--color-ink)] disabled:opacity-40"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="flex flex-col-reverse gap-2 p-4 sm:flex-row sm:justify-end sm:p-5">
+        <div className="flex flex-col-reverse gap-2 p-5 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={onCancel} disabled={busy}>
             {cancelLabel}
           </Button>
@@ -99,11 +101,6 @@ export function ConfirmDialog({
             variant={destructive ? 'destructive' : 'primary'}
             onClick={onConfirm}
             disabled={busy}
-            className={
-              destructive
-                ? 'bg-red-600 text-white border-transparent hover:bg-red-700'
-                : ''
-            }
           >
             {busy ? 'Working…' : confirmLabel}
           </Button>

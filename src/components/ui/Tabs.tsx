@@ -25,7 +25,7 @@ export function Tabs<TValue extends string>({
     <div
       role="tablist"
       className={cn(
-        'inline-flex flex-wrap items-center gap-1 rounded-lg border border-gray-200 bg-white p-1',
+        'inline-flex flex-wrap items-center gap-1.5 rounded-full border-[1.5px] border-[var(--color-line)] bg-white p-1',
         className,
       )}
     >
@@ -39,10 +39,10 @@ export function Tabs<TValue extends string>({
             aria-selected={active}
             onClick={() => onChange(t.value)}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+              'inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)]',
               active
-                ? 'bg-orange-600 text-white'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                ? 'bg-[var(--color-ink)] text-white'
+                : 'text-[var(--color-ink-2)] hover:bg-[var(--color-cream)] hover:text-[var(--color-ink)]',
             )}
           >
             {t.icon}
@@ -50,10 +50,10 @@ export function Tabs<TValue extends string>({
             {typeof t.count === 'number' ? (
               <span
                 className={cn(
-                  'ml-0.5 rounded-full px-1.5 text-[10px] font-semibold',
+                  'ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums',
                   active
                     ? 'bg-white/20 text-white'
-                    : 'bg-gray-100 text-gray-600',
+                    : 'bg-[var(--color-cream)] text-[var(--color-ink-2)]',
                 )}
               >
                 {t.count}

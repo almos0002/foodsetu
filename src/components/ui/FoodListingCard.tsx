@@ -61,35 +61,58 @@ export function FoodListingCard({
   footerSlot,
   className,
 }: Props) {
+  const isAnimal = listing.foodCategory === 'ANIMAL_SAFE'
   return (
     <article
       className={cn(
-        'flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white',
+        'flex flex-col overflow-hidden rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white transition-all hover:border-[var(--color-line-strong)]',
         className,
       )}
     >
       {showImage ? (
         listing.imageUrl ? (
-          <img
-            src={listing.imageUrl}
-            alt={listing.title}
-            className="h-36 w-full object-cover"
-          />
+          <div className="relative aspect-[16/10] w-full overflow-hidden bg-[var(--color-cream-2)]">
+            <img
+              src={listing.imageUrl}
+              alt={listing.title}
+              className="h-full w-full object-cover"
+            />
+            {listing.foodCategory ? (
+              <span
+                className={cn(
+                  'sticker absolute left-3 top-3 rotate-[-3deg]',
+                  isAnimal
+                    ? 'bg-[var(--color-sun-soft)]'
+                    : 'bg-[var(--color-mint-soft)]',
+                )}
+              >
+                <span
+                  className={cn(
+                    'h-2 w-2 rounded-full',
+                    isAnimal
+                      ? 'bg-[var(--color-sun-ink)]'
+                      : 'bg-[var(--color-mint)]',
+                  )}
+                />
+                {isAnimal ? 'Animal-safe' : 'Human-safe'}
+              </span>
+            ) : null}
+          </div>
         ) : (
-          <div className="flex h-36 w-full items-center justify-center bg-orange-50 text-orange-300">
-            <Utensils className="h-8 w-8" />
+          <div className="flex h-36 w-full items-center justify-center bg-[var(--color-coral-soft)] text-[var(--color-coral)]">
+            <Utensils className="h-9 w-9" />
           </div>
         )
       ) : null}
 
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="truncate text-base font-semibold text-gray-900">
+            <h3 className="font-display truncate text-lg font-bold tracking-tight text-[var(--color-ink)]">
               {listing.title}
             </h3>
             {listing.restaurantName || listing.cityName ? (
-              <div className="mt-0.5 truncate text-xs text-gray-500">
+              <div className="mt-0.5 truncate text-xs text-[var(--color-ink-2)]">
                 {listing.restaurantName ?? ''}
                 {listing.restaurantName && listing.cityName ? ' · ' : ''}
                 {listing.cityName ?? ''}
@@ -101,7 +124,7 @@ export function FoodListingCard({
           ) : null}
         </div>
 
-        <dl className="grid grid-cols-2 gap-2 text-xs text-gray-700">
+        <dl className="grid grid-cols-2 gap-2 text-xs">
           <Field
             icon={<Utensils className="h-3 w-3" />}
             label="Quantity"
@@ -122,7 +145,7 @@ export function FoodListingCard({
                 <span className="block">
                   {formatTime(listing.pickupStartTime)}
                 </span>
-                <span className="block text-gray-500">
+                <span className="block text-[var(--color-ink-2)]">
                   → {formatTime(listing.pickupEndTime)}
                 </span>
               </>
@@ -155,8 +178,8 @@ export function FoodListingCard({
           />
         </dl>
 
-        {listing.foodCategory ? (
-          <div className="text-[11px] text-gray-500">
+        {listing.foodCategory && !listing.imageUrl ? (
+          <div className="text-[11px] font-semibold text-[var(--color-ink-2)]">
             {FOOD_CATEGORY_LABELS[listing.foodCategory as FoodCategory] ??
               listing.foodCategory}
           </div>
@@ -191,12 +214,14 @@ function Field({
   value: ReactNode
 }) {
   return (
-    <div className="rounded-md border border-gray-100 bg-gray-50 px-2 py-1.5">
-      <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+    <div className="rounded-2xl border-[1.5px] border-[var(--color-line)] bg-[var(--color-cream)] px-2.5 py-2">
+      <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-2)]">
         {icon}
         {label}
       </div>
-      <div className="mt-0.5 text-xs text-gray-900">{value}</div>
+      <div className="mt-0.5 text-xs font-semibold text-[var(--color-ink)]">
+        {value}
+      </div>
     </div>
   )
 }

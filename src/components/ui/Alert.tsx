@@ -5,16 +5,22 @@ import { cn } from './cn'
 type Tone = 'info' | 'success' | 'warning' | 'error'
 
 const TONES: Record<Tone, { wrap: string; icon: typeof Info }> = {
-  info: { wrap: 'border-blue-200 bg-blue-50 text-blue-900', icon: Info },
+  info: {
+    wrap: 'border-[var(--color-sky)] bg-[var(--color-sky-soft)] text-[var(--color-sky-ink)]',
+    icon: Info,
+  },
   success: {
-    wrap: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+    wrap: 'border-[var(--color-mint)] bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]',
     icon: CheckCircle2,
   },
   warning: {
-    wrap: 'border-amber-200 bg-amber-50 text-amber-900',
+    wrap: 'border-[var(--color-sun)] bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]',
     icon: AlertTriangle,
   },
-  error: { wrap: 'border-red-200 bg-red-50 text-red-900', icon: XCircle },
+  error: {
+    wrap: 'border-[var(--color-coral)] bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]',
+    icon: XCircle,
+  },
 }
 
 type Props = {
@@ -31,14 +37,14 @@ export function Alert({ tone = 'info', title, children, className }: Props) {
     <div
       role="status"
       className={cn(
-        'flex items-start gap-2 rounded-lg border px-3 py-2 text-sm',
+        'flex items-start gap-2.5 rounded-2xl border-[1.5px] px-4 py-3 text-sm',
         cfg.wrap,
         className,
       )}
     >
       <Icon className="mt-0.5 h-4 w-4 flex-shrink-0" />
       <div className="min-w-0 flex-1">
-        {title ? <div className="font-semibold">{title}</div> : null}
+        {title ? <div className="font-bold">{title}</div> : null}
         {children ? (
           <div className={cn(title && 'mt-0.5')}>{children}</div>
         ) : null}

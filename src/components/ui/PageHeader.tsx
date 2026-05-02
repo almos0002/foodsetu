@@ -27,11 +27,11 @@ export function PageHeader({
   className,
 }: Props) {
   return (
-    <div className={cn('mb-5 space-y-3', className)}>
+    <div className={cn('mb-6 space-y-3', className)}>
       {back ? (
         <Link
           to={back.to}
-          className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-900"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-ink-2)] hover:text-[var(--color-coral)]"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           {back.label}
@@ -40,15 +40,15 @@ export function PageHeader({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           {eyebrow ? (
-            <div className="text-[11px] font-medium uppercase tracking-wide text-gray-500">
-              {eyebrow}
-            </div>
+            <div className="tiny-cap text-[var(--color-coral)]">{eyebrow}</div>
           ) : null}
-          <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">
+          <h1 className="font-display mt-1 text-3xl font-bold tracking-tight text-[var(--color-ink)] sm:text-[34px]">
             {title}
           </h1>
           {description ? (
-            <div className="mt-1 text-sm text-gray-500">{description}</div>
+            <div className="mt-2 text-sm text-[var(--color-ink-2)]">
+              {description}
+            </div>
           ) : null}
         </div>
         {actions ? (

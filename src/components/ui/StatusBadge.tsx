@@ -13,15 +13,20 @@ export type BadgeTone =
   | 'teal'
 
 const TONES: Record<BadgeTone, string> = {
-  gray: 'bg-gray-100 text-gray-700 ring-gray-200',
-  orange: 'bg-orange-50 text-orange-700 ring-orange-200',
-  green: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-  blue: 'bg-blue-50 text-blue-700 ring-blue-200',
-  amber: 'bg-amber-50 text-amber-700 ring-amber-200',
-  red: 'bg-red-50 text-red-700 ring-red-200',
-  purple: 'bg-purple-50 text-purple-700 ring-purple-200',
-  indigo: 'bg-indigo-50 text-indigo-700 ring-indigo-200',
-  teal: 'bg-teal-50 text-teal-700 ring-teal-200',
+  gray: 'bg-[var(--color-cream)] text-[var(--color-ink-2)] border-[var(--color-line-strong)]',
+  orange:
+    'bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)] border-[var(--color-coral)]',
+  green:
+    'bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)] border-[var(--color-mint)]',
+  blue: 'bg-[var(--color-sky-soft)] text-[var(--color-sky-ink)] border-[var(--color-sky)]',
+  amber:
+    'bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)] border-[var(--color-sun)]',
+  red: 'bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)] border-[var(--color-coral)]',
+  purple:
+    'bg-[var(--color-berry-soft)] text-[var(--color-berry-ink)] border-[var(--color-berry)]',
+  indigo:
+    'bg-[var(--color-berry-soft)] text-[var(--color-berry-ink)] border-[var(--color-berry)]',
+  teal: 'bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)] border-[var(--color-mint)]',
 }
 
 type Props = {
@@ -42,7 +47,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full font-medium ring-1',
+        'inline-flex items-center gap-1 rounded-full border-[1.5px] font-semibold',
         size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs',
         TONES[tone],
         className,

@@ -167,10 +167,14 @@ export const VERIFICATION_LABELS: Record<VerificationStatus, string> = {
 }
 
 export const VERIFICATION_BADGE_CLASSES: Record<VerificationStatus, string> = {
-  PENDING: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
-  VERIFIED: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
-  REJECTED: 'bg-red-100 text-red-800 ring-1 ring-red-200',
-  SUSPENDED: 'bg-gray-200 text-gray-800 ring-1 ring-gray-300',
+  PENDING:
+    'border-[var(--color-sun)] bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]',
+  VERIFIED:
+    'border-[var(--color-mint)] bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]',
+  REJECTED:
+    'border-[var(--color-coral)] bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]',
+  SUSPENDED:
+    'border-[var(--color-line-strong)] bg-[var(--color-cream-2)] text-[var(--color-ink-2)]',
 }
 
 // ---------------------------------------------------------------------------
@@ -201,14 +205,22 @@ export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
 }
 
 export const LISTING_STATUS_BADGE_CLASSES: Record<ListingStatus, string> = {
-  DRAFT: 'bg-gray-100 text-gray-700 ring-1 ring-gray-200',
-  AVAILABLE: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
-  CLAIM_REQUESTED: 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
-  CLAIMED: 'bg-indigo-100 text-indigo-800 ring-1 ring-indigo-200',
-  PICKED_UP: 'bg-purple-100 text-purple-800 ring-1 ring-purple-200',
-  EXPIRED: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
-  CANCELLED: 'bg-gray-200 text-gray-700 ring-1 ring-gray-300',
-  REPORTED: 'bg-red-100 text-red-800 ring-1 ring-red-200',
+  DRAFT:
+    'border-[var(--color-line-strong)] bg-[var(--color-cream)] text-[var(--color-ink-2)]',
+  AVAILABLE:
+    'border-[var(--color-mint)] bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]',
+  CLAIM_REQUESTED:
+    'border-[var(--color-sky)] bg-[var(--color-sky-soft)] text-[var(--color-sky-ink)]',
+  CLAIMED:
+    'border-[var(--color-berry)] bg-[var(--color-berry-soft)] text-[var(--color-berry-ink)]',
+  PICKED_UP:
+    'border-[var(--color-mint)] bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]',
+  EXPIRED:
+    'border-[var(--color-sun)] bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]',
+  CANCELLED:
+    'border-[var(--color-line-strong)] bg-[var(--color-cream-2)] text-[var(--color-ink-2)]',
+  REPORTED:
+    'border-[var(--color-coral)] bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]',
 }
 
 // Active = listing is still in the live pipeline (visible to claimants or
@@ -312,12 +324,18 @@ export const CLAIM_STATUS_LABELS: Record<ClaimStatus, string> = {
 }
 
 export const CLAIM_STATUS_BADGE_CLASSES: Record<ClaimStatus, string> = {
-  PENDING: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
-  ACCEPTED: 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
-  REJECTED: 'bg-red-100 text-red-800 ring-1 ring-red-200',
-  CANCELLED: 'bg-gray-200 text-gray-700 ring-1 ring-gray-300',
-  PICKED_UP: 'bg-purple-100 text-purple-800 ring-1 ring-purple-200',
-  COMPLETED: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
+  PENDING:
+    'border-[var(--color-sun)] bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]',
+  ACCEPTED:
+    'border-[var(--color-sky)] bg-[var(--color-sky-soft)] text-[var(--color-sky-ink)]',
+  REJECTED:
+    'border-[var(--color-coral)] bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]',
+  CANCELLED:
+    'border-[var(--color-line-strong)] bg-[var(--color-cream-2)] text-[var(--color-ink-2)]',
+  PICKED_UP:
+    'border-[var(--color-berry)] bg-[var(--color-berry-soft)] text-[var(--color-berry-ink)]',
+  COMPLETED:
+    'border-[var(--color-mint)] bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]',
 }
 
 export const ACTIVE_CLAIM_STATUSES: readonly ClaimStatus[] = [
@@ -420,9 +438,12 @@ export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
 }
 
 export const REPORT_STATUS_BADGE_CLASSES: Record<ReportStatus, string> = {
-  OPEN: 'bg-red-100 text-red-800 ring-1 ring-red-200',
-  REVIEWED: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
-  RESOLVED: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
+  OPEN:
+    'border-[var(--color-coral)] bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]',
+  REVIEWED:
+    'border-[var(--color-sun)] bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]',
+  RESOLVED:
+    'border-[var(--color-mint)] bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]',
 }
 
 export function isValidReportReason(v: unknown): v is ReportReason {

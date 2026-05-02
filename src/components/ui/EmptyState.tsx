@@ -23,20 +23,23 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center gap-3 px-6 py-12 text-center',
-        !bare && 'rounded-lg border border-dashed border-gray-300 bg-white',
+        'flex flex-col items-center justify-center gap-4 px-6 py-14 text-center',
+        !bare &&
+          'rounded-3xl border-[1.5px] border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)]',
         className,
       )}
     >
       {Icon ? (
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-500">
-          <Icon className="h-5 w-5" />
+        <div className="flex h-14 w-14 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-white text-[var(--color-coral)]">
+          <Icon className="h-6 w-6" />
         </div>
       ) : null}
-      <div className="space-y-1">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+      <div className="space-y-1.5">
+        <h3 className="font-display text-xl font-bold tracking-tight text-[var(--color-ink)]">
+          {title}
+        </h3>
         {description ? (
-          <div className="mx-auto max-w-md text-xs text-gray-500">
+          <div className="mx-auto max-w-md text-sm text-[var(--color-ink-2)]">
             {description}
           </div>
         ) : null}

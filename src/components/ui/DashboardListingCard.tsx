@@ -24,12 +24,13 @@ type Props = {
 }
 
 function formatPickup(d: Date): string {
-  return d.toLocaleString(undefined, {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-  })
+  }).format(d)
 }
 
 export function DashboardListingCard({
@@ -49,31 +50,29 @@ export function DashboardListingCard({
     <Link
       to={to}
       className={cn(
-        'group block overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2',
+        'group block overflow-hidden rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white transition-all hover:-translate-y-1 hover:border-[var(--color-line-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2',
         className,
       )}
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
+      <div className="relative aspect-[16/10] overflow-hidden bg-[var(--color-cream-2)]">
         <img
           src={imageUrl || FALLBACK_IMG}
           alt={title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        {badge ? (
-          <div className="absolute left-2.5 top-2.5">{badge}</div>
-        ) : null}
+        {badge ? <div className="absolute left-3 top-3">{badge}</div> : null}
       </div>
-      <div className="p-3.5">
+      <div className="p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">
+          <h3 className="font-display min-w-0 flex-1 truncate text-base font-bold tracking-tight text-[var(--color-ink)]">
             {title}
           </h3>
           {trailing}
         </div>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-ink-2)]">
           <span className="inline-flex items-center gap-1">
             <Utensils className="h-3 w-3" />
-            <span className="tabular-nums">{primaryMeta}</span>
+            <span className="tabular-nums font-semibold">{primaryMeta}</span>
           </span>
           {pickupDate ? (
             <span className="inline-flex items-center gap-1">

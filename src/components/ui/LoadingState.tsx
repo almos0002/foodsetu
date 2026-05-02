@@ -12,12 +12,13 @@ export function LoadingState({ label = 'Loading…', className, bare }: Props) {
   return (
     <div
       className={cn(
-        'flex items-center justify-center gap-2 px-6 py-10 text-sm text-gray-500',
-        !bare && 'rounded-lg border border-gray-200 bg-white',
+        'flex items-center justify-center gap-2 px-6 py-12 text-sm font-medium text-[var(--color-ink-2)]',
+        !bare &&
+          'rounded-3xl border-[1.5px] border-[var(--color-line)] bg-white',
         className,
       )}
     >
-      <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+      <Loader2 className="h-4 w-4 animate-spin text-[var(--color-coral)]" />
       <span>{label}</span>
     </div>
   )
@@ -29,6 +30,11 @@ type SkeletonProps = {
 
 export function Skeleton({ className }: SkeletonProps) {
   return (
-    <div className={cn('animate-pulse rounded-md bg-gray-100', className)} />
+    <div
+      className={cn(
+        'animate-pulse rounded-2xl bg-[var(--color-cream)]',
+        className,
+      )}
+    />
   )
 }
