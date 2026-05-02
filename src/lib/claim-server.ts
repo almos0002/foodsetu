@@ -6,6 +6,7 @@ import { auth, pool } from './auth'
 import { db } from '../db'
 import { claims, foodListings, type Claim } from '../db/schema'
 import { safeExpireOldListings } from './expiry-server'
+import { getNearbyListings } from './geo-server'
 import {
   notifyClaimAccepted,
   notifyClaimRequested,
@@ -17,6 +18,10 @@ import {
   HISTORY_CLAIM_STATUSES,
   type ClaimStatus,
 } from './permissions'
+
+// Re-export for backward compatibility — callers historically imported
+// haversineKm from this module before geo-server.ts existed.
+export { haversineKm } from './geo-server'
 
 // ---------------------------------------------------------------------------
 // Auth helpers
@@ -118,35 +123,6 @@ async function requireVerifiedClaimantOrg(
     throw new Error('Your organization must be verified before claiming food')
   }
   return org
-}
-
-// ---------------------------------------------------------------------------
-// Distance (Haversine)
-// ---------------------------------------------------------------------------
-
-const EARTH_RADIUS_KM = 6371
-
-function toRadians(deg: number): number {
-  return (deg * Math.PI) / 180
-}
-
-/** Great-circle distance in kilometers between two lat/lng points. */
-export function haversineKm(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number,
-): number {
-  const dLat = toRadians(lat2 - lat1)
-  const dLng = toRadians(lng2 - lng1)
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return EARTH_RADIUS_KM * c
 }
 
 // ---------------------------------------------------------------------------
@@ -281,20 +257,31 @@ function validateIdInput(value: unknown): { id: string } {
 // ---------------------------------------------------------------------------
 
 /**
- * Returns AVAILABLE listings of the given kind whose pickup window and
- * expiry are still in the future, enriched with restaurant info and the
- * great-circle distance from the claimant org's location. Sorted by
- * distance ascending (nulls last) then expiry ascending. Caller must own a
- * verified org of the expected type.
+ * Thin auth/role wrapper around {@link getNearbyListings}.
+ *
+ * - Hides the feed entirely if the caller does not own a verified org of the
+ *   expected type (mirrors the route guard, defence-in-depth if it's
+ *   bypassed). ADMIN bypasses the verification gate but still needs to own
+ *   an org of the right type.
+ * - Returns `[]` (rather than throwing) when the org has no location set,
+ *   because geo-matching is meaningless without an origin point. The page
+ *   surfaces a "set your location" prompt in that case.
+ * - Sweeps stale rows first so claimants never see (and never attempt to
+ *   claim) listings whose expiry has just passed.
+ *
+ * Category filtering is enforced inside `getNearbyListings`:
+ *   NGO_KIND     → HUMAN_SAFE only
+ *   ANIMAL_KIND  → ANIMAL_SAFE only
+ *
+ * The `NearbyListing.distanceKm` shape stays nullable for backward compat
+ * with existing UI; in this code path we always supply a number because
+ * the org has a location by the time we get here.
  */
 async function listNearbyFoodForKind(
   user: SessionUser,
   kind: ClaimantKind,
 ): Promise<NearbyListing[]> {
   const org = await fetchOwnerOrgForUser(user.id)
-  // Hide the feed entirely for callers without an org of the right type
-  // (mirrors the role gate in routes). Avoids accidental data exposure if
-  // the route guard is bypassed.
   if (!org || org.type !== kind.orgType) return []
   if (user.role !== 'ADMIN' && org.verificationStatus !== 'VERIFIED') {
     return []
@@ -307,72 +294,20 @@ async function listNearbyFoodForKind(
   // block the feed.
   await safeExpireOldListings()
 
-  // NOTE: `o.phone` is intentionally NOT selected — restaurant contact is
-  // gated behind an accepted claim (see `listMyClaimsForKind`).
-  const { rows } = await pool.query(
-    `SELECT fl.id, fl.title, fl.description, fl.quantity, fl.quantity_unit,
-            fl.food_category, fl.food_type,
-            fl.pickup_start_time, fl.pickup_end_time, fl.expiry_time,
-            fl.latitude, fl.longitude, fl.image_url, fl.status, fl.created_at,
-            fl.restaurant_id,
-            o.name AS restaurant_name,
-            o.address AS restaurant_address,
-            c.name AS city_name
-       FROM food_listings fl
-       LEFT JOIN "organization" o ON o.id = fl.restaurant_id
-       LEFT JOIN cities c ON c.id = fl.city_id
-      WHERE fl.food_category = $1
-        AND fl.status = 'AVAILABLE'
-        AND fl.expiry_time > NOW()
-        AND fl.pickup_end_time > NOW()
-      LIMIT 200`,
-    [kind.foodCategory],
-  )
+  if (org.latitude == null || org.longitude == null) return []
 
-  const orgLat = org.latitude
-  const orgLng = org.longitude
-
-  const enriched: NearbyListing[] = rows.map((r) => {
-    const lat = Number(r.latitude)
-    const lng = Number(r.longitude)
-    const distanceKm =
-      orgLat != null && orgLng != null
-        ? haversineKm(orgLat, orgLng, lat, lng)
-        : null
-    return {
-      id: r.id,
-      title: r.title,
-      description: r.description,
-      quantity: Number(r.quantity),
-      quantityUnit: r.quantity_unit,
-      foodCategory: r.food_category,
-      foodType: r.food_type,
-      pickupStartTime: new Date(r.pickup_start_time).toISOString(),
-      pickupEndTime: new Date(r.pickup_end_time).toISOString(),
-      expiryTime: new Date(r.expiry_time).toISOString(),
-      latitude: lat,
-      longitude: lng,
-      imageUrl: r.image_url,
-      status: r.status,
-      createdAt: new Date(r.created_at).toISOString(),
-      restaurantId: r.restaurant_id,
-      restaurantName: r.restaurant_name,
-      restaurantAddress: r.restaurant_address,
-      cityName: r.city_name,
-      distanceKm,
-    }
+  const rows = await getNearbyListings({
+    latitude: org.latitude,
+    longitude: org.longitude,
+    foodCategory: kind.foodCategory,
+    // radiusKm uses the function's default (10 km).
+    // limit uses the function's default (50).
   })
 
-  enriched.sort((a, b) => {
-    const da = a.distanceKm ?? Number.POSITIVE_INFINITY
-    const db = b.distanceKm ?? Number.POSITIVE_INFINITY
-    if (da !== db) return da - db
-    return (
-      new Date(a.expiryTime).getTime() - new Date(b.expiryTime).getTime()
-    )
-  })
-
-  return enriched.slice(0, 100)
+  // The shared `NearbyListing` type carries `distanceKm: number | null` for
+  // backward compat with surfaces that may not have an origin; in this
+  // branch we always have a number, so the cast is structural-only.
+  return rows as NearbyListing[]
 }
 
 /** Lists the caller's own claims (newest first), with denormalized listing info. */

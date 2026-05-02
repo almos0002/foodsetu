@@ -93,8 +93,8 @@ function NearbyAnimalFoodPage() {
         <>
           {!hasOrgLocation ? (
             <div className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 ring-1 ring-amber-200">
-              Add a location to your organization profile to see distances.
-              Listings are still shown, sorted by earliest expiry.
+              Add a location to your organization profile to see nearby
+              listings. We match within 10 km of your location.
             </div>
           ) : null}
 
@@ -106,7 +106,9 @@ function NearbyAnimalFoodPage() {
 
           {listings.length === 0 ? (
             <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center text-sm text-gray-500">
-              No animal-safe food available nearby right now.
+              {hasOrgLocation
+                ? 'No animal-safe food available within 10 km right now.'
+                : 'Set your organization location to see nearby food.'}
               <div className="mt-1 text-xs">
                 Check back in a little while — restaurants post throughout the day.
               </div>

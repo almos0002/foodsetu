@@ -224,7 +224,7 @@ Server fns live in `src/lib/claim-server.ts`. Internal helpers
 
 | Function | Auth | Purpose |
 |----------|------|---------|
-| `listNearbyHumanFoodFn()` / `listNearbyAnimalFoodFn()` | session | Returns `[]` for callers without a verified org of the matching type. SQL filters `food_category=$1 AND status='AVAILABLE' AND expiry_time > NOW() AND pickup_end_time > NOW()` (LIMIT 200). **Restaurant phone is intentionally NOT selected — contact info is gated behind an accepted claim.** Distance is computed in TS via `haversineKm`. Sorted by distance asc (nulls last) then `expiryTime` asc; returns top 100. |
+| `listNearbyHumanFoodFn()` / `listNearbyAnimalFoodFn()` | session | Returns `[]` for callers without a verified org of the matching type, or whose org has no `latitude`/`longitude` set (geo-matching requires an origin). Delegates to `getNearbyListings` from `src/lib/geo-server.ts` (10 km default radius, top 50). **Restaurant phone is intentionally NOT selected — contact info is gated behind an accepted claim.** Sorted by `expiryTime` asc (urgency wins) then distance asc (tiebreaker). |
 | `listMyClaimsFn()` / `listMyAnimalClaimsFn()` | session | The org's own claims (newest first), with denormalized listing + restaurant info; returns `[]` for callers of the wrong org type. **`restaurantPhone` is server-side redacted to `null` unless claim status is `ACCEPTED` or `PICKED_UP`** — the value never reaches the client before then, regardless of UI logic. |
 | `createClaimFn({id})` / `createAnimalClaimFn({id})` | verified org of matching type | Atomic Drizzle `db.transaction`: (1) `UPDATE food_listings SET status='CLAIM_REQUESTED' WHERE id=? AND status='AVAILABLE' AND food_category=<kind> AND pickup_end_time > NOW() AND expiry_time > NOW()` returning row — primary race guard + temporal guard for stale-but-still-AVAILABLE rows; (2) `INSERT INTO claims (..., status='PENDING')` — secondary guard via partial unique index `claims_listing_active_uq`. Throws user-friendly errors (`Listing not found` / `Only <category> food can be claimed by <org type>s` / `This listing has expired` / `This listing is no longer available to claim`). |
 
@@ -271,7 +271,31 @@ to own a RESTAURANT org.
 listing fetches and renders a "Pending claims" stat card (linking to
 `/restaurant/claims`) plus a Claims quick-action button with a count badge.
 
-`haversineKm(lat1, lng1, lat2, lng2)`: great-circle distance in km, exported from `claim-server.ts`. Pure TS — no PostGIS dependency.
+### Geo-matching (`src/lib/geo-server.ts`)
+
+Reusable, context-free geo-matching primitives shared by every nearby-food
+surface (NGO feed, animal-rescue feed, future map view, dashboard widgets).
+
+| Export | Purpose |
+|--------|---------|
+| `haversineKm(lat1, lng1, lat2, lng2)` | Great-circle distance in km. Pure TS — no PostGIS dependency. Re-exported from `claim-server.ts` for backward compat. |
+| `getNearbyListings({ latitude, longitude, radiusKm?, foodCategory, limit? })` | Returns `AVAILABLE`, non-expired listings of `foodCategory` within `radiusKm` of the origin, enriched with restaurant info + `distanceKm`. Defaults: `radiusKm = 10`, `limit = 50` (capped at `MAX_NEARBY_LIMIT = 200`). Sort: expiry soonest first, then nearest distance as tiebreaker. |
+| `DEFAULT_RADIUS_KM` (`10`) / `DEFAULT_NEARBY_LIMIT` (`50`) / `MAX_NEARBY_LIMIT` (`200`) | Tunables. |
+
+`getNearbyListings` is **deliberately auth-free** so it can be reused from
+any caller — auth/role/org gating is the caller's job. Today it's wrapped by
+`listNearbyFoodForKind` in `claim-server.ts`, which adds:
+1. Org type + verification gate (`NGO`→`HUMAN_SAFE`, `ANIMAL_RESCUE`→`ANIMAL_SAFE`).
+2. Stale-listing sweep via `safeExpireOldListings()` before the SELECT.
+3. Returns `[]` (instead of throwing) when the org has no location set —
+   geo-matching is meaningless without an origin point. The route surfaces
+   a "set your location" prompt in that case.
+
+Implementation: bounding-box pre-filter in SQL (`lat BETWEEN ? AND ? AND
+lng BETWEEN ? AND ?`, derived from `radiusKm / 111` for lat and
+`radiusKm / (111*cos(lat))` for lng), then exact Haversine in app code to
+honor the radius precisely. The bounding box is approximate (over-includes
+corners and degrades near the poles) so the exact pass is required.
 
 Claim status sets live in `src/lib/permissions.ts`:
 - `ACTIVE_CLAIM_STATUSES = ['PENDING', 'ACCEPTED', 'PICKED_UP']`
