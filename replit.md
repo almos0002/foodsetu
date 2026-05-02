@@ -61,7 +61,7 @@ Domain tables reference `user.id` / `organization.id` as **soft text references*
 | `claim_status` | PENDING, ACCEPTED, REJECTED, CANCELLED, PICKED_UP, COMPLETED |
 | `verification_status` | PENDING, VERIFIED, REJECTED, SUSPENDED |
 | `report_reason` | SPOILED, MISLABELED, NO_SHOW, INAPPROPRIATE, OTHER |
-| `report_status` | OPEN, REVIEWING, RESOLVED, DISMISSED |
+| `report_status` | OPEN, REVIEWING, RESOLVED, DISMISSED (UI surfaces only OPEN, REVIEWED [↔ REVIEWING], RESOLVED — see Reports section) |
 | `sms_purpose` | OTP, NEW_LISTING_ALERT, CLAIM_ACCEPTED, PICKUP_REMINDER, GENERIC |
 | `sms_status` | QUEUED, SENT, DELIVERED, FAILED |
 
@@ -115,7 +115,9 @@ Each dashboard route adds its own `beforeLoad` doing a plain role check (NOT the
 | `/admin/organizations` | ADMIN | review table; verify / reject / suspend / reset |
 | `/admin/listings` | ADMIN | all food listings + admin-cancel |
 | `/admin/claims` | ADMIN | all claims across the platform |
-| `/admin/reports` | ADMIN | report queue: review / resolve / dismiss |
+| `/admin/reports` | ADMIN | report queue: mark reviewed / resolve / re-open |
+| `/reports` | any logged-in user | Caller-visible reports (filed by them or about their listings/claims) |
+| `/reports/new` | any logged-in user | File a new report; accepts `?listingId=` and `?claimId=` query params |
 | `/admin/cities` | ADMIN | create / edit / enable / disable cities |
 | `/restaurant/dashboard` | RESTAURANT, ADMIN | gated by org verification for actions |
 | `/ngo/dashboard` | NGO, ADMIN | gated by org verification for actions |
@@ -322,6 +324,79 @@ with a wider allowed status set (a restaurant can only cancel `DRAFT` /
 `AVAILABLE`; an admin can additionally cancel `CLAIM_REQUESTED` /
 `CLAIMED` / `REPORTED` for unsafe-food situations and frees any active
 claim row in the same transaction so the claimant doesn't get stuck).
+
+### Reports
+
+The reports system lets any logged-in user flag a problem against a
+listing, claim, or organization. Admins triage the queue; the listing
+owner / claimant org sees reports relevant to them.
+
+**Schema** (`reports` table — Drizzle-owned):
+
+| Column | Notes |
+|--------|-------|
+| `food_listing_id` | **Nullable** (migration `0003_reports_listing_nullable.sql`) so reports about a fake org or generic platform issues can be filed without a linked listing. Most reports do reference a listing because the form is opened from listing-context surfaces. |
+| `claim_id` | Nullable. When the form is opened from a claim card, both `listingId` and `claimId` are sent; if only `claimId` is present `createReportFn` derives the `food_listing_id` from the claim. |
+| `reporter_id`, `reporter_org_id` | Caller's user id + their owned org (if any). |
+| `reason`, `status`, `description`, `resolved_at` | See enum mapping below. |
+
+**Enum mapping** (the user-facing labels intentionally differ from the
+DB enum values, kept stable to avoid a destructive migration):
+
+| Spec label | DB `report_reason` |
+|------------|-------------------|
+| Unsafe food | `SPOILED` |
+| Wrong quantity | `MISLABELED` |
+| Pickup no-show | `NO_SHOW` |
+| Fake organization | `INAPPROPRIATE` |
+| Other issue | `OTHER` |
+
+| Spec status | DB `report_status` |
+|-------------|-------------------|
+| `OPEN` | `OPEN` |
+| `REVIEWED` | `REVIEWING` |
+| `RESOLVED` | `RESOLVED` |
+| _(legacy, hidden)_ | `DISMISSED` (surfaced as `RESOLVED` in the UI; not selectable) |
+
+`reportStatusToDb` / `reportStatusFromDb` in `src/lib/permissions.ts`
+translate at the DB boundary. The constants `REPORT_REASONS`,
+`REPORT_REASON_LABELS`, `REPORT_STATUSES`, `REPORT_STATUS_LABELS`,
+`REPORT_STATUS_BADGE_CLASSES` are the single source of truth for UI.
+
+**Server fns** (`src/lib/report-server.ts`):
+
+| Function | Auth | Purpose |
+|----------|------|---------|
+| `createReportFn({reason, description, foodListingId?, claimId?})` | session | Inserts an `OPEN` report. Defensive existence checks on the listing/claim id (so client typos return a friendly error instead of FK 500). When only `claimId` is supplied, derives `food_listing_id` from the claim so owner-side visibility (rule 3) still works. Description is required when reason is `OTHER`. |
+| `listMyVisibleReportsFn()` | session | Returns reports where the caller is the reporter, OR the caller's owned org owns the listing, OR the caller's owned org filed the linked claim. Adds a `visibility: 'FILED_BY_ME' \| 'ABOUT_MY_LISTING' \| 'ABOUT_MY_CLAIM'` discriminator (priority in that order) so the UI can label why each row is visible. |
+
+**Admin server fns** (in `src/lib/admin-server.ts`):
+
+| Function | Notes |
+|----------|-------|
+| `listReportsForAdminFn()` | Joins listing + reporter user + reporter org. Translates DB `status` to UI `status` via `reportStatusFromDb`. |
+| `setReportStatusFn({id, status})` | Validates the new status with `isValidReportStatus` (3 values only), translates to DB enum, sets `resolved_at = NOW()` only when transitioning to `RESOLVED`. |
+| `listListingsForAdminFn()` | Now returns a `reportCount` per row via a `LEFT JOIN (SELECT food_listing_id, COUNT(*)::int AS n FROM reports GROUP BY food_listing_id)` subquery. The admin listings table renders a `REPORTED (n)` flag-icon pill next to the title when `reportCount > 0` (per spec rule 4 — independent of whether the listing's own `food_listing_status` was manually flipped to `REPORTED`). |
+
+**Routes**:
+
+| Route | Component | Notes |
+|-------|-----------|-------|
+| `/reports/new` | `src/routes/_authed/reports/new.tsx` | Radio-button reason picker (5 options with explanatory hints), 2000-char description textarea, optional context block showing the linked `listingId`/`claimId` from the query string. On submit shows a success state with a link to `/reports`. |
+| `/reports` (index) | `src/routes/_authed/reports/index.tsx` | Cards list of `listMyVisibleReportsFn()` output, each tagged with a small visibility pill. Admins additionally see a button into `/admin/reports`. |
+| `/admin/reports` | `src/routes/_authed/admin/reports.tsx` | Filter chips (All / Open / Reviewed / Resolved), search box, action buttons that drive `setReportStatusFn`: "Mark reviewed" (OPEN → REVIEWED), "Resolve" (any → RESOLVED), "Re-open" (RESOLVED → OPEN). |
+
+**UI entry points** (where users can file a report):
+
+| Surface | Prefilled context |
+|---------|-------------------|
+| `MyClaimCard` (NGO + Animal Rescue `…/my-claims`) | `listingId` + `claimId` |
+| `/restaurant/claims/$id` aside | `listingId` + `claimId` |
+| `DashboardShell` header (visible to all roles) | none — opens `/reports` |
+
+The DashboardShell header gains a small "Reports" link that routes to
+`/reports` so any logged-in user can find their report queue from any
+shell-wrapped page.
 
 ### Listing expiry sweep (`src/lib/expiry-server.ts`)
 

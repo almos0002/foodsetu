@@ -1,5 +1,13 @@
 import { Link, useRouter } from '@tanstack/react-router'
-import { AlertTriangle, CheckCircle2, Clock, LogOut, Utensils, XCircle } from 'lucide-react'
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Flag,
+  LogOut,
+  Utensils,
+  XCircle,
+} from 'lucide-react'
 import type { ReactNode } from 'react'
 import { signOut } from '../lib/auth-client'
 import {
@@ -46,7 +54,15 @@ export function DashboardShell({
             <Utensils className="h-6 w-6" />
             <span className="text-lg font-semibold">FoodSetu</span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Link
+              to="/reports"
+              className="hidden items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 sm:inline-flex"
+              title="View reports related to you"
+            >
+              <Flag className="h-4 w-4" />
+              Reports
+            </Link>
             <div className="hidden text-right sm:block">
               <div className="text-sm font-medium text-gray-900">
                 {user.name ?? user.email}

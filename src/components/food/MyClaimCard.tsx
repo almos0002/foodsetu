@@ -1,6 +1,8 @@
+import { Link } from '@tanstack/react-router'
 import {
   CalendarClock,
   CheckCircle2,
+  Flag,
   KeyRound,
   MapPin,
   Phone,
@@ -142,6 +144,17 @@ export function MyClaimCard({ claim }: { claim: MyClaim }) {
           The restaurant declined this claim.
         </div>
       ) : null}
+
+      <div className="flex items-center justify-end border-t border-gray-100 bg-gray-50 px-4 py-2">
+        <Link
+          to="/reports/new"
+          search={{ listingId: l.id, claimId: claim.id }}
+          className="inline-flex items-center gap-1 text-[11px] font-medium text-red-600 hover:text-red-700"
+        >
+          <Flag className="h-3 w-3" />
+          Report a problem
+        </Link>
+      </div>
     </article>
   )
 }

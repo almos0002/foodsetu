@@ -2,6 +2,14 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { auth, pool } from './auth'
 import { safeExpireOldListings } from './expiry-server'
+import {
+  REPORT_STATUSES,
+  isValidReportStatus,
+  reportStatusFromDb,
+  reportStatusToDb,
+  type ReportReason,
+  type ReportStatus,
+} from './permissions'
 
 // ---------------------------------------------------------------------------
 // Auth gate
@@ -166,6 +174,10 @@ export type AdminListingRow = {
   restaurantName: string | null
   cityId: string | null
   cityName: string | null
+  // Number of reports filed against this listing (any status). Drives the
+  // "REPORTED" badge in the admin listings table per spec rule 4. Counted
+  // as int so the JSON payload doesn't surface PostgreSQL's bigint string.
+  reportCount: number
 }
 
 export const listListingsForAdminFn = createServerFn({ method: 'GET' }).handler(
@@ -185,10 +197,17 @@ export const listListingsForAdminFn = createServerFn({ method: 'GET' }).handler(
               l.restaurant_id     AS "restaurantId",
               o.name              AS "restaurantName",
               l.city_id           AS "cityId",
-              c.name              AS "cityName"
+              c.name              AS "cityName",
+              COALESCE(rc.n, 0)::int AS "reportCount"
          FROM food_listings l
          LEFT JOIN "organization" o ON o.id = l.restaurant_id
          LEFT JOIN cities c ON c.id = l.city_id
+         LEFT JOIN (
+           SELECT food_listing_id, COUNT(*)::int AS n
+             FROM reports
+            WHERE food_listing_id IS NOT NULL
+            GROUP BY food_listing_id
+         ) rc ON rc.food_listing_id = l.id
         ORDER BY l.created_at DESC
         LIMIT 500`,
     )
@@ -306,23 +325,18 @@ export const listClaimsForAdminFn = createServerFn({ method: 'GET' }).handler(
 // ---------------------------------------------------------------------------
 // Reports
 // ---------------------------------------------------------------------------
+//
+// Report enums (REPORT_STATUSES, REPORT_REASONS, ReportStatus, ReportReason)
+// are defined in src/lib/permissions.ts and re-exported below for callers
+// that import from `admin-server` for backward compatibility.
+//
+// IMPORTANT: the user-facing `REPORT_STATUSES` constant has 3 values
+// (OPEN, REVIEWED, RESOLVED) but the underlying PG enum has 4 values
+// including a legacy DISMISSED. Always translate via `reportStatusToDb`
+// / `reportStatusFromDb` when crossing the DB boundary.
 
-export const REPORT_STATUSES = [
-  'OPEN',
-  'REVIEWING',
-  'RESOLVED',
-  'DISMISSED',
-] as const
-export type ReportStatus = (typeof REPORT_STATUSES)[number]
-
-export const REPORT_REASONS = [
-  'SPOILED',
-  'MISLABELED',
-  'NO_SHOW',
-  'INAPPROPRIATE',
-  'OTHER',
-] as const
-export type ReportReason = (typeof REPORT_REASONS)[number]
+export { REPORT_STATUSES }
+export type { ReportStatus, ReportReason }
 
 export type AdminReportRow = {
   id: string
@@ -331,9 +345,10 @@ export type AdminReportRow = {
   description: string | null
   createdAt: string
   resolvedAt: string | null
-  listingId: string
+  listingId: string | null
   listingTitle: string | null
   listingStatus: string | null
+  claimId: string | null
   reporterId: string
   reporterName: string | null
   reporterEmail: string | null
@@ -349,6 +364,7 @@ export const listReportsForAdminFn = createServerFn({ method: 'GET' }).handler(
               r.food_listing_id AS "listingId",
               l.title  AS "listingTitle",
               l.status AS "listingStatus",
+              r.claim_id AS "claimId",
               r.reporter_id AS "reporterId",
               u.name  AS "reporterName",
               u.email AS "reporterEmail",
@@ -360,7 +376,10 @@ export const listReportsForAdminFn = createServerFn({ method: 'GET' }).handler(
         ORDER BY r.created_at DESC
         LIMIT 500`,
     )
-    return rows as AdminReportRow[]
+    return (rows as Array<Record<string, unknown>>).map((raw) => {
+      const r = raw as Omit<AdminReportRow, 'status'> & { status: string }
+      return { ...r, status: reportStatusFromDb(r.status) }
+    })
   },
 )
 
@@ -371,34 +390,48 @@ function validateReportStatusInput(value: unknown): {
   if (!value || typeof value !== 'object') throw new Error('Invalid input')
   const v = value as Record<string, unknown>
   if (typeof v.id !== 'string' || !v.id) throw new Error('id required')
-  if (
-    typeof v.status !== 'string' ||
-    !(REPORT_STATUSES as readonly string[]).includes(v.status)
-  ) {
-    throw new Error('Invalid status')
-  }
-  return { id: v.id, status: v.status as ReportStatus }
+  if (!isValidReportStatus(v.status)) throw new Error('Invalid status')
+  return { id: v.id, status: v.status }
 }
 
 export const setReportStatusFn = createServerFn({ method: 'POST' })
   .inputValidator(validateReportStatusInput)
   .handler(async ({ data }) => {
     await requireAdmin()
-    const isTerminal = data.status === 'RESOLVED' || data.status === 'DISMISSED'
+    const dbStatus = reportStatusToDb(data.status)
+    // `resolved_at` semantics:
+    //   - Going to RESOLVED: stamp NOW() only on the *first* transition
+    //     (preserve any existing closure timestamp on idempotent
+    //     re-resolves so we don't rewrite history when an admin clicks
+    //     Resolve a second time).
+    //   - Going to OPEN/REVIEWED: clear the timestamp — the report is
+    //     no longer closed.
+    //   - Legacy DISMISSED rows surface as RESOLVED in the UI but the DB
+    //     still holds 'DISMISSED'; we treat them as terminal for the
+    //     "preserve existing timestamp" rule (`status IN (...)`).
     const result = await pool.query(
       `UPDATE reports
-          SET status = $1,
-              resolved_at = CASE WHEN $2::boolean THEN NOW() ELSE NULL END,
+          SET status = $1::report_status,
+              resolved_at = CASE
+                WHEN $1::report_status = 'RESOLVED' THEN
+                  CASE
+                    WHEN status IN ('RESOLVED', 'DISMISSED')
+                         AND resolved_at IS NOT NULL
+                      THEN resolved_at
+                    ELSE NOW()
+                  END
+                ELSE NULL
+              END,
               updated_at = NOW()
-        WHERE id = $3
+        WHERE id = $2
         RETURNING id, status`,
-      [data.status, isTerminal, data.id],
+      [dbStatus, data.id],
     )
     if (result.rowCount === 0) throw new Error('Report not found')
     return {
       ok: true as const,
       id: result.rows[0].id as string,
-      status: result.rows[0].status as ReportStatus,
+      status: reportStatusFromDb(result.rows[0].status as string),
     }
   })
 

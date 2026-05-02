@@ -13,8 +13,10 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedReportsIndexRouteImport } from './routes/_authed/reports/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthedRestaurantDashboardRouteImport } from './routes/_authed/restaurant/dashboard'
+import { Route as AuthedReportsNewRouteImport } from './routes/_authed/reports/new'
 import { Route as AuthedOnboardingOrganizationRouteImport } from './routes/_authed/onboarding/organization'
 import { Route as AuthedNgoNearbyFoodRouteImport } from './routes/_authed/ngo/nearby-food'
 import { Route as AuthedNgoMyClaimsRouteImport } from './routes/_authed/ngo/my-claims'
@@ -55,6 +57,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedReportsIndexRoute = AuthedReportsIndexRouteImport.update({
+  id: '/reports/',
+  path: '/reports/',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -66,6 +73,11 @@ const AuthedRestaurantDashboardRoute =
     path: '/restaurant/dashboard',
     getParentRoute: () => AuthedRoute,
   } as any)
+const AuthedReportsNewRoute = AuthedReportsNewRouteImport.update({
+  id: '/reports/new',
+  path: '/reports/new',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedOnboardingOrganizationRoute =
   AuthedOnboardingOrganizationRouteImport.update({
     id: '/onboarding/organization',
@@ -193,8 +205,10 @@ export interface FileRoutesByFullPath {
   '/ngo/my-claims': typeof AuthedNgoMyClaimsRoute
   '/ngo/nearby-food': typeof AuthedNgoNearbyFoodRoute
   '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
+  '/reports/new': typeof AuthedReportsNewRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/reports/': typeof AuthedReportsIndexRoute
   '/restaurant/claims/$id': typeof AuthedRestaurantClaimsIdRoute
   '/restaurant/listings/new': typeof AuthedRestaurantListingsNewRoute
   '/restaurant/claims/': typeof AuthedRestaurantClaimsIndexRoute
@@ -220,8 +234,10 @@ export interface FileRoutesByTo {
   '/ngo/my-claims': typeof AuthedNgoMyClaimsRoute
   '/ngo/nearby-food': typeof AuthedNgoNearbyFoodRoute
   '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
+  '/reports/new': typeof AuthedReportsNewRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/reports': typeof AuthedReportsIndexRoute
   '/restaurant/claims/$id': typeof AuthedRestaurantClaimsIdRoute
   '/restaurant/listings/new': typeof AuthedRestaurantListingsNewRoute
   '/restaurant/claims': typeof AuthedRestaurantClaimsIndexRoute
@@ -249,8 +265,10 @@ export interface FileRoutesById {
   '/_authed/ngo/my-claims': typeof AuthedNgoMyClaimsRoute
   '/_authed/ngo/nearby-food': typeof AuthedNgoNearbyFoodRoute
   '/_authed/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
+  '/_authed/reports/new': typeof AuthedReportsNewRoute
   '/_authed/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_authed/reports/': typeof AuthedReportsIndexRoute
   '/_authed/restaurant/claims/$id': typeof AuthedRestaurantClaimsIdRoute
   '/_authed/restaurant/listings/new': typeof AuthedRestaurantListingsNewRoute
   '/_authed/restaurant/claims/': typeof AuthedRestaurantClaimsIndexRoute
@@ -278,8 +296,10 @@ export interface FileRouteTypes {
     | '/ngo/my-claims'
     | '/ngo/nearby-food'
     | '/onboarding/organization'
+    | '/reports/new'
     | '/restaurant/dashboard'
     | '/api/auth/$'
+    | '/reports/'
     | '/restaurant/claims/$id'
     | '/restaurant/listings/new'
     | '/restaurant/claims/'
@@ -305,8 +325,10 @@ export interface FileRouteTypes {
     | '/ngo/my-claims'
     | '/ngo/nearby-food'
     | '/onboarding/organization'
+    | '/reports/new'
     | '/restaurant/dashboard'
     | '/api/auth/$'
+    | '/reports'
     | '/restaurant/claims/$id'
     | '/restaurant/listings/new'
     | '/restaurant/claims'
@@ -333,8 +355,10 @@ export interface FileRouteTypes {
     | '/_authed/ngo/my-claims'
     | '/_authed/ngo/nearby-food'
     | '/_authed/onboarding/organization'
+    | '/_authed/reports/new'
     | '/_authed/restaurant/dashboard'
     | '/api/auth/$'
+    | '/_authed/reports/'
     | '/_authed/restaurant/claims/$id'
     | '/_authed/restaurant/listings/new'
     | '/_authed/restaurant/claims/'
@@ -381,6 +405,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/reports/': {
+      id: '/_authed/reports/'
+      path: '/reports'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof AuthedReportsIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -393,6 +424,13 @@ declare module '@tanstack/react-router' {
       path: '/restaurant/dashboard'
       fullPath: '/restaurant/dashboard'
       preLoaderRoute: typeof AuthedRestaurantDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/reports/new': {
+      id: '/_authed/reports/new'
+      path: '/reports/new'
+      fullPath: '/reports/new'
+      preLoaderRoute: typeof AuthedReportsNewRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/onboarding/organization': {
@@ -553,7 +591,9 @@ interface AuthedRouteChildren {
   AuthedNgoMyClaimsRoute: typeof AuthedNgoMyClaimsRoute
   AuthedNgoNearbyFoodRoute: typeof AuthedNgoNearbyFoodRoute
   AuthedOnboardingOrganizationRoute: typeof AuthedOnboardingOrganizationRoute
+  AuthedReportsNewRoute: typeof AuthedReportsNewRoute
   AuthedRestaurantDashboardRoute: typeof AuthedRestaurantDashboardRoute
+  AuthedReportsIndexRoute: typeof AuthedReportsIndexRoute
   AuthedRestaurantClaimsIdRoute: typeof AuthedRestaurantClaimsIdRoute
   AuthedRestaurantListingsNewRoute: typeof AuthedRestaurantListingsNewRoute
   AuthedRestaurantClaimsIndexRoute: typeof AuthedRestaurantClaimsIndexRoute
@@ -577,7 +617,9 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedNgoMyClaimsRoute: AuthedNgoMyClaimsRoute,
   AuthedNgoNearbyFoodRoute: AuthedNgoNearbyFoodRoute,
   AuthedOnboardingOrganizationRoute: AuthedOnboardingOrganizationRoute,
+  AuthedReportsNewRoute: AuthedReportsNewRoute,
   AuthedRestaurantDashboardRoute: AuthedRestaurantDashboardRoute,
+  AuthedReportsIndexRoute: AuthedReportsIndexRoute,
   AuthedRestaurantClaimsIdRoute: AuthedRestaurantClaimsIdRoute,
   AuthedRestaurantListingsNewRoute: AuthedRestaurantListingsNewRoute,
   AuthedRestaurantClaimsIndexRoute: AuthedRestaurantClaimsIndexRoute,

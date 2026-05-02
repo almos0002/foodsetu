@@ -13,6 +13,7 @@ import {
   Check,
   CheckCircle2,
   Clock,
+  Flag,
   KeyRound,
   MapPin,
   Phone,
@@ -432,6 +433,14 @@ function RestaurantClaimDetail() {
             <div className="mt-1">
               Updated {new Date(claim.updatedAt).toLocaleString()}
             </div>
+            <Link
+              to="/reports/new"
+              search={{ listingId: l.id, claimId: claim.id }}
+              className="mt-3 inline-flex items-center gap-1 text-[11px] font-medium text-red-600 hover:text-red-700"
+            >
+              <Flag className="h-3 w-3" />
+              Report a problem with this claim
+            </Link>
           </div>
         </aside>
       </div>

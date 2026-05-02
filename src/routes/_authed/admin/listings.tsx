@@ -1,6 +1,6 @@
 import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Ban } from 'lucide-react'
+import { Ban, Flag } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
 import { AdminTable, type Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
@@ -97,7 +97,18 @@ function AdminListings() {
       header: 'Listing',
       render: (l) => (
         <div>
-          <div className="font-medium text-gray-900">{l.title}</div>
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-gray-900">{l.title}</span>
+            {l.reportCount > 0 ? (
+              <span
+                className="inline-flex items-center gap-0.5 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-800 ring-1 ring-red-200"
+                title={`${l.reportCount} report(s) filed against this listing`}
+              >
+                <Flag className="h-3 w-3" />
+                REPORTED ({l.reportCount})
+              </span>
+            ) : null}
+          </div>
           <div className="text-xs text-gray-500">
             {Number(l.quantity)} {l.quantityUnit} ·{' '}
             {FOOD_CATEGORY_LABELS[l.foodCategory as FoodCategory] ??
