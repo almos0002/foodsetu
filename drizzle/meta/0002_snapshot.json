@@ -295,12 +295,8 @@
           "name": "claims_food_listing_id_food_listings_id_fk",
           "tableFrom": "claims",
           "tableTo": "food_listings",
-          "columnsFrom": [
-            "food_listing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["food_listing_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -563,12 +559,8 @@
           "name": "food_listings_city_id_cities_id_fk",
           "tableFrom": "food_listings",
           "tableTo": "cities",
-          "columnsFrom": [
-            "city_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["city_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -707,12 +699,8 @@
           "name": "reports_food_listing_id_food_listings_id_fk",
           "tableFrom": "reports",
           "tableTo": "food_listings",
-          "columnsFrom": [
-            "food_listing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["food_listing_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -720,12 +708,8 @@
           "name": "reports_claim_id_claims_id_fk",
           "tableFrom": "reports",
           "tableTo": "claims",
-          "columnsFrom": [
-            "claim_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["claim_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -864,12 +848,8 @@
           "name": "sms_logs_related_listing_id_food_listings_id_fk",
           "tableFrom": "sms_logs",
           "tableTo": "food_listings",
-          "columnsFrom": [
-            "related_listing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["related_listing_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -877,12 +857,8 @@
           "name": "sms_logs_related_claim_id_claims_id_fk",
           "tableFrom": "sms_logs",
           "tableTo": "claims",
-          "columnsFrom": [
-            "related_claim_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["related_claim_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -910,11 +886,7 @@
     "public.food_category": {
       "name": "food_category",
       "schema": "public",
-      "values": [
-        "HUMAN_SAFE",
-        "ANIMAL_SAFE",
-        "COMPOST_ONLY"
-      ]
+      "values": ["HUMAN_SAFE", "ANIMAL_SAFE", "COMPOST_ONLY"]
     },
     "public.food_listing_status": {
       "name": "food_listing_status",
@@ -933,32 +905,17 @@
     "public.org_type": {
       "name": "org_type",
       "schema": "public",
-      "values": [
-        "RESTAURANT",
-        "NGO",
-        "ANIMAL_RESCUE"
-      ]
+      "values": ["RESTAURANT", "NGO", "ANIMAL_RESCUE"]
     },
     "public.report_reason": {
       "name": "report_reason",
       "schema": "public",
-      "values": [
-        "SPOILED",
-        "MISLABELED",
-        "NO_SHOW",
-        "INAPPROPRIATE",
-        "OTHER"
-      ]
+      "values": ["SPOILED", "MISLABELED", "NO_SHOW", "INAPPROPRIATE", "OTHER"]
     },
     "public.report_status": {
       "name": "report_status",
       "schema": "public",
-      "values": [
-        "OPEN",
-        "REVIEWING",
-        "RESOLVED",
-        "DISMISSED"
-      ]
+      "values": ["OPEN", "REVIEWING", "RESOLVED", "DISMISSED"]
     },
     "public.sms_purpose": {
       "name": "sms_purpose",
@@ -974,32 +931,17 @@
     "public.sms_status": {
       "name": "sms_status",
       "schema": "public",
-      "values": [
-        "QUEUED",
-        "SENT",
-        "DELIVERED",
-        "FAILED"
-      ]
+      "values": ["QUEUED", "SENT", "DELIVERED", "FAILED"]
     },
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "ADMIN",
-        "RESTAURANT",
-        "NGO",
-        "ANIMAL_RESCUE"
-      ]
+      "values": ["ADMIN", "RESTAURANT", "NGO", "ANIMAL_RESCUE"]
     },
     "public.verification_status": {
       "name": "verification_status",
       "schema": "public",
-      "values": [
-        "PENDING",
-        "VERIFIED",
-        "REJECTED",
-        "SUSPENDED"
-      ]
+      "values": ["PENDING", "VERIFIED", "REJECTED", "SUSPENDED"]
     }
   },
   "schemas": {},

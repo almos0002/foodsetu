@@ -32,7 +32,7 @@ const baseURL =
 const trustedOrigins = [
   ...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : []),
   ...(isProduction
-    ? replitProdDomains?.map((d) => `https://${d}`) ?? []
+    ? (replitProdDomains?.map((d) => `https://${d}`) ?? [])
     : replitDevDomain
       ? [`https://${replitDevDomain}`]
       : []),

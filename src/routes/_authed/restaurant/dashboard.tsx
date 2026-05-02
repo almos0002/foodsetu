@@ -19,13 +19,11 @@ import { DashboardWelcomeBanner } from '../../../components/ui/DashboardWelcomeB
 import { EmptyState } from '../../../components/ui/EmptyState'
 import { listClaimRequestsForRestaurantFn } from '../../../lib/claim-server'
 import { listMyListingsFn } from '../../../lib/listing-server'
-import type { OrganizationRow } from '../../../lib/org-server'
 import {
   ROLE_LABELS,
   canCreateFoodListing,
   isOrgVerified,
   roleToDashboard,
-  type ListingStatus,
 } from '../../../lib/permissions'
 
 const BANNER_IMG =
@@ -35,7 +33,7 @@ export const Route = createFileRoute('/_authed/restaurant/dashboard')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => {
@@ -61,10 +59,7 @@ function todayLabel(): string {
 
 function RestaurantDashboard() {
   const { active, history, activeClaims } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
   const verified = isOrgVerified(organization)
   const canPost = canCreateFoodListing(user, organization)
   const recent = active.slice(0, 4)
@@ -206,7 +201,7 @@ function RestaurantDashboard() {
           ) : (
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {recent.map((row) => {
-                const status = row.status as ListingStatus
+                const status = row.status
                 return (
                   <DashboardListingCard
                     key={row.id}

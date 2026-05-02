@@ -1,9 +1,4 @@
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Info,
-  XCircle,
-} from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Info, XCircle } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from './cn'
 
@@ -44,7 +39,9 @@ export function Alert({ tone = 'info', title, children, className }: Props) {
       <Icon className="mt-0.5 h-4 w-4 flex-shrink-0" />
       <div className="min-w-0 flex-1">
         {title ? <div className="font-semibold">{title}</div> : null}
-        {children ? <div className={cn(title && 'mt-0.5')}>{children}</div> : null}
+        {children ? (
+          <div className={cn(title && 'mt-0.5')}>{children}</div>
+        ) : null}
       </div>
     </div>
   )

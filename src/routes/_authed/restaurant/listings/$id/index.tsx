@@ -30,9 +30,8 @@ import { PageHeader } from '../../../../../components/ui/PageHeader'
 import {
   cancelListingFn,
   getMyListingFn,
-  type ListingRow,
 } from '../../../../../lib/listing-server'
-import type { OrganizationRow } from '../../../../../lib/org-server'
+import type { ListingRow } from '../../../../../lib/listing-server'
 import {
   FOOD_CATEGORY_LABELS,
   FOOD_TYPE_LABELS,
@@ -40,16 +39,14 @@ import {
   isListingCancelable,
   isListingEditable,
   roleToDashboard,
-  type FoodCategory,
-  type FoodType,
-  type ListingStatus,
 } from '../../../../../lib/permissions'
+import type { FoodCategory, FoodType } from '../../../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/restaurant/listings/$id/')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async ({ params }) => {
@@ -68,7 +65,8 @@ export const Route = createFileRoute('/_authed/restaurant/listings/$id/')({
     <div className="mx-auto max-w-3xl px-6 py-20 text-center">
       <h2 className="text-xl font-semibold text-gray-900">Listing not found</h2>
       <p className="mt-2 text-sm text-gray-600">
-        This listing doesn&apos;t exist or doesn&apos;t belong to your organization.
+        This listing doesn&apos;t exist or doesn&apos;t belong to your
+        organization.
       </p>
       <Link
         to="/restaurant/listings"
@@ -84,12 +82,9 @@ export const Route = createFileRoute('/_authed/restaurant/listings/$id/')({
 function ListingDetail() {
   const router = useRouter()
   const { listing } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
 
-  const status = listing.status as ListingStatus
+  const status = listing.status
   const editable = isListingEditable(status)
   const cancelable = isListingCancelable(status)
 
@@ -213,9 +208,7 @@ function ListingDetail() {
                   params={{ id: listing.id }}
                   aria-disabled={!editable}
                   className={
-                    editable
-                      ? 'block'
-                      : 'pointer-events-none block opacity-50'
+                    editable ? 'block' : 'pointer-events-none block opacity-50'
                   }
                 >
                   <Button

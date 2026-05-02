@@ -19,13 +19,7 @@ export const Route = createFileRoute('/_authed/onboarding/organization')({
 function OnboardingOrganization() {
   const router = useRouter()
   const { cities } = Route.useLoaderData()
-  const { user } = Route.useRouteContext() as {
-    user: {
-      name?: string | null
-      email?: string | null
-      role?: string | null
-    }
-  }
+  const { user } = Route.useRouteContext()
 
   const expectedType = expectedOrgTypeForRole(user.role) ?? ''
   const roleLabel =
@@ -66,7 +60,9 @@ function OnboardingOrganization() {
       router.invalidate()
       await router.navigate({ to: '/' })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create organization')
+      setError(
+        err instanceof Error ? err.message : 'Failed to create organization',
+      )
     } finally {
       setSubmitting(false)
     }
@@ -108,15 +104,18 @@ function OnboardingOrganization() {
             </h1>
             <p className="mt-1 text-sm text-gray-600">
               Welcome, {user.name ?? user.email}. Tell us about your{' '}
-              <span className="font-medium text-gray-800">{roleLabel}</span> so an admin can verify it.
+              <span className="font-medium text-gray-800">{roleLabel}</span> so
+              an admin can verify it.
             </p>
           </div>
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
           <Alert tone="warning" className="mb-5">
-            Your organization will be reviewed by an admin. You can sign in and view your dashboard
-            immediately, but you won&apos;t be able to {user.role === 'RESTAURANT' ? 'post listings' : 'claim food'} until it&apos;s verified.
+            Your organization will be reviewed by an admin. You can sign in and
+            view your dashboard immediately, but you won&apos;t be able to{' '}
+            {user.role === 'RESTAURANT' ? 'post listings' : 'claim food'} until
+            it&apos;s verified.
           </Alert>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -134,7 +133,9 @@ function OnboardingOrganization() {
             <Field label="Type">
               <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
                 {expectedType || '—'}
-                <span className="ml-2 text-xs text-gray-500">(matches your account role)</span>
+                <span className="ml-2 text-xs text-gray-500">
+                  (matches your account role)
+                </span>
               </div>
             </Field>
 

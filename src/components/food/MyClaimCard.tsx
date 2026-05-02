@@ -11,11 +11,8 @@ import {
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { MyClaim } from '../../lib/claim-server'
-import {
-  FOOD_TYPE_LABELS,
-  type ClaimStatus,
-  type FoodType,
-} from '../../lib/permissions'
+import { FOOD_TYPE_LABELS } from '../../lib/permissions'
+import type { ClaimStatus, FoodType } from '../../lib/permissions'
 import { ClaimStatusBadge } from '../ui/ClaimStatusBadge'
 import { formatTime } from '../ui/FoodListingCard'
 

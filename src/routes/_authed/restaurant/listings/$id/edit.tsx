@@ -12,7 +12,6 @@ import {
   getMyListingFn,
   updateListingFn,
 } from '../../../../../lib/listing-server'
-import type { OrganizationRow } from '../../../../../lib/org-server'
 import {
   ROLE_LABELS,
   isListingEditable,
@@ -23,7 +22,7 @@ export const Route = createFileRoute('/_authed/restaurant/listings/$id/edit')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async ({ params }) => {
@@ -43,10 +42,7 @@ export const Route = createFileRoute('/_authed/restaurant/listings/$id/edit')({
 function EditListingPage() {
   const router = useRouter()
   const { listing } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
   const editable = isListingEditable(listing.status)
 
   return (

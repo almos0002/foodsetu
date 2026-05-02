@@ -44,11 +44,7 @@ export function DashboardListingCard({
   className,
 }: Props) {
   const pickupDate =
-    pickupAt instanceof Date
-      ? pickupAt
-      : pickupAt
-        ? new Date(pickupAt)
-        : null
+    pickupAt instanceof Date ? pickupAt : pickupAt ? new Date(pickupAt) : null
   return (
     <Link
       to={to}

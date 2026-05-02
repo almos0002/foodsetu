@@ -2,15 +2,16 @@ import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Ban, Flag } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
-import { AdminTable, type Column } from '../../../components/admin/AdminTable'
+import { AdminTable } from '../../../components/admin/AdminTable'
+import type { Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
 import { Alert } from '../../../components/ui/Alert'
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog'
 import {
   adminCancelListingFn,
   listListingsForAdminFn,
-  type AdminListingRow,
 } from '../../../lib/admin-server'
+import type { AdminListingRow } from '../../../lib/admin-server'
 import {
   FOOD_CATEGORY_LABELS,
   LISTING_STATUSES,
@@ -18,15 +19,14 @@ import {
   LISTING_STATUS_LABELS,
   canAccessAdmin,
   roleToDashboard,
-  type FoodCategory,
-  type ListingStatus,
 } from '../../../lib/permissions'
+import type { FoodCategory, ListingStatus } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/listings')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => ({ listings: await listListingsForAdminFn() }),
@@ -44,18 +44,14 @@ type StatusFilter = 'ALL' | ListingStatus
 function AdminListings() {
   const router = useRouter()
   const { listings } = Route.useLoaderData()
-  const { user } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-  }
+  const { user } = Route.useRouteContext()
   const [filter, setFilter] = useState<StatusFilter>('ALL')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [confirmRow, setConfirmRow] = useState<AdminListingRow | null>(null)
 
   const filtered =
-    filter === 'ALL'
-      ? listings
-      : listings.filter((l) => l.status === filter)
+    filter === 'ALL' ? listings : listings.filter((l) => l.status === filter)
 
   const counts = LISTING_STATUSES.reduce(
     (acc, s) => {
@@ -68,7 +64,7 @@ function AdminListings() {
   const filters = [
     { value: 'ALL' as StatusFilter, label: 'All', count: listings.length },
     ...LISTING_STATUSES.map((s) => ({
-      value: s as StatusFilter,
+      value: s,
       label: LISTING_STATUS_LABELS[s],
       count: counts[s],
     })),
@@ -132,9 +128,7 @@ function AdminListings() {
       header: 'Status',
       render: (l) => (
         <StatusPill
-          label={
-            LISTING_STATUS_LABELS[l.status as ListingStatus] ?? l.status
-          }
+          label={LISTING_STATUS_LABELS[l.status as ListingStatus] ?? l.status}
           className={LISTING_STATUS_BADGE_CLASSES[l.status as ListingStatus]}
         />
       ),

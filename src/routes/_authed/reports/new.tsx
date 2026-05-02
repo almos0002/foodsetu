@@ -9,7 +9,6 @@ import { ArrowLeft, CheckCircle2, Flag } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
 import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
-import type { OrganizationRow } from '../../../lib/org-server'
 import { createReportFn } from '../../../lib/report-server'
 import {
   REPORT_REASONS,
@@ -17,9 +16,8 @@ import {
   REPORT_REASON_LABELS,
   ROLE_LABELS,
   isValidReportReason,
-  type ReportReason,
-  type Role,
 } from '../../../lib/permissions'
+import type { ReportReason, Role } from '../../../lib/permissions'
 
 type SearchSchema = {
   listingId?: string
@@ -47,10 +45,7 @@ export const Route = createFileRoute('/_authed/reports/new')({
 function NewReportPage() {
   const router = useRouter()
   const search = useSearch({ from: '/_authed/reports/new' })
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
 
   const [reason, setReason] = useState<ReportReason>(
     (search.reason as ReportReason) ?? 'SPOILED',
@@ -82,8 +77,7 @@ function NewReportPage() {
     }
   }
 
-  const roleLabel =
-    (user.role && ROLE_LABELS[user.role as Role]) ?? 'Member'
+  const roleLabel = (user.role && ROLE_LABELS[user.role as Role]) ?? 'Member'
 
   if (submittedId) {
     return (
@@ -103,8 +97,8 @@ function NewReportPage() {
               </span>
             }
           >
-            An admin will review it shortly. You can track its status on
-            your reports page.
+            An admin will review it shortly. You can track its status on your
+            reports page.
             <div className="mt-4 flex flex-wrap gap-2">
               <Link to="/reports">
                 <Button size="sm">View my reports</Button>
@@ -151,8 +145,8 @@ function NewReportPage() {
                 Tell us what went wrong
               </h2>
               <p className="mt-1 text-sm text-gray-600">
-                Reports are reviewed by FoodSetu admins. Please be specific
-                so they can act quickly.
+                Reports are reviewed by FoodSetu admins. Please be specific so
+                they can act quickly.
               </p>
             </div>
           </div>

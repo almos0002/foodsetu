@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react'
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 
 export type Column<T> = {
   key: string
@@ -9,20 +10,20 @@ export type Column<T> = {
   align?: 'left' | 'right' | 'center'
 }
 
-export type FilterChip<F extends string> = {
-  value: F
+export type FilterChip<TFilter extends string> = {
+  value: TFilter
   label: string
   count?: number
 }
 
-type Props<T, F extends string> = {
+type Props<T, TFilter extends string> = {
   rows: T[]
   columns: Column<T>[]
   searchPlaceholder?: string
   searchKeys?: (keyof T | ((row: T) => string | null | undefined))[]
-  filters?: FilterChip<F>[]
-  filterValue?: F
-  onFilterChange?: (value: F) => void
+  filters?: FilterChip<TFilter>[]
+  filterValue?: TFilter
+  onFilterChange?: (value: TFilter) => void
   emptyLabel?: string
   rowKey: (row: T) => string
 }
@@ -38,7 +39,7 @@ function alignClass(a: Column<unknown>['align']) {
   }
 }
 
-export function AdminTable<T, F extends string>({
+export function AdminTable<T, TFilter extends string>({
   rows,
   columns,
   searchPlaceholder,
@@ -48,7 +49,7 @@ export function AdminTable<T, F extends string>({
   onFilterChange,
   emptyLabel,
   rowKey,
-}: Props<T, F>) {
+}: Props<T, TFilter>) {
   const [query, setQuery] = useState('')
 
   const visible = useMemo(() => {

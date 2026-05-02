@@ -3,7 +3,8 @@ import { getRequest } from '@tanstack/react-start/server'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { auth, pool } from './auth'
 import { db } from '../db'
-import { foodListings, type FoodListing } from '../db/schema'
+import { foodListings } from '../db/schema'
+import type { FoodListing } from '../db/schema'
 import { safeExpireOldListings } from './expiry-server'
 import { notifyFoodListingCreated } from './notification-server'
 import {
@@ -14,10 +15,12 @@ import {
   FOOD_TYPES,
   HISTORY_LISTING_STATUSES,
   QUANTITY_UNITS,
-  type FoodCategory,
-  type FoodType,
-  type ListingStatus,
-  type QuantityUnit,
+} from './permissions'
+import type {
+  FoodCategory,
+  FoodType,
+  ListingStatus,
+  QuantityUnit,
 } from './permissions'
 
 // ---------------------------------------------------------------------------
@@ -30,7 +33,7 @@ async function requireSessionUser(): Promise<SessionUser> {
   const request = getRequest()
   const session = await auth.api.getSession({ headers: request.headers })
   if (!session?.user) throw new Error('UNAUTHORIZED')
-  return session.user as SessionUser
+  return session.user
 }
 
 type OwnerOrgRow = {
@@ -72,7 +75,9 @@ async function requireVerifiedRestaurantOrg(
     throw new Error('Only restaurants can manage food listings')
   }
   if (user.role !== 'ADMIN' && org.verificationStatus !== 'VERIFIED') {
-    throw new Error('Your organization must be verified before posting listings')
+    throw new Error(
+      'Your organization must be verified before posting listings',
+    )
   }
   return org
 }
@@ -100,7 +105,12 @@ export type ListingInput = {
   imageUrl: string | null
 }
 
-function asString(v: unknown, label: string, max: number, required = true): string | null {
+function asString(
+  v: unknown,
+  label: string,
+  max: number,
+  required = true,
+): string | null {
   if (v === undefined || v === null || v === '') {
     if (required) throw new Error(`${label} is required`)
     return null
@@ -129,9 +139,7 @@ function asEnum<T extends string>(
   allowed: readonly T[],
 ): T {
   if (typeof v !== 'string' || !(allowed as readonly string[]).includes(v)) {
-    throw new Error(
-      `${label} must be one of: ${allowed.join(', ')}`,
-    )
+    throw new Error(`${label} must be one of: ${allowed.join(', ')}`)
   }
   return v as T
 }
@@ -173,11 +181,17 @@ function validateListingInput(value: unknown): ListingInput {
 
   const title = asString(v.title, 'Title', MAX_TITLE) as string
   if (title.length < 2) throw new Error('Title must be at least 2 characters')
-  const description = asString(v.description, 'Description', MAX_DESCRIPTION, false)
+  const description = asString(
+    v.description,
+    'Description',
+    MAX_DESCRIPTION,
+    false,
+  )
 
   const quantity = asNumber(v.quantity, 'Quantity')
   if (quantity <= 0) throw new Error('Quantity must be greater than zero')
-  if (quantity > MAX_QUANTITY) throw new Error(`Quantity must be ${MAX_QUANTITY} or less`)
+  if (quantity > MAX_QUANTITY)
+    throw new Error(`Quantity must be ${MAX_QUANTITY} or less`)
 
   const quantityUnit = asEnum(v.quantityUnit, 'Quantity unit', QUANTITY_UNITS)
   const foodCategory = asEnum(v.foodCategory, 'Food category', FOOD_CATEGORIES)
@@ -224,7 +238,10 @@ function validateListingInput(value: unknown): ListingInput {
   }
 }
 
-function validateUpdateInput(value: unknown): { id: string; data: ListingInput } {
+function validateUpdateInput(value: unknown): {
+  id: string
+  data: ListingInput
+} {
   if (!value || typeof value !== 'object') throw new Error('Invalid input')
   const v = value as Record<string, unknown>
   if (typeof v.id !== 'string' || v.id.length === 0) {
@@ -242,7 +259,9 @@ function validateIdInput(value: unknown): { id: string } {
   return { id: v.id }
 }
 
-function validateListInput(value: unknown): { scope: 'active' | 'history' | 'all' } {
+function validateListInput(value: unknown): {
+  scope: 'active' | 'history' | 'all'
+} {
   const v = (value ?? {}) as Record<string, unknown>
   const scope =
     v.scope === 'active' || v.scope === 'history' || v.scope === 'all'
@@ -311,9 +330,9 @@ export const listMyListingsFn = createServerFn({ method: 'GET' })
 
     const statuses =
       data.scope === 'active'
-        ? (ACTIVE_LISTING_STATUSES as readonly ListingStatus[])
+        ? ACTIVE_LISTING_STATUSES
         : data.scope === 'history'
-          ? (HISTORY_LISTING_STATUSES as readonly ListingStatus[])
+          ? HISTORY_LISTING_STATUSES
           : null
 
     const where = statuses
@@ -439,7 +458,10 @@ export const updateListingFn = createServerFn({ method: 'POST' })
     if (!row) {
       // Disambiguate so the user knows whether it's a permission or a status issue.
       const [existing] = await db
-        .select({ status: foodListings.status, restaurantId: foodListings.restaurantId })
+        .select({
+          status: foodListings.status,
+          restaurantId: foodListings.restaurantId,
+        })
         .from(foodListings)
         .where(eq(foodListings.id, data.id))
         .limit(1)
@@ -476,7 +498,10 @@ export const cancelListingFn = createServerFn({ method: 'POST' })
 
     if (!row) {
       const [existing] = await db
-        .select({ status: foodListings.status, restaurantId: foodListings.restaurantId })
+        .select({
+          status: foodListings.status,
+          restaurantId: foodListings.restaurantId,
+        })
         .from(foodListings)
         .where(eq(foodListings.id, data.id))
         .limit(1)

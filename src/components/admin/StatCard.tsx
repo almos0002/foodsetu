@@ -27,9 +27,7 @@ export function StatCard({ label, value, icon: Icon, hint, to, tone }: Props) {
         <div className="text-xs font-medium uppercase tracking-wide text-gray-500">
           {label}
         </div>
-        <div className="mt-1 text-2xl font-semibold text-gray-900">
-          {value}
-        </div>
+        <div className="mt-1 text-2xl font-semibold text-gray-900">{value}</div>
         {hint ? (
           <div className="mt-0.5 text-xs text-gray-500">{hint}</div>
         ) : null}

@@ -1,15 +1,21 @@
-import { Link, createFileRoute, redirect, useRouter } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  redirect,
+  useRouter,
+} from '@tanstack/react-router'
 import { useState } from 'react'
 import { ExternalLink } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
-import { AdminTable, type Column } from '../../../components/admin/AdminTable'
+import { AdminTable } from '../../../components/admin/AdminTable'
+import type { Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
 import { Alert } from '../../../components/ui/Alert'
 import {
   listReportsForAdminFn,
   setReportStatusFn,
-  type AdminReportRow,
 } from '../../../lib/admin-server'
+import type { AdminReportRow } from '../../../lib/admin-server'
 import {
   REPORT_REASON_LABELS,
   REPORT_STATUSES,
@@ -17,14 +23,14 @@ import {
   REPORT_STATUS_LABELS,
   canAccessAdmin,
   roleToDashboard,
-  type ReportStatus,
 } from '../../../lib/permissions'
+import type { ReportStatus } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/reports')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => ({ reports: await listReportsForAdminFn() }),
@@ -36,9 +42,7 @@ type StatusFilter = 'ALL' | ReportStatus
 function AdminReports() {
   const router = useRouter()
   const { reports } = Route.useLoaderData()
-  const { user } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-  }
+  const { user } = Route.useRouteContext()
   const [filter, setFilter] = useState<StatusFilter>('ALL')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -57,7 +61,7 @@ function AdminReports() {
   const filters = [
     { value: 'ALL' as StatusFilter, label: 'All', count: reports.length },
     ...REPORT_STATUSES.map((s) => ({
-      value: s as StatusFilter,
+      value: s,
       label: REPORT_STATUS_LABELS[s],
       count: counts[s],
     })),

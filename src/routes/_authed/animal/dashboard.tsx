@@ -21,14 +21,13 @@ import {
   listMyAnimalClaimsFn,
   listNearbyAnimalFoodFn,
 } from '../../../lib/claim-server'
-import type { OrganizationRow } from '../../../lib/org-server'
 import {
   ROLE_LABELS,
   canManageAnimalClaims,
   isClaimActive,
   roleToDashboard,
-  type ClaimStatus,
 } from '../../../lib/permissions'
+import type { ClaimStatus } from '../../../lib/permissions'
 
 const BANNER_IMG =
   'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=900&auto=format&fit=crop&q=80'
@@ -37,7 +36,7 @@ export const Route = createFileRoute('/_authed/animal/dashboard')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'ANIMAL_RESCUE' && user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => {
@@ -60,10 +59,7 @@ function todayLabel(): string {
 
 function AnimalDashboard() {
   const { nearby, myClaims } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
   const canClaim = canManageAnimalClaims(user, organization)
   const activeClaims = myClaims.filter((c) => isClaimActive(c.status))
   const recentNearby = nearby.slice(0, 4)

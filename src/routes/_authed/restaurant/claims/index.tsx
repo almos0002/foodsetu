@@ -1,4 +1,9 @@
-import { Link, createFileRoute, redirect, useRouter } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  redirect,
+  useRouter,
+} from '@tanstack/react-router'
 import { useState } from 'react'
 import { ClipboardList, History, Inbox, ListChecks } from 'lucide-react'
 import { DashboardShell } from '../../../../components/DashboardShell'
@@ -13,7 +18,6 @@ import {
   listClaimRequestsForRestaurantFn,
   rejectClaimFn,
 } from '../../../../lib/claim-server'
-import type { OrganizationRow } from '../../../../lib/org-server'
 import {
   ACTIVE_CLAIM_STATUSES,
   ROLE_LABELS,
@@ -27,7 +31,7 @@ export const Route = createFileRoute('/_authed/restaurant/claims/')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => {
@@ -46,19 +50,17 @@ const ACTIVE_SET = new Set<string>(ACTIVE_CLAIM_STATUSES)
 function RestaurantClaimsPage() {
   const router = useRouter()
   const { claims } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
 
   const verified = isOrgVerified(organization)
-  const isRestaurantOrg =
-    !!organization && organization.type === 'RESTAURANT'
-  const canManage =
-    user.role === 'ADMIN' || (isRestaurantOrg && verified)
+  const isRestaurantOrg = !!organization && organization.type === 'RESTAURANT'
+  const canManage = user.role === 'ADMIN' || (isRestaurantOrg && verified)
 
   const [tab, setTab] = useState<Tab>('active')
-  const [busy, setBusy] = useState<{ id: string; kind: 'accept' | 'reject' } | null>(null)
+  const [busy, setBusy] = useState<{
+    id: string
+    kind: 'accept' | 'reject'
+  } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const active = claims.filter((c) => ACTIVE_SET.has(c.status))
@@ -95,7 +97,10 @@ function RestaurantClaimsPage() {
         back={{ to: '/restaurant/dashboard', label: 'Back to dashboard' }}
         actions={
           <Link to="/restaurant/listings">
-            <Button variant="outline" leftIcon={<ListChecks className="h-4 w-4" />}>
+            <Button
+              variant="outline"
+              leftIcon={<ListChecks className="h-4 w-4" />}
+            >
               My listings
             </Button>
           </Link>
@@ -141,9 +146,7 @@ function RestaurantClaimsPage() {
             <EmptyState
               icon={Inbox}
               title={
-                tab === 'active'
-                  ? 'No pending requests'
-                  : 'No past claims yet'
+                tab === 'active' ? 'No pending requests' : 'No past claims yet'
               }
               description={
                 tab === 'active'

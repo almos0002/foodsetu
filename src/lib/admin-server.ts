@@ -7,9 +7,8 @@ import {
   isValidReportStatus,
   reportStatusFromDb,
   reportStatusToDb,
-  type ReportReason,
-  type ReportStatus,
 } from './permissions'
+import type { ReportReason, ReportStatus } from './permissions'
 
 // ---------------------------------------------------------------------------
 // Auth gate
@@ -322,6 +321,88 @@ export const listClaimsForAdminFn = createServerFn({ method: 'GET' }).handler(
   },
 )
 
+// Admin claim cancellation:
+//   - claim PENDING/ACCEPTED -> CANCELLED
+//   - if the listing is held by this claim (CLAIM_REQUESTED / CLAIMED with
+//     accepted_claim_id pointing here), restore it to AVAILABLE so others
+//     can re-claim. Listings already PICKED_UP or otherwise terminal are
+//     left alone.
+//
+// Conservative: PICKED_UP / COMPLETED claims (post-OTP) and already-terminal
+// claims (REJECTED / CANCELLED) cannot be cancelled by admin -- those have
+// real-world delivery consequences and need a different remediation path.
+const ADMIN_CANCELABLE_CLAIM_STATUSES = new Set(['PENDING', 'ACCEPTED'])
+
+export const adminCancelClaimFn = createServerFn({ method: 'POST' })
+  .inputValidator(validateListingIdInput) // reuses { id: string } shape
+  .handler(async ({ data }) => {
+    await requireAdmin()
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const { rows: crows } = await client.query(
+        `SELECT id, status, food_listing_id AS "foodListingId"
+           FROM claims WHERE id = $1 FOR UPDATE`,
+        [data.id],
+      )
+      if (crows.length === 0) throw new Error('Claim not found')
+      const claim = crows[0] as {
+        id: string
+        status: string
+        foodListingId: string
+      }
+      if (!ADMIN_CANCELABLE_CLAIM_STATUSES.has(claim.status)) {
+        throw new Error(
+          `Claim can no longer be cancelled (status: ${claim.status})`,
+        )
+      }
+      // Lock the listing too, so we can safely free it.
+      const { rows: lrows } = await client.query(
+        `SELECT id, status, accepted_claim_id AS "acceptedClaimId"
+           FROM food_listings WHERE id = $1 FOR UPDATE`,
+        [claim.foodListingId],
+      )
+      const listing = lrows[0] as
+        | { id: string; status: string; acceptedClaimId: string | null }
+        | undefined
+      // Cancel the claim, status-gated so concurrent transitions lose safely.
+      const { rowCount: claimUpdated } = await client.query(
+        `UPDATE claims
+            SET status = 'CANCELLED', updated_at = NOW()
+          WHERE id = $1
+            AND status = ANY($2::claim_status[])`,
+        [data.id, ['PENDING', 'ACCEPTED']],
+      )
+      if (claimUpdated === 0) {
+        throw new Error('This claim was just modified — please refresh')
+      }
+      // Free the listing if it was held by this claim.
+      if (
+        listing &&
+        (listing.status === 'CLAIM_REQUESTED' ||
+          listing.status === 'CLAIMED') &&
+        (listing.acceptedClaimId === data.id ||
+          listing.status === 'CLAIM_REQUESTED')
+      ) {
+        await client.query(
+          `UPDATE food_listings
+              SET status = 'AVAILABLE',
+                  accepted_claim_id = NULL,
+                  updated_at = NOW()
+            WHERE id = $1`,
+          [claim.foodListingId],
+        )
+      }
+      await client.query('COMMIT')
+    } catch (e) {
+      await client.query('ROLLBACK')
+      throw e
+    } finally {
+      client.release()
+    }
+    return { ok: true as const, id: data.id }
+  })
+
 // ---------------------------------------------------------------------------
 // Reports
 // ---------------------------------------------------------------------------
@@ -576,7 +657,10 @@ export const updateCityFn = createServerFn({ method: 'POST' })
     return { ok: true as const, id: data.id }
   })
 
-function validateToggleInput(value: unknown): { id: string; isActive: boolean } {
+function validateToggleInput(value: unknown): {
+  id: string
+  isActive: boolean
+} {
   if (!value || typeof value !== 'object') throw new Error('Invalid input')
   const v = value as Record<string, unknown>
   if (typeof v.id !== 'string' || !v.id) throw new Error('id required')

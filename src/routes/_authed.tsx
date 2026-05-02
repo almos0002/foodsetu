@@ -1,6 +1,7 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { getServerSession } from '../lib/auth-server'
-import { getMyOrganizationFn, type OrganizationRow } from '../lib/org-server'
+import { getMyOrganizationFn } from '../lib/org-server'
+import type { OrganizationRow } from '../lib/org-server'
 import { requiresOrganization, roleToDashboard } from '../lib/permissions'
 
 export const Route = createFileRoute('/_authed')({
@@ -25,11 +26,11 @@ export const Route = createFileRoute('/_authed')({
         throw redirect({ to: '/onboarding/organization' })
       }
       if (organization && isOnboardingRoute) {
-        throw redirect({ to: roleToDashboard(user.role) as string })
+        throw redirect({ to: roleToDashboard(user.role) })
       }
     } else if (isOnboardingRoute) {
       // Admins don't onboard.
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
 
     return {

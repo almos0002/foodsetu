@@ -33,16 +33,20 @@ const ORG_TYPE_FOR_ROLE: Record<string, string> = {
   ANIMAL_RESCUE: 'ANIMAL_RESCUE',
 }
 
-export function expectedOrgTypeForRole(role: string | null | undefined): string | null {
-  return role ? ORG_TYPE_FOR_ROLE[role] ?? null : null
+export function expectedOrgTypeForRole(
+  role: string | null | undefined,
+): string | null {
+  return role ? (ORG_TYPE_FOR_ROLE[role] ?? null) : null
 }
 
 function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-    .slice(0, 40) || 'org'
+  return (
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+      .slice(0, 40) || 'org'
+  )
 }
 
 async function requireUser() {
@@ -58,7 +62,9 @@ async function requireAdmin() {
   return user
 }
 
-async function fetchOrgForUser(userId: string): Promise<OrganizationRow | null> {
+async function fetchOrgForUser(
+  userId: string,
+): Promise<OrganizationRow | null> {
   // Scoped to owner role: the entire app currently models a user as owning at
   // most one org (enforced by the `member_one_owner_per_user_uq` partial
   // unique index). Filtering on `m.role = 'owner'` keeps the route context's
@@ -118,8 +124,10 @@ function validateCreateInput(value: unknown): CreateOrgInput {
   }
   const lat = optNum('latitude')
   const lng = optNum('longitude')
-  if (lat !== null && (lat < -90 || lat > 90)) throw new Error('Latitude out of range')
-  if (lng !== null && (lng < -180 || lng > 180)) throw new Error('Longitude out of range')
+  if (lat !== null && (lat < -90 || lat > 90))
+    throw new Error('Latitude out of range')
+  if (lng !== null && (lng < -180 || lng > 180))
+    throw new Error('Longitude out of range')
   return {
     name,
     description: optStr('description', 1000),
@@ -142,7 +150,8 @@ export const createMyOrganizationFn = createServerFn({ method: 'POST' })
       throw new Error('Invalid user role')
     }
     const expectedType = expectedOrgTypeForRole(user.role)
-    if (!expectedType) throw new Error('Your role cannot create an organization')
+    if (!expectedType)
+      throw new Error('Your role cannot create an organization')
 
     // Reject if user already has an org
     const existing = await fetchOrgForUser(user.id)
@@ -150,7 +159,9 @@ export const createMyOrganizationFn = createServerFn({ method: 'POST' })
 
     // Validate cityId references an actual city if provided
     if (data.cityId) {
-      const c = await pool.query('SELECT id FROM cities WHERE id = $1', [data.cityId])
+      const c = await pool.query('SELECT id FROM cities WHERE id = $1', [
+        data.cityId,
+      ])
       if (c.rowCount === 0) throw new Error('Invalid city selected')
     }
 
@@ -208,11 +219,12 @@ export const createMyOrganizationFn = createServerFn({ method: 'POST' })
     return fetchOrgForUser(user.id)
   })
 
-export const listOrganizationsForAdminFn = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    await requireAdmin()
-    const { rows } = await pool.query(
-      `SELECT o.*,
+export const listOrganizationsForAdminFn = createServerFn({
+  method: 'GET',
+}).handler(async () => {
+  await requireAdmin()
+  const { rows } = await pool.query(
+    `SELECT o.*,
               owner.id   AS "ownerId",
               owner.name AS "ownerName",
               owner.email AS "ownerEmail",
@@ -227,10 +239,9 @@ export const listOrganizationsForAdminFn = createServerFn({ method: 'GET' }).han
             LIMIT 1
          ) owner ON TRUE
         ORDER BY o."createdAt" DESC`,
-    )
-    return rows as OrganizationWithOwner[]
-  },
-)
+  )
+  return rows as OrganizationWithOwner[]
+})
 
 const ALLOWED_ADMIN_STATUSES = new Set([
   'PENDING',
@@ -274,9 +285,11 @@ export const setOrganizationVerificationFn = createServerFn({ method: 'POST' })
     return result.rows[0] as OrganizationRow
   })
 
-export const listCitiesFn = createServerFn({ method: 'GET' }).handler(async () => {
-  const { rows } = await pool.query(
-    `SELECT id, name, state FROM cities WHERE is_active = true ORDER BY name ASC`,
-  )
-  return rows as { id: string; name: string; state: string | null }[]
-})
+export const listCitiesFn = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const { rows } = await pool.query(
+      `SELECT id, name, state FROM cities WHERE is_active = true ORDER BY name ASC`,
+    )
+    return rows as { id: string; name: string; state: string | null }[]
+  },
+)

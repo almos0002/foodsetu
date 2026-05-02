@@ -9,7 +9,6 @@ import {
   Flag,
   LayoutDashboard,
   LogOut,
-  type LucideIcon,
   MapPin,
   Menu,
   PawPrint,
@@ -19,14 +18,12 @@ import {
   X,
   XCircle,
 } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import { signOut } from '../lib/auth-client'
-import {
-  ROLE_LABELS,
-  VERIFICATION_LABELS,
-  type Role,
-  type VerificationStatus,
-} from '../lib/permissions'
+import { ROLE_LABELS, VERIFICATION_LABELS } from '../lib/permissions'
+import type { Role, VerificationStatus } from '../lib/permissions'
 import { Alert } from './ui/Alert'
 import { cn } from './ui/cn'
 
@@ -64,7 +61,11 @@ const RESTAURANT_NAV: NavSection[] = [
     items: [
       { to: '/restaurant/dashboard', label: 'Overview', icon: LayoutDashboard },
       { to: '/restaurant/listings', label: 'Listings', icon: ShoppingBag },
-      { to: '/restaurant/claims', label: 'Claim requests', icon: ClipboardList },
+      {
+        to: '/restaurant/claims',
+        label: 'Claim requests',
+        icon: ClipboardList,
+      },
     ],
   },
   {
@@ -164,9 +165,8 @@ export function DashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const sections = navForRole(user.role)
-  const status = (organization?.verificationStatus ?? null) as
-    | VerificationStatus
-    | null
+  const status = (organization?.verificationStatus ??
+    null) as VerificationStatus | null
 
   // Close drawer + menus on route change
   useEffect(() => {
@@ -400,9 +400,7 @@ function SidebarBody({
             onClick={() => setUserMenuOpen?.((v) => !v)}
             className={cn(
               'flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors',
-              userMenuOpen
-                ? 'bg-gray-100'
-                : 'hover:bg-gray-50',
+              userMenuOpen ? 'bg-gray-100' : 'hover:bg-gray-50',
             )}
           >
             <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-gray-900 text-[11px] font-semibold text-white">

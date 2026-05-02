@@ -132,7 +132,7 @@ function Home() {
               Become a partner
             </a>
             {isPending ? null : user ? (
-              <Link to={roleToDashboard(user.role) as string}>
+              <Link to={roleToDashboard(user.role)}>
                 <Button rightIcon={<ArrowRight className="h-4 w-4" />}>
                   Dashboard
                 </Button>
@@ -180,8 +180,8 @@ function Home() {
                   before it&apos;s wasted.
                 </h1>
                 <p className="mt-4 max-w-xl text-base text-white/90 sm:text-lg">
-                  Restaurants post surplus meals nearby. NGOs and animal
-                  rescues claim them in minutes — fresh, free, and verified.
+                  Restaurants post surplus meals nearby. NGOs and animal rescues
+                  claim them in minutes — fresh, free, and verified.
                 </p>
               </div>
 
@@ -212,7 +212,7 @@ function Home() {
                     </div>
                   </div>
                   <Link
-                    to={user ? (roleToDashboard(user.role) as string) : '/register'}
+                    to={user ? roleToDashboard(user.role) : '/register'}
                     className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-orange-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-orange-700 sm:rounded-full"
                   >
                     <Search className="h-4 w-4" />
@@ -561,7 +561,9 @@ function RoleCard({
         />
       </div>
       <div className="flex flex-1 flex-col p-6">
-        <div className={`inline-flex items-center gap-2 text-xs font-semibold ${tone}`}>
+        <div
+          className={`inline-flex items-center gap-2 text-xs font-semibold ${tone}`}
+        >
           <Icon className="h-4 w-4" />
           {tag}
         </div>

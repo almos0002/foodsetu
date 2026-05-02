@@ -8,7 +8,6 @@ import { EmptyState } from '../../../components/ui/EmptyState'
 import { PageHeader } from '../../../components/ui/PageHeader'
 import { Tabs } from '../../../components/ui/Tabs'
 import { listMyClaimsFn } from '../../../lib/claim-server'
-import type { OrganizationRow } from '../../../lib/org-server'
 import {
   ACTIVE_CLAIM_STATUSES,
   ROLE_LABELS,
@@ -22,7 +21,7 @@ export const Route = createFileRoute('/_authed/ngo/my-claims')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'NGO' && user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => {
@@ -36,10 +35,7 @@ const ACTIVE_SET = new Set<string>(ACTIVE_CLAIM_STATUSES)
 
 function MyClaimsPage() {
   const { claims } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
   const canClaim = canManageNgoClaims(user, organization)
   const [tab, setTab] = useState<Tab>('active')
 
@@ -93,9 +89,7 @@ function MyClaimsPage() {
       {rows.length === 0 ? (
         <EmptyState
           icon={Inbox}
-          title={
-            tab === 'active' ? 'No active claims' : 'No past claims yet'
-          }
+          title={tab === 'active' ? 'No active claims' : 'No past claims yet'}
           description={
             tab === 'active'
               ? canClaim

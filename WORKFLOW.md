@@ -51,12 +51,12 @@ Admin sees impact report
 
 ## Core Roles
 
-| Role | Description |
-|------|-------------|
-| **Donor** | Restaurant / Hotel / Bakery uploading surplus food. |
-| **Receiver (Human)** | Verified NGO / Shelter for human-safe food. |
-| **Receiver (Animal)** | Verified animal rescue / feeder group for animal-safe food. |
-| **Admin** | Platform admin viewing impact, verifying receivers, moderating. |
+| Role                  | Description                                                     |
+| --------------------- | --------------------------------------------------------------- |
+| **Donor**             | Restaurant / Hotel / Bakery uploading surplus food.             |
+| **Receiver (Human)**  | Verified NGO / Shelter for human-safe food.                     |
+| **Receiver (Animal)** | Verified animal rescue / feeder group for animal-safe food.     |
+| **Admin**             | Platform admin viewing impact, verifying receivers, moderating. |
 
 ## Listing Status Lifecycle
 

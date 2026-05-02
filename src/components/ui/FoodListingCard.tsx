@@ -9,13 +9,8 @@ import type { ReactNode } from 'react'
 import { Button } from './Button'
 import { cn } from './cn'
 import { ListingStatusBadge } from './ClaimStatusBadge'
-import {
-  FOOD_CATEGORY_LABELS,
-  FOOD_TYPE_LABELS,
-  type FoodCategory,
-  type FoodType,
-  type ListingStatus,
-} from '../../lib/permissions'
+import { FOOD_CATEGORY_LABELS, FOOD_TYPE_LABELS } from '../../lib/permissions'
+import type { FoodCategory, FoodType } from '../../lib/permissions'
 
 export type FoodListingCardData = {
   id: string
@@ -102,10 +97,7 @@ export function FoodListingCard({
             ) : null}
           </div>
           {showStatus && listing.status ? (
-            <ListingStatusBadge
-              status={listing.status as ListingStatus}
-              size="sm"
-            />
+            <ListingStatusBadge status={listing.status} size="sm" />
           ) : null}
         </div>
 
@@ -119,8 +111,7 @@ export function FoodListingCard({
             icon={<Utensils className="h-3 w-3" />}
             label="Type"
             value={
-              FOOD_TYPE_LABELS[listing.foodType as FoodType] ??
-              listing.foodType
+              FOOD_TYPE_LABELS[listing.foodType as FoodType] ?? listing.foodType
             }
           />
           <Field
@@ -128,7 +119,9 @@ export function FoodListingCard({
             label="Pickup"
             value={
               <>
-                <span className="block">{formatTime(listing.pickupStartTime)}</span>
+                <span className="block">
+                  {formatTime(listing.pickupStartTime)}
+                </span>
                 <span className="block text-gray-500">
                   → {formatTime(listing.pickupEndTime)}
                 </span>

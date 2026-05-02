@@ -27,7 +27,7 @@ export const Route = createFileRoute('/_authed/admin/dashboard')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => ({ stats: await getAdminStatsFn() }),
@@ -50,9 +50,7 @@ function todayLabel(): string {
 
 function AdminDashboard() {
   const { stats } = Route.useLoaderData()
-  const { user } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-  }
+  const { user } = Route.useRouteContext()
 
   const rescuedSummary =
     stats.rescuedFoodByUnit.length === 0
@@ -259,9 +257,7 @@ function AdminDashboard() {
           value={stats.pendingVerificationRequests}
           icon={Clock}
           to="/admin/organizations"
-          tone={
-            stats.pendingVerificationRequests > 0 ? 'amber' : 'default'
-          }
+          tone={stats.pendingVerificationRequests > 0 ? 'amber' : 'default'}
           hint="Orgs awaiting review"
         />
         <DashboardStatsCard

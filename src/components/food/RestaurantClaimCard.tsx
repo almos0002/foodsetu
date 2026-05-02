@@ -14,11 +14,8 @@ import {
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { RestaurantClaim } from '../../lib/claim-server'
-import {
-  FOOD_TYPE_LABELS,
-  type ClaimStatus,
-  type FoodType,
-} from '../../lib/permissions'
+import { FOOD_TYPE_LABELS } from '../../lib/permissions'
+import type { ClaimStatus, FoodType } from '../../lib/permissions'
 import { Button } from '../ui/Button'
 import { ClaimStatusBadge } from '../ui/ClaimStatusBadge'
 import { formatTime } from '../ui/FoodListingCard'
@@ -158,7 +155,10 @@ export function RestaurantClaimCard({
           </Link>
           {status === 'ACCEPTED' ? (
             <Link to="/restaurant/claims/$id" params={{ id: claim.id }}>
-              <Button size="sm" leftIcon={<ShieldCheck className="h-3.5 w-3.5" />}>
+              <Button
+                size="sm"
+                leftIcon={<ShieldCheck className="h-3.5 w-3.5" />}
+              >
                 Verify pickup
               </Button>
             </Link>

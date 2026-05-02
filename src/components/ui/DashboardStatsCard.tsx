@@ -1,16 +1,10 @@
 import { Link } from '@tanstack/react-router'
-import { ArrowDownRight, ArrowUpRight, Minus, type LucideIcon } from 'lucide-react'
+import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from './cn'
 
-type Tone =
-  | 'default'
-  | 'orange'
-  | 'green'
-  | 'blue'
-  | 'amber'
-  | 'red'
-  | 'purple'
+type Tone = 'default' | 'orange' | 'green' | 'blue' | 'amber' | 'red' | 'purple'
 
 const TONES: Record<Tone, string> = {
   default: 'bg-gray-100 text-gray-700',
@@ -91,9 +85,7 @@ export function DashboardStatsCard({
         {value}
       </div>
       <div className="mt-2 text-sm font-medium text-gray-700">{label}</div>
-      {hint ? (
-        <div className="mt-1 text-xs text-gray-500">{hint}</div>
-      ) : null}
+      {hint ? <div className="mt-1 text-xs text-gray-500">{hint}</div> : null}
       {trailing ? <div className="mt-3">{trailing}</div> : null}
     </div>
   )

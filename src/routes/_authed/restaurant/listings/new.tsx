@@ -1,4 +1,9 @@
-import { Link, createFileRoute, redirect, useRouter } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  redirect,
+  useRouter,
+} from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { DashboardShell } from '../../../../components/DashboardShell'
 import { ListingForm } from '../../../../components/ListingForm'
@@ -22,7 +27,7 @@ export const Route = createFileRoute('/_authed/restaurant/listings/new')({
     // and unverified users see a friendly message instead of being bounced
     // (which prevents redirect loops).
     if (ctx.user.role !== 'RESTAURANT' && ctx.user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(ctx.user.role) as string })
+      throw redirect({ to: roleToDashboard(ctx.user.role) })
     }
   },
   component: NewListingPage,
@@ -30,10 +35,7 @@ export const Route = createFileRoute('/_authed/restaurant/listings/new')({
 
 function NewListingPage() {
   const router = useRouter()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
   const canPost = canManageRestaurantListings(user, organization)
 
   return (

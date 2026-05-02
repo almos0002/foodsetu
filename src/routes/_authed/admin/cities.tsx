@@ -2,7 +2,8 @@ import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Pencil, Plus, X } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
-import { AdminTable, type Column } from '../../../components/admin/AdminTable'
+import { AdminTable } from '../../../components/admin/AdminTable'
+import type { Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
 import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
@@ -12,15 +13,15 @@ import {
   listCitiesForAdminFn,
   toggleCityActiveFn,
   updateCityFn,
-  type AdminCityRow,
 } from '../../../lib/admin-server'
+import type { AdminCityRow } from '../../../lib/admin-server'
 import { canAccessAdmin, roleToDashboard } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/cities')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => ({ cities: await listCitiesForAdminFn() }),
@@ -55,9 +56,7 @@ const INPUT_CLS =
 function AdminCities() {
   const router = useRouter()
   const { cities } = Route.useLoaderData()
-  const { user } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-  }
+  const { user } = Route.useRouteContext()
   const [filter, setFilter] = useState<ActiveFilter>('ALL')
   const [form, setForm] = useState<FormState | null>(null)
   const [busy, setBusy] = useState(false)
@@ -68,9 +67,7 @@ function AdminCities() {
   const filtered =
     filter === 'ALL'
       ? cities
-      : cities.filter((c) =>
-          filter === 'ACTIVE' ? c.isActive : !c.isActive,
-        )
+      : cities.filter((c) => (filter === 'ACTIVE' ? c.isActive : !c.isActive))
 
   const filters = [
     { value: 'ALL' as ActiveFilter, label: 'All', count: cities.length },
@@ -243,10 +240,7 @@ function AdminCities() {
         title="Cities"
         description="Cities listed here power the city dropdown shown to restaurants and claimants. Disabling a city hides it from new sign-ups but keeps existing references intact."
         actions={
-          <Button
-            onClick={startCreate}
-            leftIcon={<Plus className="h-4 w-4" />}
-          >
+          <Button onClick={startCreate} leftIcon={<Plus className="h-4 w-4" />}>
             New city
           </Button>
         }
@@ -335,9 +329,7 @@ function AdminCities() {
                 type="number"
                 step="any"
                 value={form.latitude}
-                onChange={(e) =>
-                  setForm({ ...form, latitude: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, latitude: e.target.value })}
                 min={-90}
                 max={90}
                 placeholder="e.g. 19.0760"

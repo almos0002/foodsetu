@@ -25,7 +25,12 @@ import type { ReactNode } from 'react'
 import { DashboardShell } from '../../../../components/DashboardShell'
 import { Alert } from '../../../../components/ui/Alert'
 import { Button } from '../../../../components/ui/Button'
-import { Card, CardBody, CardHeader, CardTitle } from '../../../../components/ui/Card'
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+} from '../../../../components/ui/Card'
 import { ClaimStatusBadge } from '../../../../components/ui/ClaimStatusBadge'
 import { ConfirmDialog } from '../../../../components/ui/ConfirmDialog'
 import { PageHeader } from '../../../../components/ui/PageHeader'
@@ -35,7 +40,6 @@ import {
   rejectClaimFn,
   verifyPickupFn,
 } from '../../../../lib/claim-server'
-import type { OrganizationRow } from '../../../../lib/org-server'
 import {
   CLAIM_STATUS_LABELS,
   FOOD_CATEGORY_LABELS,
@@ -43,9 +47,11 @@ import {
   ROLE_LABELS,
   isOrgVerified,
   roleToDashboard,
-  type ClaimStatus,
-  type FoodCategory,
-  type FoodType,
+} from '../../../../lib/permissions'
+import type {
+  ClaimStatus,
+  FoodCategory,
+  FoodType,
 } from '../../../../lib/permissions'
 
 const CLAIMANT_ORG_TYPE_LABELS: Record<string, string> = {
@@ -58,7 +64,7 @@ export const Route = createFileRoute('/_authed/restaurant/claims/$id')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async ({ params }) => {
@@ -94,20 +100,15 @@ export const Route = createFileRoute('/_authed/restaurant/claims/$id')({
 function RestaurantClaimDetail() {
   const router = useRouter()
   const { claim } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
 
   const status = claim.status as ClaimStatus
   const isPending = status === 'PENDING'
   const isAccepted = status === 'ACCEPTED'
   const isCompleted = status === 'COMPLETED'
   const verified = isOrgVerified(organization)
-  const isRestaurantOrg =
-    !!organization && organization.type === 'RESTAURANT'
-  const canManage =
-    user.role === 'ADMIN' || (isRestaurantOrg && verified)
+  const isRestaurantOrg = !!organization && organization.type === 'RESTAURANT'
+  const canManage = user.role === 'ADMIN' || (isRestaurantOrg && verified)
 
   const [busy, setBusy] = useState<'accept' | 'reject' | 'verify' | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -121,7 +122,9 @@ function RestaurantClaimDetail() {
     setBusy('accept')
     try {
       await acceptClaimFn({ data: { id: claim.id } })
-      setSuccess('Claim accepted. A 6-digit pickup OTP was issued to the claimant.')
+      setSuccess(
+        'Claim accepted. A 6-digit pickup OTP was issued to the claimant.',
+      )
       router.invalidate()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to accept claim')
@@ -384,8 +387,8 @@ function RestaurantClaimDetail() {
                 <form onSubmit={handleVerify}>
                   <p className="text-xs text-gray-500">
                     Ask the claimant for their 6-digit pickup OTP and enter it
-                    here. On a successful match, the listing is marked as
-                    picked up and this claim is completed.
+                    here. On a successful match, the listing is marked as picked
+                    up and this claim is completed.
                   </p>
                   <label
                     htmlFor="otp"
@@ -403,9 +406,7 @@ function RestaurantClaimDetail() {
                     placeholder="000000"
                     value={otpInput}
                     onChange={(e) =>
-                      setOtpInput(
-                        e.target.value.replace(/\D/g, '').slice(0, 6),
-                      )
+                      setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))
                     }
                     disabled={!canManage || busy != null}
                     className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-center font-mono text-lg tracking-[0.4em] text-gray-900 placeholder:text-gray-300 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200 disabled:cursor-not-allowed disabled:bg-gray-50"

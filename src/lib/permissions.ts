@@ -56,7 +56,10 @@ function roleAndVerified(
   return isOrgVerified(org)
 }
 
-export function canCreateFoodListing(u: AuthUser, org?: AuthOrganization): boolean {
+export function canCreateFoodListing(
+  u: AuthUser,
+  org?: AuthOrganization,
+): boolean {
   return roleAndVerified(u, org ?? null, ['RESTAURANT'])
 }
 
@@ -75,11 +78,17 @@ export function canManageRestaurantListings(
   return isOrgVerified(org)
 }
 
-export function canClaimHumanFood(u: AuthUser, org?: AuthOrganization): boolean {
+export function canClaimHumanFood(
+  u: AuthUser,
+  org?: AuthOrganization,
+): boolean {
   return roleAndVerified(u, org ?? null, ['NGO'])
 }
 
-export function canClaimAnimalFood(u: AuthUser, org?: AuthOrganization): boolean {
+export function canClaimAnimalFood(
+  u: AuthUser,
+  org?: AuthOrganization,
+): boolean {
   return roleAndVerified(u, org ?? null, ['ANIMAL_RESCUE'])
 }
 
@@ -235,7 +244,9 @@ export function isListingEditable(status: string | null | undefined): boolean {
   return (EDITABLE_LISTING_STATUSES as readonly string[]).includes(status ?? '')
 }
 
-export function isListingCancelable(status: string | null | undefined): boolean {
+export function isListingCancelable(
+  status: string | null | undefined,
+): boolean {
   return (CANCELABLE_LISTING_STATUSES as readonly string[]).includes(
     status ?? '',
   )
@@ -331,9 +342,7 @@ export function isClaimActive(status: string | null | undefined): boolean {
 }
 
 export function isClaimCancelable(status: string | null | undefined): boolean {
-  return (CANCELABLE_CLAIM_STATUSES as readonly string[]).includes(
-    status ?? '',
-  )
+  return (CANCELABLE_CLAIM_STATUSES as readonly string[]).includes(status ?? '')
 }
 
 // ---------------------------------------------------------------------------
@@ -365,10 +374,13 @@ export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
 }
 
 export const REPORT_REASON_HINTS: Record<ReportReason, string> = {
-  SPOILED: 'The food was spoiled, contaminated, or otherwise unsafe to consume.',
-  MISLABELED: 'The actual quantity, food type, or category did not match the listing.',
+  SPOILED:
+    'The food was spoiled, contaminated, or otherwise unsafe to consume.',
+  MISLABELED:
+    'The actual quantity, food type, or category did not match the listing.',
   NO_SHOW: 'The other party did not show up at the pickup window.',
-  INAPPROPRIATE: 'The organization appears fake, fraudulent, or otherwise inappropriate.',
+  INAPPROPRIATE:
+    'The organization appears fake, fraudulent, or otherwise inappropriate.',
   OTHER: 'Anything else that warrants admin attention.',
 }
 
@@ -427,11 +439,14 @@ export function isValidReportStatus(v: unknown): v is ReportStatus {
 
 // Restrict post-login `?redirect=` to internal paths to prevent open-redirect.
 // Accepted: starts with a single "/" and contains no scheme or protocol-relative prefix.
-export function safeRedirectPath(input: string | null | undefined): string | null {
+export function safeRedirectPath(
+  input: string | null | undefined,
+): string | null {
   if (!input || typeof input !== 'string') return null
   if (!input.startsWith('/')) return null
   if (input.startsWith('//')) return null
   if (input.includes('://')) return null
+  // eslint-disable-next-line no-control-regex -- intentional: strip ASCII control chars from user-supplied redirect path.
   if (/[\s\x00-\x1f]/.test(input)) return null
   return input
 }

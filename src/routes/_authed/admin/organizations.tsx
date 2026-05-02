@@ -2,28 +2,29 @@ import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { CheckCircle2, PauseCircle, RotateCcw, XCircle } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
-import { AdminTable, type Column } from '../../../components/admin/AdminTable'
+import { AdminTable } from '../../../components/admin/AdminTable'
+import type { Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
 import { Alert } from '../../../components/ui/Alert'
 import {
   listOrganizationsForAdminFn,
   setOrganizationVerificationFn,
-  type OrganizationWithOwner,
 } from '../../../lib/org-server'
+import type { OrganizationWithOwner } from '../../../lib/org-server'
 import {
   VERIFICATION_BADGE_CLASSES,
   VERIFICATION_LABELS,
   VERIFICATION_STATUSES,
   canAccessAdmin,
   roleToDashboard,
-  type VerificationStatus,
 } from '../../../lib/permissions'
+import type { VerificationStatus } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/organizations')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => ({ organizations: await listOrganizationsForAdminFn() }),
@@ -35,13 +36,7 @@ type StatusFilter = 'ALL' | VerificationStatus
 function AdminOrganizations() {
   const router = useRouter()
   const { organizations } = Route.useLoaderData()
-  const { user } = Route.useRouteContext() as {
-    user: {
-      name?: string | null
-      email?: string | null
-      role?: string | null
-    }
-  }
+  const { user } = Route.useRouteContext()
   const [filter, setFilter] = useState<StatusFilter>('ALL')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -66,7 +61,7 @@ function AdminOrganizations() {
       count: organizations.length,
     },
     ...VERIFICATION_STATUSES.map((s) => ({
-      value: s as StatusFilter,
+      value: s,
       label: VERIFICATION_LABELS[s],
       count: counts[s],
     })),
@@ -131,15 +126,10 @@ function AdminOrganizations() {
       render: (org) => (
         <StatusPill
           label={
-            VERIFICATION_LABELS[
-              org.verificationStatus as VerificationStatus
-            ] ?? org.verificationStatus
+            VERIFICATION_LABELS[org.verificationStatus] ??
+            org.verificationStatus
           }
-          className={
-            VERIFICATION_BADGE_CLASSES[
-              org.verificationStatus as VerificationStatus
-            ]
-          }
+          className={VERIFICATION_BADGE_CLASSES[org.verificationStatus]}
         />
       ),
     },
@@ -162,21 +152,27 @@ function AdminOrganizations() {
             label="Verify"
             icon={<CheckCircle2 className="h-3.5 w-3.5" />}
             color="emerald"
-            disabled={busyId === org.id || org.verificationStatus === 'VERIFIED'}
+            disabled={
+              busyId === org.id || org.verificationStatus === 'VERIFIED'
+            }
             onClick={() => update(org, 'VERIFIED')}
           />
           <ActionBtn
             label="Reject"
             icon={<XCircle className="h-3.5 w-3.5" />}
             color="red"
-            disabled={busyId === org.id || org.verificationStatus === 'REJECTED'}
+            disabled={
+              busyId === org.id || org.verificationStatus === 'REJECTED'
+            }
             onClick={() => update(org, 'REJECTED')}
           />
           <ActionBtn
             label="Suspend"
             icon={<PauseCircle className="h-3.5 w-3.5" />}
             color="gray"
-            disabled={busyId === org.id || org.verificationStatus === 'SUSPENDED'}
+            disabled={
+              busyId === org.id || org.verificationStatus === 'SUSPENDED'
+            }
             onClick={() => update(org, 'SUSPENDED')}
           />
           <ActionBtn

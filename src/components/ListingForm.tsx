@@ -1,14 +1,13 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useState } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import {
   FOOD_CATEGORIES,
   FOOD_CATEGORY_LABELS,
   FOOD_TYPES,
   FOOD_TYPE_LABELS,
   QUANTITY_UNITS,
-  type FoodCategory,
-  type FoodType,
-  type QuantityUnit,
 } from '../lib/permissions'
+import type { FoodCategory, FoodType, QuantityUnit } from '../lib/permissions'
 import type { ListingInput } from '../lib/listing-server'
 import { Alert } from './ui/Alert'
 import { Button } from './ui/Button'

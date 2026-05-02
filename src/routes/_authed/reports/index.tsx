@@ -2,19 +2,16 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft, Flag } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
 import { EmptyState } from '../../../components/ui/EmptyState'
-import type { OrganizationRow } from '../../../lib/org-server'
-import {
-  listMyVisibleReportsFn,
-  type VisibleReport,
-} from '../../../lib/report-server'
+import { listMyVisibleReportsFn } from '../../../lib/report-server'
+import type { VisibleReport } from '../../../lib/report-server'
 import {
   REPORT_REASON_LABELS,
   REPORT_STATUS_BADGE_CLASSES,
   REPORT_STATUS_LABELS,
   ROLE_LABELS,
   roleToDashboard,
-  type Role,
 } from '../../../lib/permissions'
+import type { Role } from '../../../lib/permissions'
 
 const VISIBILITY_LABEL: Record<VisibleReport['visibility'], string> = {
   FILED_BY_ME: 'Filed by you',
@@ -30,25 +27,19 @@ const VISIBILITY_BADGE: Record<VisibleReport['visibility'], string> = {
 
 export const Route = createFileRoute('/_authed/reports/')({
   loader: async () => ({
-    reports: await listMyVisibleReportsFn().catch(
-      (): VisibleReport[] => [],
-    ),
+    reports: await listMyVisibleReportsFn().catch((): VisibleReport[] => []),
   }),
   component: MyReportsPage,
 })
 
 function MyReportsPage() {
   const { reports } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
 
   // Admin gets a one-line shortcut to /admin/reports because that view is
   // the source of truth for them; the rest of the page still works.
   const isAdmin = user.role === 'ADMIN'
-  const roleLabel =
-    (user.role && ROLE_LABELS[user.role as Role]) ?? 'Member'
+  const roleLabel = (user.role && ROLE_LABELS[user.role as Role]) ?? 'Member'
   const dashboardPath = roleToDashboard(user.role)
 
   return (
@@ -78,8 +69,8 @@ function MyReportsPage() {
       </div>
 
       <p className="mb-4 text-sm text-gray-600">
-        Reports you&apos;ve filed, plus reports about your listings or
-        claims so you know what an admin is looking into.
+        Reports you&apos;ve filed, plus reports about your listings or claims so
+        you know what an admin is looking into.
       </p>
 
       {reports.length === 0 ? (

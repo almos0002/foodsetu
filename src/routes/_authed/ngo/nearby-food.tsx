@@ -1,4 +1,9 @@
-import { Link, createFileRoute, redirect, useRouter } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  redirect,
+  useRouter,
+} from '@tanstack/react-router'
 import { useState } from 'react'
 import { MapPin, ShoppingBag, Utensils } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
@@ -7,11 +12,7 @@ import { Button } from '../../../components/ui/Button'
 import { EmptyState } from '../../../components/ui/EmptyState'
 import { FoodListingCard } from '../../../components/ui/FoodListingCard'
 import { PageHeader } from '../../../components/ui/PageHeader'
-import {
-  createClaimFn,
-  listNearbyHumanFoodFn,
-} from '../../../lib/claim-server'
-import type { OrganizationRow } from '../../../lib/org-server'
+import { createClaimFn, listNearbyHumanFoodFn } from '../../../lib/claim-server'
 import {
   ROLE_LABELS,
   canManageNgoClaims,
@@ -23,7 +24,7 @@ export const Route = createFileRoute('/_authed/ngo/nearby-food')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'NGO' && user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => {
@@ -36,10 +37,7 @@ export const Route = createFileRoute('/_authed/ngo/nearby-food')({
 function NearbyFoodPage() {
   const router = useRouter()
   const { listings } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
   const canClaim = canManageNgoClaims(user, organization)
   const hasOrgLocation =
     organization?.latitude != null && organization?.longitude != null

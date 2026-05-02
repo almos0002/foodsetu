@@ -1,19 +1,24 @@
 import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ChevronRight, History, ListChecks, Plus, ShoppingBag } from 'lucide-react'
+import {
+  ChevronRight,
+  History,
+  ListChecks,
+  Plus,
+  ShoppingBag,
+} from 'lucide-react'
 import { DashboardShell } from '../../../../components/DashboardShell'
 import { Button } from '../../../../components/ui/Button'
 import { ListingStatusBadge } from '../../../../components/ui/ClaimStatusBadge'
 import { EmptyState } from '../../../../components/ui/EmptyState'
 import { PageHeader } from '../../../../components/ui/PageHeader'
 import { Tabs } from '../../../../components/ui/Tabs'
-import { listMyListingsFn, type ListingRow } from '../../../../lib/listing-server'
-import type { OrganizationRow } from '../../../../lib/org-server'
+import { listMyListingsFn } from '../../../../lib/listing-server'
+import type { ListingRow } from '../../../../lib/listing-server'
 import {
   ROLE_LABELS,
   isOrgVerified,
   roleToDashboard,
-  type ListingStatus,
 } from '../../../../lib/permissions'
 
 type Tab = 'active' | 'history'
@@ -22,7 +27,7 @@ export const Route = createFileRoute('/_authed/restaurant/listings/')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => {
@@ -37,10 +42,7 @@ export const Route = createFileRoute('/_authed/restaurant/listings/')({
 
 function RestaurantListings() {
   const { active, history } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
   const verified = isOrgVerified(organization)
   const [tab, setTab] = useState<Tab>('active')
   const rows = tab === 'active' ? active : history
@@ -59,7 +61,9 @@ function RestaurantListings() {
         actions={
           verified ? (
             <Link to="/restaurant/listings/new">
-              <Button leftIcon={<Plus className="h-4 w-4" />}>New listing</Button>
+              <Button leftIcon={<Plus className="h-4 w-4" />}>
+                New listing
+              </Button>
             </Link>
           ) : (
             <span className="text-xs text-gray-500">
@@ -144,7 +148,7 @@ function RestaurantListings() {
 }
 
 function ListingRowEl({ row }: { row: ListingRow }) {
-  const status = row.status as ListingStatus
+  const status = row.status
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-4 py-3">

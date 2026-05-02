@@ -1,4 +1,9 @@
-import { Link, createFileRoute, redirect, useRouter } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  redirect,
+  useRouter,
+} from '@tanstack/react-router'
 import { useState } from 'react'
 import { MapPin, PawPrint, ShoppingBag } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
@@ -11,7 +16,6 @@ import {
   createAnimalClaimFn,
   listNearbyAnimalFoodFn,
 } from '../../../lib/claim-server'
-import type { OrganizationRow } from '../../../lib/org-server'
 import {
   ROLE_LABELS,
   canManageAnimalClaims,
@@ -23,7 +27,7 @@ export const Route = createFileRoute('/_authed/animal/nearby-food')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'ANIMAL_RESCUE' && user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => {
@@ -36,10 +40,7 @@ export const Route = createFileRoute('/_authed/animal/nearby-food')({
 function NearbyAnimalFoodPage() {
   const router = useRouter()
   const { listings } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-    organization: OrganizationRow | null
-  }
+  const { user, organization } = Route.useRouteContext()
   const canClaim = canManageAnimalClaims(user, organization)
   const hasOrgLocation =
     organization?.latitude != null && organization?.longitude != null

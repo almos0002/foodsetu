@@ -2,12 +2,11 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useState } from 'react'
 import { CheckCircle2, ShieldCheck, XCircle } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
-import { AdminTable, type Column } from '../../../components/admin/AdminTable'
+import { AdminTable } from '../../../components/admin/AdminTable'
+import type { Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
-import {
-  listUsersForAdminFn,
-  type AdminUserRow,
-} from '../../../lib/admin-server'
+import { listUsersForAdminFn } from '../../../lib/admin-server'
+import type { AdminUserRow } from '../../../lib/admin-server'
 import {
   ROLE_LABELS,
   ROLES,
@@ -15,15 +14,14 @@ import {
   VERIFICATION_LABELS,
   canAccessAdmin,
   roleToDashboard,
-  type Role,
-  type VerificationStatus,
 } from '../../../lib/permissions'
+import type { Role, VerificationStatus } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/users')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {
-      throw redirect({ to: roleToDashboard(user.role) as string })
+      throw redirect({ to: roleToDashboard(user.role) })
     }
   },
   loader: async () => ({ users: await listUsersForAdminFn() }),
@@ -41,15 +39,11 @@ type RoleFilter = 'ALL' | Role
 
 function AdminUsers() {
   const { users } = Route.useLoaderData()
-  const { user } = Route.useRouteContext() as {
-    user: { name?: string | null; email?: string | null; role?: string | null }
-  }
+  const { user } = Route.useRouteContext()
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL')
 
   const filtered =
-    roleFilter === 'ALL'
-      ? users
-      : users.filter((u) => u.role === roleFilter)
+    roleFilter === 'ALL' ? users : users.filter((u) => u.role === roleFilter)
 
   const counts = ROLES.reduce(
     (acc, r) => {
@@ -62,7 +56,7 @@ function AdminUsers() {
   const filters = [
     { value: 'ALL' as RoleFilter, label: 'All', count: users.length },
     ...ROLES.map((r) => ({
-      value: r as RoleFilter,
+      value: r,
       label: ROLE_LABELS[r],
       count: counts[r],
     })),

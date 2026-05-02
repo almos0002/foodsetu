@@ -1,5 +1,6 @@
 import { AlertTriangle, X } from 'lucide-react'
-import { useEffect, type ReactNode } from 'react'
+import { useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { Button } from './Button'
 import { cn } from './cn'
 
@@ -98,7 +99,11 @@ export function ConfirmDialog({
             variant={destructive ? 'destructive' : 'primary'}
             onClick={onConfirm}
             disabled={busy}
-            className={destructive ? 'bg-red-600 text-white border-transparent hover:bg-red-700' : ''}
+            className={
+              destructive
+                ? 'bg-red-600 text-white border-transparent hover:bg-red-700'
+                : ''
+            }
           >
             {busy ? 'Working…' : confirmLabel}
           </Button>

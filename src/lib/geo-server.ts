@@ -140,7 +140,7 @@ export async function getNearbyListings({
   // is fine because the exact Haversine pass below still enforces the radius).
   const latRad = toRadians(latitude)
   const latDelta = radiusKm / 111
-  const lngDelta = radiusKm / ((111 * Math.cos(latRad)) || 1e-6)
+  const lngDelta = radiusKm / (111 * Math.cos(latRad) || 1e-6)
   const minLat = Math.max(-90, latitude - latDelta)
   const maxLat = Math.min(90, latitude + latDelta)
   const minLng = longitude - lngDelta

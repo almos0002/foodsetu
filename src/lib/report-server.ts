@@ -5,9 +5,8 @@ import {
   REPORT_REASONS,
   isValidReportReason,
   reportStatusFromDb,
-  type ReportReason,
-  type ReportStatus,
 } from './permissions'
+import type { ReportReason, ReportStatus } from './permissions'
 
 // ---------------------------------------------------------------------------
 // Auth helper
@@ -55,7 +54,7 @@ function validateCreateReportInput(value: unknown): CreateReportInput {
   if (!isValidReportReason(v.reason)) {
     throw new Error('Pick a reason for the report.')
   }
-  const reason = v.reason as ReportReason
+  const reason = v.reason
 
   let description: string | null = null
   if (typeof v.description === 'string' && v.description.trim()) {
@@ -70,8 +69,7 @@ function validateCreateReportInput(value: unknown): CreateReportInput {
     typeof v.foodListingId === 'string' && v.foodListingId
       ? v.foodListingId
       : null
-  const claimId =
-    typeof v.claimId === 'string' && v.claimId ? v.claimId : null
+  const claimId = typeof v.claimId === 'string' && v.claimId ? v.claimId : null
 
   return { reason, description, foodListingId, claimId }
 }
@@ -171,10 +169,7 @@ export type VisibleReport = {
   claimId: string | null
   // Why the caller can see this report — drives the small "context" pill
   // in the UI.
-  visibility:
-    | 'FILED_BY_ME'
-    | 'ABOUT_MY_LISTING'
-    | 'ABOUT_MY_CLAIM'
+  visibility: 'FILED_BY_ME' | 'ABOUT_MY_LISTING' | 'ABOUT_MY_CLAIM'
 }
 
 export const listMyVisibleReportsFn = createServerFn({ method: 'GET' }).handler(

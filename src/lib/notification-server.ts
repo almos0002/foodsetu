@@ -22,7 +22,8 @@
 
 import { pool } from './auth'
 import { db } from '../db'
-import { smsLogs, type NewSmsLog } from '../db/schema'
+import { smsLogs } from '../db/schema'
+import type { NewSmsLog } from '../db/schema'
 
 type SmsPurpose =
   | 'OTP'

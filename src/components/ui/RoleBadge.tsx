@@ -1,7 +1,9 @@
 import { Building2, PawPrint, ShieldCheck, Utensils } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { ROLE_LABELS, type Role } from '../../lib/permissions'
-import { StatusBadge, type BadgeTone } from './StatusBadge'
+import { ROLE_LABELS } from '../../lib/permissions'
+import type { Role } from '../../lib/permissions'
+import { StatusBadge } from './StatusBadge'
+import type { BadgeTone } from './StatusBadge'
 
 const ROLE_TONE: Record<Role, BadgeTone> = {
   ADMIN: 'purple',
@@ -48,7 +50,9 @@ export function RoleBadge({
     )
   }
   const r = role as Role
-  const label = short ? (SHORT_ROLE_LABELS[r] ?? role) : (ROLE_LABELS[r] ?? role)
+  const label = short
+    ? (SHORT_ROLE_LABELS[r] ?? role)
+    : (ROLE_LABELS[r] ?? role)
   return (
     <StatusBadge
       tone={ROLE_TONE[r] ?? 'gray'}

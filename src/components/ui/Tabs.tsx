@@ -1,26 +1,26 @@
 import type { ReactNode } from 'react'
 import { cn } from './cn'
 
-type Tab<V extends string> = {
-  value: V
+type Tab<TValue extends string> = {
+  value: TValue
   label: string
   icon?: ReactNode
   count?: number
 }
 
-type Props<V extends string> = {
-  value: V
-  onChange: (value: V) => void
-  tabs: Tab<V>[]
+type Props<TValue extends string> = {
+  value: TValue
+  onChange: (value: TValue) => void
+  tabs: Tab<TValue>[]
   className?: string
 }
 
-export function Tabs<V extends string>({
+export function Tabs<TValue extends string>({
   value,
   onChange,
   tabs,
   className,
-}: Props<V>) {
+}: Props<TValue>) {
   return (
     <div
       role="tablist"
@@ -51,7 +51,9 @@ export function Tabs<V extends string>({
               <span
                 className={cn(
                   'ml-0.5 rounded-full px-1.5 text-[10px] font-semibold',
-                  active ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600',
+                  active
+                    ? 'bg-white/20 text-white'
+                    : 'bg-gray-100 text-gray-600',
                 )}
               >
                 {t.count}

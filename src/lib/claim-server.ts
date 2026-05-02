@@ -4,7 +4,8 @@ import { timingSafeEqual } from 'node:crypto'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { auth, pool } from './auth'
 import { db } from '../db'
-import { claims, foodListings, type Claim } from '../db/schema'
+import { claims, foodListings } from '../db/schema'
+import type { Claim } from '../db/schema'
 import { safeExpireOldListings } from './expiry-server'
 import { getNearbyListings } from './geo-server'
 import {
@@ -13,11 +14,8 @@ import {
   notifyOtpGenerated,
   notifyPickupCompleted,
 } from './notification-server'
-import {
-  ACTIVE_CLAIM_STATUSES,
-  HISTORY_CLAIM_STATUSES,
-  type ClaimStatus,
-} from './permissions'
+import { ACTIVE_CLAIM_STATUSES, HISTORY_CLAIM_STATUSES } from './permissions'
+import type { ClaimStatus } from './permissions'
 
 // Re-export for backward compatibility — callers historically imported
 // haversineKm from this module before geo-server.ts existed.
@@ -33,7 +31,7 @@ async function requireSessionUser(): Promise<SessionUser> {
   const request = getRequest()
   const session = await auth.api.getSession({ headers: request.headers })
   if (!session?.user) throw new Error('UNAUTHORIZED')
-  return session.user as SessionUser
+  return session.user
 }
 
 type OwnerOrgRow = {
@@ -117,7 +115,9 @@ async function requireVerifiedClaimantOrg(
   const org = await fetchOwnerOrgForUser(user.id)
   if (!org) throw new Error('You must set up your organization first')
   if (org.type !== kind.orgType) {
-    throw new Error(`Only ${kind.orgLabel}s can claim ${kind.categoryLabel} food`)
+    throw new Error(
+      `Only ${kind.orgLabel}s can claim ${kind.categoryLabel} food`,
+    )
   }
   if (user.role !== 'ADMIN' && org.verificationStatus !== 'VERIFIED') {
     throw new Error('Your organization must be verified before claiming food')
@@ -307,7 +307,7 @@ async function listNearbyFoodForKind(
   // The shared `NearbyListing` type carries `distanceKm: number | null` for
   // backward compat with surfaces that may not have an origin; in this
   // branch we always have a number, so the cast is structural-only.
-  return rows as NearbyListing[]
+  return rows
 }
 
 /** Lists the caller's own claims (newest first), with denormalized listing info. */
@@ -377,7 +377,7 @@ async function listMyClaimsForKind(
         : null,
       cityName: r.city_name,
     },
-  })) as MyClaim[]
+  }))
 }
 
 /**
@@ -459,14 +459,14 @@ async function createClaimForKind(
           status: 'PENDING',
         })
         .returning()
-      return { claim: claim as Claim, listing }
+      return { claim: claim, listing }
     } catch (e) {
       // Unique-violation on claims_listing_active_uq = a concurrent claim won.
       // The transaction will roll back the listing status change.
       if (
         e &&
-        typeof e === 'object'
-        && (e as { code?: string }).code === '23505'
+        typeof e === 'object' &&
+        (e as { code?: string }).code === '23505'
       ) {
         throw new Error('This listing is no longer available to claim')
       }
@@ -657,11 +657,11 @@ export const listClaimRequestsForRestaurantFn = createServerFn({
     if (data.scope === 'active') {
       sqlText +=
         ' AND cl.status = ANY($2::claim_status[]) ORDER BY cl.created_at DESC LIMIT 200'
-      params.push(ACTIVE_CLAIM_STATUSES as readonly string[])
+      params.push(ACTIVE_CLAIM_STATUSES)
     } else if (data.scope === 'history') {
       sqlText +=
         ' AND cl.status = ANY($2::claim_status[]) ORDER BY cl.created_at DESC LIMIT 200'
-      params.push(HISTORY_CLAIM_STATUSES as readonly string[])
+      params.push(HISTORY_CLAIM_STATUSES)
     } else {
       sqlText += ' ORDER BY cl.created_at DESC LIMIT 200'
     }
@@ -799,7 +799,7 @@ export const acceptClaimFn = createServerFn({ method: 'POST' })
             // Status changed between SELECT and UPDATE.
             throw new Error('This claim was just modified — please refresh')
           }
-          claimRow = c as Claim
+          claimRow = c
           issuedOtp = otp
           break
         } catch (e) {
@@ -809,8 +809,8 @@ export const acceptClaimFn = createServerFn({ method: 'POST' })
             e &&
             typeof e === 'object' &&
             (e as { code?: string }).code === '23505' &&
-            (e as { constraint?: string; constraint_name?: string }).constraint
-              === 'claims_listing_otp_uq'
+            (e as { constraint?: string; constraint_name?: string })
+              .constraint === 'claims_listing_otp_uq'
           ) {
             lastError = e
             continue
@@ -920,18 +920,12 @@ export const rejectClaimFn = createServerFn({ method: 'POST' })
         .where(
           and(
             eq(claims.foodListingId, row.listingId),
-            inArray(
-              claims.status,
-              ACTIVE_CLAIM_STATUSES as ClaimStatus[],
-            ),
+            inArray(claims.status, ACTIVE_CLAIM_STATUSES as ClaimStatus[]),
           ),
         )
         .limit(1)
 
-      if (
-        !otherActive &&
-        row.listingStatus === 'CLAIM_REQUESTED'
-      ) {
+      if (!otherActive && row.listingStatus === 'CLAIM_REQUESTED') {
         await tx
           .update(foodListings)
           .set({ status: 'AVAILABLE', acceptedClaimId: null })
@@ -1030,6 +1024,8 @@ export const verifyPickupFn = createServerFn({ method: 'POST' })
           listingTitle: foodListings.title,
           listingStatus: foodListings.status,
           restaurantId: foodListings.restaurantId,
+          pickupEndTime: foodListings.pickupEndTime,
+          expiryTime: foodListings.expiryTime,
         })
         .from(claims)
         .innerJoin(foodListings, eq(foodListings.id, claims.foodListingId))
@@ -1052,6 +1048,25 @@ export const verifyPickupFn = createServerFn({ method: 'POST' })
       if (row.listingStatus !== 'CLAIMED') {
         throw new Error(
           `Listing is ${(row.listingStatus as string).toLowerCase()} and cannot be marked as picked up`,
+        )
+      }
+      // Expiry / pickup-window guard. Even though `expireOldListings()`
+      // intentionally leaves CLAIMED rows alone (so an in-flight pickup
+      // doesn't get yanked away mid-handoff), we MUST refuse to actually
+      // complete the pickup once the food itself has gone past its expiry
+      // time — verifying after expiry would mark spoiled food as delivered.
+      // We also enforce the pickup window: if the donor specified a
+      // pickup_end_time, OTP verification past that point is rejected.
+      // Both checks are immutable, regardless of whether the sweep has run.
+      const nowMs = Date.now()
+      if (row.expiryTime.getTime() <= nowMs) {
+        throw new Error(
+          'This listing has expired and can no longer be marked as picked up',
+        )
+      }
+      if (row.pickupEndTime.getTime() <= nowMs) {
+        throw new Error(
+          'The pickup window has closed and this claim can no longer be verified',
         )
       }
       if (!row.otpCode) {
