@@ -84,7 +84,7 @@ export function AdminTable<T, F extends string>({
                     key={f.value}
                     type="button"
                     onClick={() => onFilterChange?.(f.value)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition ${
+                    className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition-colors ${
                       active
                         ? 'bg-orange-600 text-white ring-orange-600'
                         : 'bg-white text-gray-700 ring-gray-300 hover:bg-gray-50'
@@ -115,14 +115,14 @@ export function AdminTable<T, F extends string>({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full rounded-lg border border-gray-300 bg-white py-1.5 pl-8 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
+                className="w-full rounded-md border border-gray-300 bg-white py-1.5 pl-8 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
               />
             </div>
           ) : null}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">

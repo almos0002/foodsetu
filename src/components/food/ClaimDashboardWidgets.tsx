@@ -1,16 +1,18 @@
+import type { ReactNode } from 'react'
+
 export function StatCard({
   icon,
   label,
   value,
   accent,
 }: {
-  icon: React.ReactNode
+  icon: ReactNode
   label: string
   value: number | string
   accent: string
 }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded-lg border border-gray-200 bg-white p-4">
       <div
         className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ${accent}`}
       >
@@ -31,7 +33,7 @@ export function TabBtn({
 }: {
   active: boolean
   onClick: () => void
-  icon: React.ReactNode
+  icon: ReactNode
   label: string
   count: number
 }) {
@@ -40,8 +42,10 @@ export function TabBtn({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition ${
-        active ? 'bg-orange-600 text-white' : 'text-gray-700 hover:bg-gray-50'
+      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+        active
+          ? 'bg-orange-600 text-white'
+          : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
       }`}
     >
       {icon}

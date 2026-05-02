@@ -11,16 +11,16 @@ type Props = {
 }
 
 const TONE: Record<NonNullable<Props['tone']>, string> = {
-  default: 'bg-orange-100 text-orange-700',
-  warning: 'bg-amber-100 text-amber-700',
-  success: 'bg-emerald-100 text-emerald-700',
-  danger: 'bg-red-100 text-red-700',
+  default: 'bg-orange-50 text-orange-700',
+  warning: 'bg-amber-50 text-amber-700',
+  success: 'bg-emerald-50 text-emerald-700',
+  danger: 'bg-red-50 text-red-700',
 }
 
 export function StatCard({ label, value, icon: Icon, hint, to, tone }: Props) {
   const inner = (
     <div className="flex items-start gap-3">
-      <div className={`rounded-lg p-2 ${TONE[tone ?? 'default']}`}>
+      <div className={`rounded-md p-2 ${TONE[tone ?? 'default']}`}>
         <Icon className="h-5 w-5" />
       </div>
       <div className="min-w-0">
@@ -36,11 +36,10 @@ export function StatCard({ label, value, icon: Icon, hint, to, tone }: Props) {
       </div>
     </div>
   )
-  const cls =
-    'rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition'
+  const cls = 'rounded-lg border border-gray-200 bg-white p-4 transition-colors'
   if (to) {
     return (
-      <Link to={to} className={`${cls} hover:border-orange-300 hover:shadow`}>
+      <Link to={to} className={`${cls} hover:border-orange-300`}>
         {inner}
       </Link>
     )
