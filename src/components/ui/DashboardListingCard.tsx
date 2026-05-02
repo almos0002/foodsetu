@@ -20,7 +20,7 @@ type Props = {
 
 function formatPickup(d: Date): string {
   return new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Kolkata',
+    timeZone: 'Asia/Kathmandu',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',

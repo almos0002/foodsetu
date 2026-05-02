@@ -6,10 +6,10 @@
  *   - 3 PENDING orgs   (restaurant / NGO / animal-rescue)
  *   - 3 VERIFIED orgs  (restaurant / NGO / animal-rescue)
  *   - 4 sample listings owned by the verified restaurant:
- *       * "Veg biryani lunch surplus"      HUMAN_SAFE,  AVAILABLE, future pickup
- *       * "Bakery loaves end-of-day"       HUMAN_SAFE,  AVAILABLE, future pickup
- *       * "Curd rice scraps for strays"    ANIMAL_SAFE, AVAILABLE, future pickup
- *       * "Stale pakoras (past pickup)"    HUMAN_SAFE,  AVAILABLE, expired
+ *       * "Daal bhat lunch surplus"           HUMAN_SAFE,  AVAILABLE, future pickup
+ *       * "Bakery loaves end-of-day"          HUMAN_SAFE,  AVAILABLE, future pickup
+ *       * "Momo trays leftover for strays"    ANIMAL_SAFE, AVAILABLE, future pickup
+ *       * "Stale sel roti (past pickup)"      HUMAN_SAFE,  AVAILABLE, expired
  *
  * Run:
  *   npx tsx scripts/seed.ts
@@ -82,123 +82,123 @@ const ORGS: SeedOrg[] = [
     name: 'Pending Diner Co.',
     type: 'RESTAURANT',
     status: 'PENDING',
-    cityId: 'city_blr',
-    latitude: 12.9716,
-    longitude: 77.5946,
-    phone: '+91 90000 00001',
-    address: '12 Test Lane, Bengaluru',
+    cityId: 'city_ktm',
+    latitude: 27.7172,
+    longitude: 85.324,
+    phone: '+977 98000 00001',
+    address: '12 Test Marg, Kathmandu',
   },
   {
     ownerEmail: 'verified-restaurant@foodsetu.dev',
     name: 'Verified Diner Co.',
     type: 'RESTAURANT',
     status: 'VERIFIED',
-    cityId: 'city_blr',
-    latitude: 12.9716,
-    longitude: 77.5946,
-    phone: '+91 90000 00002',
-    address: '34 Sample Road, Bengaluru',
+    cityId: 'city_ktm',
+    latitude: 27.7172,
+    longitude: 85.324,
+    phone: '+977 98000 00002',
+    address: '34 Sample Sadak, Kathmandu',
   },
   {
     ownerEmail: 'pending-ngo@foodsetu.dev',
     name: 'Pending Helping Hands',
     type: 'NGO',
     status: 'PENDING',
-    cityId: 'city_blr',
-    latitude: 12.9352,
-    longitude: 77.6245,
-    phone: '+91 90000 00003',
-    address: '7 Hope Street, Bengaluru',
+    cityId: 'city_ktm',
+    latitude: 27.7056,
+    longitude: 85.3144,
+    phone: '+977 98000 00003',
+    address: '7 Hope Tole, Kathmandu',
   },
   {
     ownerEmail: 'verified-ngo@foodsetu.dev',
     name: 'Verified Helping Hands',
     type: 'NGO',
     status: 'VERIFIED',
-    cityId: 'city_blr',
-    latitude: 12.9352,
-    longitude: 77.6245,
-    phone: '+91 90000 00004',
-    address: '9 Hope Street, Bengaluru',
+    cityId: 'city_ktm',
+    latitude: 27.7056,
+    longitude: 85.3144,
+    phone: '+977 98000 00004',
+    address: '9 Hope Tole, Kathmandu',
   },
   {
     ownerEmail: 'pending-animal@foodsetu.dev',
     name: 'Pending Strays Trust',
     type: 'ANIMAL_RESCUE',
     status: 'PENDING',
-    cityId: 'city_blr',
-    latitude: 12.9784,
-    longitude: 77.6408,
-    phone: '+91 90000 00005',
-    address: '4 Paw Lane, Bengaluru',
+    cityId: 'city_ktm',
+    latitude: 27.7333,
+    longitude: 85.34,
+    phone: '+977 98000 00005',
+    address: '4 Paw Marg, Kathmandu',
   },
   {
     ownerEmail: 'verified-animal@foodsetu.dev',
     name: 'Verified Strays Trust',
     type: 'ANIMAL_RESCUE',
     status: 'VERIFIED',
-    cityId: 'city_blr',
-    latitude: 12.9784,
-    longitude: 77.6408,
-    phone: '+91 90000 00006',
-    address: '6 Paw Lane, Bengaluru',
+    cityId: 'city_ktm',
+    latitude: 27.7333,
+    longitude: 85.34,
+    phone: '+977 98000 00006',
+    address: '6 Paw Marg, Kathmandu',
   },
 ]
 
 const SEED_LISTING_TITLES = [
-  'Veg biryani lunch surplus',
+  'Daal bhat lunch surplus',
   'Bakery loaves end-of-day',
-  'Curd rice scraps for strays',
-  'Stale pakoras (past pickup)',
+  'Momo trays leftover for strays',
+  'Stale sel roti (past pickup)',
 ]
 
 async function ensureCities(): Promise<void> {
   const cities = [
     {
-      id: 'city_blr',
-      name: 'Bengaluru',
-      state: 'Karnataka',
-      slug: 'bengaluru',
-      lat: 12.9716,
-      lng: 77.5946,
+      id: 'city_ktm',
+      name: 'Kathmandu',
+      state: 'Bagmati',
+      slug: 'kathmandu',
+      lat: 27.7172,
+      lng: 85.324,
     },
     {
-      id: 'city_mum',
-      name: 'Mumbai',
-      state: 'Maharashtra',
-      slug: 'mumbai',
-      lat: 19.076,
-      lng: 72.8777,
+      id: 'city_pkr',
+      name: 'Pokhara',
+      state: 'Gandaki',
+      slug: 'pokhara',
+      lat: 28.2096,
+      lng: 83.9856,
     },
     {
-      id: 'city_del',
-      name: 'Delhi',
-      state: 'Delhi',
-      slug: 'delhi',
-      lat: 28.6139,
-      lng: 77.209,
+      id: 'city_lal',
+      name: 'Lalitpur',
+      state: 'Bagmati',
+      slug: 'lalitpur',
+      lat: 27.6588,
+      lng: 85.3247,
     },
     {
-      id: 'city_chn',
-      name: 'Chennai',
-      state: 'Tamil Nadu',
-      slug: 'chennai',
-      lat: 13.0827,
-      lng: 80.2707,
+      id: 'city_bkt',
+      name: 'Bhaktapur',
+      state: 'Bagmati',
+      slug: 'bhaktapur',
+      lat: 27.671,
+      lng: 85.4298,
     },
     {
-      id: 'city_hyd',
-      name: 'Hyderabad',
-      state: 'Telangana',
-      slug: 'hyderabad',
-      lat: 17.385,
-      lng: 78.4867,
+      id: 'city_brt',
+      name: 'Biratnagar',
+      state: 'Koshi',
+      slug: 'biratnagar',
+      lat: 26.4525,
+      lng: 87.2718,
     },
   ]
   for (const c of cities) {
     await pool.query(
       `INSERT INTO cities (id, name, state, country, slug, latitude, longitude, is_active)
-       VALUES ($1,$2,$3,'IN',$4,$5,$6,true)
+       VALUES ($1,$2,$3,'NP',$4,$5,$6,true)
        ON CONFLICT (id) DO UPDATE SET
          name = EXCLUDED.name,
          state = EXCLUDED.state,
@@ -350,8 +350,8 @@ async function createListings(
 
   const seeds = [
     {
-      title: 'Veg biryani lunch surplus',
-      description: "2 trays of veg biryani from today's lunch service.",
+      title: 'Daal bhat lunch surplus',
+      description: "2 trays of daal bhat from today's lunch service.",
       quantity: '5.00',
       quantityUnit: 'plates',
       foodCategory: 'HUMAN_SAFE',
@@ -372,8 +372,8 @@ async function createListings(
       expiryTime: inHours(8),
     },
     {
-      title: 'Curd rice scraps for strays',
-      description: 'Plain curd rice trimmings, no spice — animal-safe.',
+      title: 'Momo trays leftover for strays',
+      description: 'Plain veg momo trimmings, no spice — animal-safe.',
       quantity: '3.50',
       quantityUnit: 'kg',
       foodCategory: 'ANIMAL_SAFE',
@@ -383,7 +383,7 @@ async function createListings(
       expiryTime: inHours(6),
     },
     {
-      title: 'Stale pakoras (past pickup)',
+      title: 'Stale sel roti (past pickup)',
       description:
         'Test fixture: pickup window already closed; sweep should EXPIRE.',
       quantity: '2.00',
@@ -408,7 +408,7 @@ async function createListings(
         crypto.randomUUID(),
         restaurantOrgId,
         ownerUserId,
-        'city_blr',
+        'city_ktm',
         s.title,
         s.description,
         s.quantity,

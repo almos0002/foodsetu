@@ -350,7 +350,7 @@ function ListingCard({
   )
 }
 
-const TZ = 'Asia/Kolkata'
+const TZ = 'Asia/Kathmandu'
 const ymdInTz = (d: Date) =>
   new Intl.DateTimeFormat('en-CA', {
     timeZone: TZ,

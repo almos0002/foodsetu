@@ -133,8 +133,8 @@ export async function getNearbyListings({
 
   // Bounding box around the origin. 1 deg latitude ≈ 111 km; 1 deg longitude
   // ≈ 111*cos(lat) km. We clamp lat to [-90, 90] but intentionally do NOT
-  // wrap longitude across the antimeridian — relevant data is in India (lon
-  // ≈ 68..98) so wraparound is not a concern in practice. cos(lat) can hit
+  // wrap longitude across the antimeridian — relevant data is in Nepal (lon
+  // ≈ 80..89) so wraparound is not a concern in practice. cos(lat) can hit
   // zero at the poles; the `|| 1e-6` keeps us from dividing by zero (and at
   // those latitudes the bounding box collapses to "the whole world", which
   // is fine because the exact Haversine pass below still enforces the radius).

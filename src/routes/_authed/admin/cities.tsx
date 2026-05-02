@@ -44,7 +44,7 @@ const EMPTY_FORM: FormState = {
   id: null,
   name: '',
   state: '',
-  country: 'IN',
+  country: 'NP',
   latitude: '',
   longitude: '',
   isActive: true,

@@ -164,7 +164,7 @@ function OnboardingOrganization() {
                   onChange={(e) => setPhone(e.target.value)}
                   maxLength={30}
                   className={inputCls}
-                  placeholder="+91 …"
+                  placeholder="+977 …"
                 />
               </Field>
               <Field label="City">

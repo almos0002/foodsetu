@@ -572,7 +572,7 @@ function validateCityInput(value: unknown): CityInput {
   const country =
     typeof v.country === 'string' && v.country.trim().length > 0
       ? v.country.trim().slice(0, 2).toUpperCase()
-      : 'IN'
+      : 'NP'
   const optNum = (k: string) => {
     const x = v[k]
     if (x === undefined || x === null || x === '') return null

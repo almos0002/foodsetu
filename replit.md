@@ -39,7 +39,7 @@ The UI adheres to a minimal product-site aesthetic, characterized by quiet monoc
 ### Technical Implementations
 - **Routing:** File-based routing in `src/routes/` with `TanStack Router`.
 - **Server-Side Rendering (SSR):** Implemented with `TanStack Start` and `Nitro`.
-- **Hydration Hygiene:** Custom `stubServerOnlyForClient()` Vite plugin prevents server-only modules from being bundled into the client. `Buffer` polyfill and `Intl.DateTimeFormat` with fixed `timeZone: 'Asia/Kolkata'` are used to prevent hydration mismatches.
+- **Hydration Hygiene:** Custom `stubServerOnlyForClient()` Vite plugin prevents server-only modules from being bundled into the client. `Buffer` polyfill and `Intl.DateTimeFormat` with fixed `timeZone: 'Asia/Kathmandu'` are used to prevent hydration mismatches.
 - **Geo-matching:** `haversineKm` function and `getNearbyListings` for efficient location-based food discovery, with a bounding-box pre-filter in SQL and exact Haversine calculation in app code.
 - **Listing Expiry Sweep:** Piggy-backed onto hot-path data fetches, `safeExpireOldListings()` atomically updates expired listings and cancels associated claims.
 

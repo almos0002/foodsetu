@@ -256,7 +256,7 @@ function LiveBadge() {
     <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-ink-2)]">
       <span className="live-dot" />
       <span className="text-[var(--color-ink)]">Live</span>
-      in Bengaluru, Mumbai, Delhi
+      in Kathmandu, Pokhara, Lalitpur
       <span className="text-[var(--color-ink-3)]">+ 2</span>
     </span>
   )
@@ -328,11 +328,11 @@ function HeroPanel() {
                 Available now
               </div>
               <div className="mt-1 truncate text-[14px] font-semibold">
-                28 portions · Veg biryani
+                28 portions · Daal bhat
               </div>
               <div className="mt-0.5 flex items-center gap-2 text-[11px] text-[var(--color-ink-3)] numeric">
                 <MapPin className="h-3 w-3" />
-                Indiranagar
+                Thamel
                 <span className="h-2.5 w-px bg-[var(--color-line)]" />
                 <Clock className="h-3 w-3" />
                 Pickup by 9:30 PM
@@ -377,15 +377,15 @@ function HeroPanel() {
 
 function LogosTape() {
   const partners = [
-    'Ananda Bhavan',
-    'Truffles',
-    'Akshaya Patra',
-    'Karunya Trust',
-    'Daily Fresh Bakers',
-    'CARE India',
+    'Bhojan Griha',
+    'Thakali Kitchen',
+    'Sarvanam Trust',
+    'Karuna Nepal',
+    'Himalayan Java Bakers',
+    'CARE Nepal',
     'Hopscotch Cafe',
-    'CUPA Bengaluru',
-    'Glen\u2019s Bakehouse',
+    'KAT Centre Kathmandu',
+    'Roadhouse Bakehouse',
     'Project Mukti',
   ]
   return (
@@ -876,7 +876,7 @@ function Footer() {
             </div>
             <p className="mt-4 max-w-xs text-[13.5px] leading-relaxed text-[var(--color-ink-2)]">
               Surplus food infrastructure for kitchens, NGOs, and animal
-              rescues. Built quietly in Bengaluru.
+              rescues. Built quietly in Kathmandu.
             </p>
           </div>
           <FooterCol
@@ -907,7 +907,7 @@ function Footer() {
 
         <div className="mt-14 flex flex-col items-start justify-between gap-3 border-t border-[var(--color-line)] pt-6 sm:flex-row sm:items-center">
           <div className="text-[12px] text-[var(--color-ink-3)] numeric">
-            © 2026 FoodSetu · Made in Bengaluru
+            © 2026 FoodSetu · Made in Kathmandu
           </div>
           <div className="flex items-center gap-5 text-[12px] text-[var(--color-ink-3)]">
             <a href="#" className="hover:text-[var(--color-ink)]">
@@ -968,7 +968,7 @@ function FooterCol({
 
 /* ───────────────────────── TZ-safe time ──────────────────────────────── */
 
-const TZ = 'Asia/Kolkata'
+const TZ = 'Asia/Kathmandu'
 const ymdInTz = (d: Date) =>
   new Intl.DateTimeFormat('en-CA', {
     timeZone: TZ,

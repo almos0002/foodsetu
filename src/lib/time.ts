@@ -1,4 +1,4 @@
-// Deterministic time helpers locked to Asia/Kolkata + en-US so SSR and client
+// Deterministic time helpers locked to Asia/Kathmandu + en-US so SSR and client
 // agree on every formatted date or hour. (Avoids React hydration mismatches
 // from the user's browser timezone differing from the Node SSR timezone.)
 
@@ -6,13 +6,13 @@ const FMT_DATE = new Intl.DateTimeFormat('en-US', {
   weekday: 'long',
   month: 'long',
   day: 'numeric',
-  timeZone: 'Asia/Kolkata',
+  timeZone: 'Asia/Kathmandu',
 })
 
 const FMT_DATE_SHORT = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
-  timeZone: 'Asia/Kolkata',
+  timeZone: 'Asia/Kathmandu',
 })
 
 const FMT_DATETIME = new Intl.DateTimeFormat('en-US', {
@@ -20,7 +20,7 @@ const FMT_DATETIME = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
   hour: 'numeric',
   minute: '2-digit',
-  timeZone: 'Asia/Kolkata',
+  timeZone: 'Asia/Kathmandu',
 })
 
 const FMT_FULL = new Intl.DateTimeFormat('en-US', {
@@ -29,19 +29,19 @@ const FMT_FULL = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   hour: 'numeric',
   minute: '2-digit',
-  timeZone: 'Asia/Kolkata',
+  timeZone: 'Asia/Kathmandu',
 })
 
 const FMT_TIME = new Intl.DateTimeFormat('en-US', {
   hour: 'numeric',
   minute: '2-digit',
-  timeZone: 'Asia/Kolkata',
+  timeZone: 'Asia/Kathmandu',
 })
 
 const FMT_HOUR = new Intl.DateTimeFormat('en-US', {
   hour: 'numeric',
   hour12: false,
-  timeZone: 'Asia/Kolkata',
+  timeZone: 'Asia/Kathmandu',
 })
 
 export function todayLabel(): string {

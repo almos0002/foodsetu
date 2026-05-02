@@ -151,7 +151,7 @@ export function ListingForm({
           onChange={(e) => setTitle(e.target.value)}
           maxLength={200}
           className={inputCls}
-          placeholder="e.g. 30 plates of vegetable biryani"
+          placeholder="e.g. 30 plates of daal bhat"
         />
       </Field>
 

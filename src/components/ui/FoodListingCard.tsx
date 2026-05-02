@@ -205,7 +205,7 @@ function Field({
 export function formatTime(iso: string): string {
   const d = new Date(iso)
   return new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Kolkata',
+    timeZone: 'Asia/Kathmandu',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',

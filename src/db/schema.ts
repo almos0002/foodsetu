@@ -106,7 +106,7 @@ export const cities = pgTable(
     id: id(),
     name: text('name').notNull(),
     state: text('state').notNull(),
-    country: text('country').notNull().default('IN'),
+    country: text('country').notNull().default('NP'),
     slug: text('slug').notNull(),
     latitude: numeric('latitude', { precision: 10, scale: 7 }),
     longitude: numeric('longitude', { precision: 10, scale: 7 }),

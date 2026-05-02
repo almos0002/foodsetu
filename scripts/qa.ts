@@ -542,7 +542,7 @@ async function main(): Promise<void> {
 
   const seededHuman = await getListingByTitle(
     verRestOrg.id,
-    'Veg biryani lunch surplus',
+    'Daal bhat lunch surplus',
   )
   record(
     'seeded HUMAN_SAFE listing exists & AVAILABLE',
@@ -588,7 +588,7 @@ async function main(): Promise<void> {
 
   let postClaimListing = await getListingByTitle(
     verRestOrg.id,
-    'Veg biryani lunch surplus',
+    'Daal bhat lunch surplus',
   )
   record(
     'listing transitions AVAILABLE → CLAIM_REQUESTED',
@@ -624,7 +624,7 @@ async function main(): Promise<void> {
 
   postClaimListing = await getListingByTitle(
     verRestOrg.id,
-    'Veg biryani lunch surplus',
+    'Daal bhat lunch surplus',
   )
   record(
     'listing CLAIM_REQUESTED → CLAIMED on accept',
@@ -664,7 +664,7 @@ async function main(): Promise<void> {
   // State should be unchanged.
   postClaimListing = await getListingByTitle(
     verRestOrg.id,
-    'Veg biryani lunch surplus',
+    'Daal bhat lunch surplus',
   )
   claimRow = await getClaimRow(claimId)
   record(
@@ -692,7 +692,7 @@ async function main(): Promise<void> {
 
   postClaimListing = await getListingByTitle(
     verRestOrg.id,
-    'Veg biryani lunch surplus',
+    'Daal bhat lunch surplus',
   )
   claimRow = await getClaimRow(claimId)
   record(
@@ -811,7 +811,7 @@ async function main(): Promise<void> {
   console.log('\n[qa] 5. Expired listing handling')
   const expired = await getListingByTitle(
     verRestOrg.id,
-    'Stale pakoras (past pickup)',
+    'Stale sel roti (past pickup)',
   )
   record('expired-fixture listing exists', !!expired, expired?.status)
 
@@ -833,7 +833,7 @@ async function main(): Promise<void> {
   }
 
   // Insert a fresh expired-but-still-AVAILABLE row so the sweep has work
-  // to do. The seeded "Stale pakoras" fixture may already have been swept
+  // to do. The seeded "Stale sel roti" fixture may already have been swept
   // by the dev server's per-render expiry hook (the HTTP layer above
   // exercises authenticated route loaders that fire it).
   const sweepFixtureId = (
