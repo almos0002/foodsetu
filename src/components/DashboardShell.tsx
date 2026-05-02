@@ -290,7 +290,7 @@ export function DashboardShell({
       </aside>
 
       {/* Main */}
-      <div className="min-w-0 lg:pl-[248px]">
+      <div className="min-w-0 overflow-x-clip lg:pl-[248px]">
         <main className="mx-auto w-full min-w-0 max-w-[1200px] overflow-x-clip px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
           {status && status !== 'VERIFIED' ? (
             <VerificationBanner status={status} />

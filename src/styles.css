@@ -117,6 +117,11 @@
 
 html, body, #app { min-height: 100%; }
 
+/* Prevent any rogue child from causing the whole page to scroll horizontally.
+   Individual scroll containers (tables, code blocks, etc.) opt back in with
+   their own `overflow-x: auto`. */
+html, body { max-width: 100%; overflow-x: clip; }
+
 body {
   margin: 0;
   font-family: var(--font-sans);
@@ -128,6 +133,9 @@ body {
   background-color: var(--color-canvas);
   letter-spacing: -0.005em;
 }
+
+/* Images never blow out their column. */
+img { max-width: 100%; height: auto; }
 
 /* ── Display type — Inter, very tight tracking, used at large sizes. ──── */
 @utility font-display {
