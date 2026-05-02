@@ -52,12 +52,37 @@ export const auth = betterAuth({
       role: {
         type: 'string',
         required: false,
-        defaultValue: 'donor',
+        defaultValue: 'RESTAURANT',
         input: false,
       },
     },
   },
-  plugins: [organization()],
+  plugins: [
+    organization({
+      schema: {
+        organization: {
+          additionalFields: {
+            type: {
+              type: 'string',
+              required: false,
+              defaultValue: 'RESTAURANT',
+            },
+            cityId: { type: 'string', required: false },
+            phone: { type: 'string', required: false },
+            address: { type: 'string', required: false },
+            latitude: { type: 'number', required: false },
+            longitude: { type: 'number', required: false },
+            verificationStatus: {
+              type: 'string',
+              required: false,
+              defaultValue: 'PENDING',
+            },
+            verifiedAt: { type: 'date', required: false },
+          },
+        },
+      },
+    }),
+  ],
 })
 
 export type Session = typeof auth.$Infer.Session

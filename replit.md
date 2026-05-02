@@ -23,8 +23,11 @@ FoodSetu connects restaurants/hotels/bakeries that have surplus food with verifi
 ```
 src/
   lib/
-    auth.ts          - Better Auth server config (pg.Pool, plugins)
+    auth.ts          - Better Auth server config (pg.Pool, plugins, custom fields)
     auth-client.ts   - Better Auth React client
+  db/
+    index.ts         - Drizzle client (shares pg.Pool with auth)
+    schema.ts        - Drizzle schema for domain tables + enums + relations
   routes/
     __root.tsx       - Root layout with head/shell
     index.tsx        - Home page route
@@ -33,16 +36,66 @@ src/
         $.ts         - Catch-all Better Auth handler (/api/auth/*)
   router.tsx         - Router configuration
   styles.css         - Global styles (Tailwind import)
+drizzle/             - drizzle-kit generated SQL migrations
+drizzle.config.ts    - drizzle-kit config
 public/              - Static assets
 ```
 
 ## Database & Auth
 
-- **Provisioned**: Replit-managed Postgres. `DATABASE_URL` is auto-set.
-- **Schema**: Better Auth tables (`user`, `session`, `account`, `verification`, `organization`, `member`, `invitation`) created via `npx @better-auth/cli@latest migrate`.
-- **Re-run migrations** after editing `src/lib/auth.ts` (e.g. adding plugins).
-- **Health check**: `GET /api/auth/ok` should return `{"ok":true}`.
-- **Custom user fields**: `role` (defaults to `donor`) — see `additionalFields` in `src/lib/auth.ts`.
+Two migration systems live side-by-side:
+
+- **Better Auth** owns: `user`, `session`, `account`, `verification`, `organization`, `member`, `invitation` (managed by `@better-auth/cli`).
+- **Drizzle** owns: `cities`, `food_listings`, `claims`, `reports`, `sms_logs` (managed by `drizzle-kit`).
+
+Domain tables reference `user.id` / `organization.id` as **soft text references** (no FK constraint) so the two systems don't conflict. Application code enforces integrity.
+
+### Enums (Postgres types)
+
+| Enum | Values |
+|------|--------|
+| `user_role` | ADMIN, RESTAURANT, NGO, ANIMAL_RESCUE |
+| `org_type` | RESTAURANT, NGO, ANIMAL_RESCUE |
+| `food_category` | HUMAN_SAFE, ANIMAL_SAFE, COMPOST_ONLY |
+| `food_listing_status` | DRAFT, AVAILABLE, CLAIM_REQUESTED, CLAIMED, PICKED_UP, EXPIRED, CANCELLED, REPORTED |
+| `claim_status` | PENDING, ACCEPTED, REJECTED, CANCELLED, PICKED_UP, COMPLETED |
+| `verification_status` | PENDING, VERIFIED, REJECTED |
+| `report_reason` | SPOILED, MISLABELED, NO_SHOW, INAPPROPRIATE, OTHER |
+| `report_status` | OPEN, REVIEWING, RESOLVED, DISMISSED |
+| `sms_purpose` | OTP, NEW_LISTING_ALERT, CLAIM_ACCEPTED, PICKUP_REMINDER, GENERIC |
+| `sms_status` | QUEUED, SENT, DELIVERED, FAILED |
+
+### Custom auth fields (managed by Better Auth)
+
+- **`user.role`** (text, default `RESTAURANT`, `input: false` so clients can't self-elevate). Allowed values mirror `user_role` enum.
+- **`organization`** extended fields: `type` (default `RESTAURANT`), `cityId`, `phone`, `address`, `latitude`, `longitude`, `verificationStatus` (default `PENDING`), `verifiedAt`.
+
+### Running migrations
+
+After editing `src/lib/auth.ts` (auth tables / plugins / additional fields):
+
+```bash
+npx @better-auth/cli@latest migrate -y
+```
+
+After editing `src/db/schema.ts` (domain tables):
+
+```bash
+# 1. Generate SQL migration file in drizzle/
+npx drizzle-kit generate --name <change_description>
+
+# 2. Apply it (in this Replit, run via the SQL tool — drizzle-kit push needs a TTY)
+#    The generated file lives at drizzle/<NNNN>_<name>.sql
+```
+
+For local apply without the SQL tool:
+```bash
+psql "$DATABASE_URL" -f drizzle/<NNNN>_<name>.sql
+```
+
+### Health check
+
+`GET /api/auth/ok` → `{"ok":true}`.
 
 ### Required env vars
 

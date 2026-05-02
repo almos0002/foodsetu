@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1777726634311,
+      "tag": "0000_init_domain",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1777727043036,
+      "tag": "0001_add_lock_audit_indexes",
+      "breakpoints": true
+    }
+  ]
+}
