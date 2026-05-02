@@ -22,6 +22,7 @@ import {
 import type { ClaimStatus } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/claims')({
+  head: () => ({ meta: [{ title: 'Claims · Admin | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {

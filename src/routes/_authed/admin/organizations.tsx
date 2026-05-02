@@ -21,6 +21,7 @@ import {
 import type { VerificationStatus } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/organizations')({
+  head: () => ({ meta: [{ title: 'Organizations · Admin | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {

@@ -61,6 +61,7 @@ const CLAIMANT_ORG_TYPE_LABELS: Record<string, string> = {
 }
 
 export const Route = createFileRoute('/_authed/restaurant/claims/$id')({
+  head: () => ({ meta: [{ title: 'Claim detail · Restaurant | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {

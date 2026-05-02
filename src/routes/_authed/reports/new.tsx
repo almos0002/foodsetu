@@ -26,6 +26,7 @@ type SearchSchema = {
 }
 
 export const Route = createFileRoute('/_authed/reports/new')({
+  head: () => ({ meta: [{ title: 'File a report | FoodSetu' }] }),
   validateSearch: (raw: Record<string, unknown>): SearchSchema => {
     const out: SearchSchema = {}
     if (typeof raw.listingId === 'string' && raw.listingId) {

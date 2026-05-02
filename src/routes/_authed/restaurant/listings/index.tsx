@@ -25,6 +25,7 @@ import { dateTime } from '../../../../lib/time'
 type Tab = 'active' | 'history'
 
 export const Route = createFileRoute('/_authed/restaurant/listings/')({
+  head: () => ({ meta: [{ title: 'My listings · Restaurant | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {

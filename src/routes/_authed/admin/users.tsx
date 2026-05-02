@@ -19,6 +19,7 @@ import type { Role, VerificationStatus } from '../../../lib/permissions'
 import type { BadgeTone } from '../../../components/ui/StatusBadge'
 
 export const Route = createFileRoute('/_authed/admin/users')({
+  head: () => ({ meta: [{ title: 'Users · Admin | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {

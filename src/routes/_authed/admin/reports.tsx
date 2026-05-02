@@ -27,6 +27,7 @@ import {
 import type { ReportStatus } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/reports')({
+  head: () => ({ meta: [{ title: 'Reports · Admin | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {

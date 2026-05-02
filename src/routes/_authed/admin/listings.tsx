@@ -23,6 +23,7 @@ import {
 import type { FoodCategory, ListingStatus } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/listings')({
+  head: () => ({ meta: [{ title: 'Listings · Admin | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {

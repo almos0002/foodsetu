@@ -19,6 +19,7 @@ import type { AdminCityRow } from '../../../lib/admin-server'
 import { canAccessAdmin, roleToDashboard } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/cities')({
+  head: () => ({ meta: [{ title: 'Cities · Admin | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {

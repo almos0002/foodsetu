@@ -23,6 +23,7 @@ import {
 } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/ngo/nearby-food')({
+  head: () => ({ meta: [{ title: 'Nearby food · NGO | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'NGO' && user.role !== 'ADMIN') {

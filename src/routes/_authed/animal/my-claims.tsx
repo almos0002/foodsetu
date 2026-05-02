@@ -18,6 +18,7 @@ import {
 type Tab = 'active' | 'history'
 
 export const Route = createFileRoute('/_authed/animal/my-claims')({
+  head: () => ({ meta: [{ title: 'My claims · Rescue | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'ANIMAL_RESCUE' && user.role !== 'ADMIN') {

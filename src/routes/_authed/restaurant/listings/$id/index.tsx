@@ -44,6 +44,7 @@ import type { FoodCategory, FoodType } from '../../../../../lib/permissions'
 import { fullDateTime } from '../../../../../lib/time'
 
 export const Route = createFileRoute('/_authed/restaurant/listings/$id/')({
+  head: () => ({ meta: [{ title: 'Listing detail · Restaurant | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {

@@ -28,6 +28,7 @@ import {
 type Tab = 'active' | 'history'
 
 export const Route = createFileRoute('/_authed/restaurant/claims/')({
+  head: () => ({ meta: [{ title: 'Claims · Restaurant | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {

@@ -15,6 +15,7 @@ import { ROLE_LABELS, roleToDashboard } from '../../../lib/permissions'
 import type { Role } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/settings/organization')({
+  head: () => ({ meta: [{ title: 'Organization settings | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (

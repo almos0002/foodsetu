@@ -13,6 +13,7 @@ import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
 
 export const Route = createFileRoute('/_authed/onboarding/organization')({
+  head: () => ({ meta: [{ title: 'Set up your organization | FoodSetu' }] }),
   loader: async () => ({ cities: await listCitiesFn() }),
   component: OnboardingOrganization,
 })

@@ -17,6 +17,7 @@ import {
 } from '../../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/restaurant/listings/new')({
+  head: () => ({ meta: [{ title: 'New listing · Restaurant | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const ctx = context as {
       user: { role?: string }

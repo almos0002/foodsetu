@@ -32,6 +32,7 @@ import type { ClaimStatus } from '../../../lib/permissions'
 import { greeting, todayLabel } from '../../../lib/time'
 
 export const Route = createFileRoute('/_authed/animal/dashboard')({
+  head: () => ({ meta: [{ title: 'Rescue dashboard | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'ANIMAL_RESCUE' && user.role !== 'ADMIN') {

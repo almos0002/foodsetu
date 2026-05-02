@@ -21,6 +21,7 @@ import { canAccessAdmin, roleToDashboard } from '../../../lib/permissions'
 import { todayLabel } from '../../../lib/time'
 
 export const Route = createFileRoute('/_authed/admin/dashboard')({
+  head: () => ({ meta: [{ title: 'Admin overview | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {

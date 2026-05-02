@@ -31,6 +31,7 @@ import {
 import { greeting, todayLabel } from '../../../lib/time'
 
 export const Route = createFileRoute('/_authed/restaurant/dashboard')({
+  head: () => ({ meta: [{ title: 'Restaurant dashboard | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {

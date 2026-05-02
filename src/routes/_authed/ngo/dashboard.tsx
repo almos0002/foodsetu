@@ -31,6 +31,7 @@ import type { ClaimStatus } from '../../../lib/permissions'
 import { greeting, todayLabel } from '../../../lib/time'
 
 export const Route = createFileRoute('/_authed/ngo/dashboard')({
+  head: () => ({ meta: [{ title: 'NGO dashboard | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (user.role !== 'NGO' && user.role !== 'ADMIN') {

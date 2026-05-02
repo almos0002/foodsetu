@@ -30,6 +30,7 @@ const VISIBILITY_TONE: Record<VisibleReport['visibility'], BadgeTone> = {
 }
 
 export const Route = createFileRoute('/_authed/reports/')({
+  head: () => ({ meta: [{ title: 'Reports | FoodSetu' }] }),
   loader: async () => ({
     reports: await listMyVisibleReportsFn().catch((): VisibleReport[] => []),
   }),
