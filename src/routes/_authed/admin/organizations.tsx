@@ -4,6 +4,7 @@ import { CheckCircle2, PauseCircle, RotateCcw, XCircle } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
 import { AdminTable, type Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
+import { Alert } from '../../../components/ui/Alert'
 import {
   listOrganizationsForAdminFn,
   setOrganizationVerificationFn,
@@ -193,9 +194,9 @@ function AdminOrganizations() {
   return (
     <AdminShell title="Organizations" user={user}>
       {error ? (
-        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
+        <Alert tone="error" className="mb-4">
           {error}
-        </div>
+        </Alert>
       ) : null}
       <AdminTable
         rows={filtered}

@@ -4,6 +4,9 @@ import { Pencil, Plus, X } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
 import { AdminTable, type Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
+import { Alert } from '../../../components/ui/Alert'
+import { Button } from '../../../components/ui/Button'
+import { PageHeader } from '../../../components/ui/PageHeader'
 import {
   createCityFn,
   listCitiesForAdminFn,
@@ -45,6 +48,9 @@ const EMPTY_FORM: FormState = {
   longitude: '',
   isActive: true,
 }
+
+const INPUT_CLS =
+  'mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20'
 
 function AdminCities() {
   const router = useRouter()
@@ -164,7 +170,7 @@ function AdminCities() {
       header: 'Coordinates',
       render: (c) =>
         c.latitude && c.longitude ? (
-          <span className="font-mono text-xs text-gray-600">
+          <span className="font-mono text-xs tabular-nums text-gray-600">
             {Number(c.latitude).toFixed(4)}, {Number(c.longitude).toFixed(4)}
           </span>
         ) : (
@@ -179,8 +185,8 @@ function AdminCities() {
           label={c.isActive ? 'Active' : 'Inactive'}
           className={
             c.isActive
-              ? 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200'
-              : 'bg-gray-200 text-gray-700 ring-1 ring-gray-300'
+              ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+              : 'bg-gray-100 text-gray-700 ring-1 ring-gray-200'
           }
         />
       ),
@@ -189,7 +195,7 @@ function AdminCities() {
       key: 'created',
       header: 'Added',
       render: (c) => (
-        <span className="text-xs text-gray-500">
+        <span className="text-xs tabular-nums text-gray-500">
           {new Date(c.createdAt).toLocaleDateString()}
         </span>
       ),
@@ -200,30 +206,31 @@ function AdminCities() {
       align: 'right',
       render: (c) => (
         <div className="flex justify-end gap-1.5">
-          <button
-            type="button"
+          <Button
+            size="sm"
+            variant="outline"
             onClick={() => startEdit(c)}
-            className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+            leftIcon={<Pencil className="h-3.5 w-3.5" />}
           >
-            <Pencil className="h-3.5 w-3.5" />
             Edit
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            size="sm"
+            variant={c.isActive ? 'outline' : 'outline'}
             onClick={() => handleToggle(c)}
             disabled={busyToggleId === c.id}
-            className={`inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium disabled:opacity-40 ${
+            className={
               c.isActive
-                ? 'border-amber-200 bg-white text-amber-700 hover:bg-amber-50'
-                : 'border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50'
-            }`}
+                ? 'border-amber-200 text-amber-700 hover:bg-amber-50'
+                : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
+            }
           >
             {busyToggleId === c.id
               ? 'Saving…'
               : c.isActive
                 ? 'Disable'
                 : 'Enable'}
-          </button>
+          </Button>
         </div>
       ),
     },
@@ -231,40 +238,38 @@ function AdminCities() {
 
   return (
     <AdminShell title="Cities" user={user}>
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-gray-600">
-          Cities listed here power the city dropdown shown to restaurants and
-          claimants. Disabling a city hides it from new sign-ups but keeps
-          existing references intact.
-        </p>
-        <button
-          type="button"
-          onClick={startCreate}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700"
-        >
-          <Plus className="h-4 w-4" />
-          New city
-        </button>
-      </div>
+      <PageHeader
+        eyebrow="Operations"
+        title="Cities"
+        description="Cities listed here power the city dropdown shown to restaurants and claimants. Disabling a city hides it from new sign-ups but keeps existing references intact."
+        actions={
+          <Button
+            onClick={startCreate}
+            leftIcon={<Plus className="h-4 w-4" />}
+          >
+            New city
+          </Button>
+        }
+      />
 
       {error ? (
-        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
+        <Alert tone="error" className="mb-4">
           {error}
-        </div>
+        </Alert>
       ) : null}
       {success ? (
-        <div className="mb-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 ring-1 ring-emerald-200">
+        <Alert tone="success" className="mb-4">
           {success}
-        </div>
+        </Alert>
       ) : null}
 
       {form ? (
         <form
           onSubmit={handleSubmit}
-          className="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
+          className="mb-6 rounded-lg border border-gray-200 bg-white p-5"
         >
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-base font-semibold text-gray-900">
+            <h3 className="text-sm font-semibold text-gray-900">
               {form.id ? 'Edit city' : 'New city'}
             </h3>
             <button
@@ -284,7 +289,7 @@ function AdminCities() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
                 maxLength={120}
-                className="input"
+                className={INPUT_CLS}
               />
             </Field>
             <Field label="State / region" required>
@@ -294,7 +299,7 @@ function AdminCities() {
                 onChange={(e) => setForm({ ...form, state: e.target.value })}
                 required
                 maxLength={120}
-                className="input"
+                className={INPUT_CLS}
               />
             </Field>
             <Field label="Country code">
@@ -309,7 +314,7 @@ function AdminCities() {
                 }
                 maxLength={2}
                 placeholder="IN"
-                className="input"
+                className={INPUT_CLS}
               />
             </Field>
             <Field label="Active in dropdowns">
@@ -336,7 +341,7 @@ function AdminCities() {
                 min={-90}
                 max={90}
                 placeholder="e.g. 19.0760"
-                className="input"
+                className={INPUT_CLS}
               />
             </Field>
             <Field label="Longitude">
@@ -350,27 +355,22 @@ function AdminCities() {
                 min={-180}
                 max={180}
                 placeholder="e.g. 72.8777"
-                className="input"
+                className={INPUT_CLS}
               />
             </Field>
           </div>
           <div className="mt-4 flex justify-end gap-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setForm(null)}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={busy}
-              className="rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:bg-gray-300"
-            >
+            </Button>
+            <Button type="submit" disabled={busy}>
               {busy ? 'Saving…' : form.id ? 'Save changes' : 'Add city'}
-            </button>
+            </Button>
           </div>
-          <style>{`.input { margin-top: 0.25rem; width: 100%; border-radius: 0.5rem; border: 1px solid #D1D5DB; padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #111827; } .input:focus { outline: none; border-color: #F97316; box-shadow: 0 0 0 2px rgba(254, 215, 170, 0.6); }`}</style>
         </form>
       ) : null}
 
@@ -400,7 +400,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+      <span className="text-[11px] font-medium uppercase tracking-wider text-gray-500">
         {label}
         {required ? <span className="ml-0.5 text-red-500">*</span> : null}
       </span>

@@ -5,8 +5,10 @@ import {
   useSearch,
 } from '@tanstack/react-router'
 import { useState } from 'react'
-import { AlertTriangle, ArrowLeft, CheckCircle2, Flag } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Flag } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
+import { Alert } from '../../../components/ui/Alert'
+import { Button } from '../../../components/ui/Button'
 import type { OrganizationRow } from '../../../lib/org-server'
 import { createReportFn } from '../../../lib/report-server'
 import {
@@ -92,38 +94,33 @@ function NewReportPage() {
         organization={organization}
       >
         <div className="mx-auto max-w-2xl">
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 h-6 w-6 text-emerald-600" />
-              <div className="flex-1">
-                <h2 className="text-base font-semibold text-emerald-900">
-                  Thanks — your report was filed.
-                </h2>
-                <p className="mt-1 text-sm text-emerald-800">
-                  An admin will review it shortly. You can track its status
-                  on your reports page.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Link
-                    to="/reports"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-                  >
-                    View my reports
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSubmittedId(null)
-                      setDescription('')
-                    }}
-                    className="rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-50"
-                  >
-                    File another report
-                  </button>
-                </div>
-              </div>
+          <Alert
+            tone="success"
+            title={
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4" />
+                Thanks — your report was filed
+              </span>
+            }
+          >
+            An admin will review it shortly. You can track its status on
+            your reports page.
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link to="/reports">
+                <Button size="sm">View my reports</Button>
+              </Link>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSubmittedId(null)
+                  setDescription('')
+                }}
+              >
+                File another report
+              </Button>
             </div>
-          </div>
+          </Alert>
         </div>
       </DashboardShell>
     )
@@ -146,7 +143,7 @@ function NewReportPage() {
           Back
         </button>
 
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
           <div className="flex items-start gap-3">
             <Flag className="mt-0.5 h-5 w-5 text-red-600" />
             <div>
@@ -161,7 +158,7 @@ function NewReportPage() {
           </div>
 
           {search.listingId || search.claimId ? (
-            <div className="mt-4 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600">
+            <div className="mt-4 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600">
               <div className="font-medium uppercase tracking-wide text-gray-500">
                 Linked context
               </div>
@@ -183,9 +180,9 @@ function NewReportPage() {
                 {REPORT_REASONS.map((r) => (
                   <label
                     key={r}
-                    className={`flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2 transition ${
+                    className={`flex cursor-pointer items-start gap-3 rounded-md border px-3 py-2 transition-colors ${
                       reason === r
-                        ? 'border-orange-300 bg-orange-50 ring-1 ring-orange-200'
+                        ? 'border-orange-300 bg-orange-50'
                         : 'border-gray-200 bg-white hover:border-gray-300'
                     }`}
                   >
@@ -235,30 +232,25 @@ function NewReportPage() {
               </div>
             </div>
 
-            {error ? (
-              <div className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
-                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                <span>{error}</span>
-              </div>
-            ) : null}
+            {error ? <Alert tone="error">{error}</Alert> : null}
 
             <div className="flex items-center justify-end gap-2">
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => router.history.back()}
                 disabled={busy}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
+                variant="destructive"
                 disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:bg-gray-400"
+                leftIcon={<Flag className="h-4 w-4" />}
               >
-                <Flag className="h-4 w-4" />
                 {busy ? 'Filing…' : 'File report'}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

@@ -16,6 +16,17 @@ import {
   Utensils,
 } from 'lucide-react'
 import { DashboardShell } from '../../../../../components/DashboardShell'
+import { Alert } from '../../../../../components/ui/Alert'
+import { Button } from '../../../../../components/ui/Button'
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+} from '../../../../../components/ui/Card'
+import { ListingStatusBadge } from '../../../../../components/ui/ClaimStatusBadge'
+import { ConfirmDialog } from '../../../../../components/ui/ConfirmDialog'
+import { PageHeader } from '../../../../../components/ui/PageHeader'
 import {
   cancelListingFn,
   getMyListingFn,
@@ -25,8 +36,6 @@ import type { OrganizationRow } from '../../../../../lib/org-server'
 import {
   FOOD_CATEGORY_LABELS,
   FOOD_TYPE_LABELS,
-  LISTING_STATUS_BADGE_CLASSES,
-  LISTING_STATUS_LABELS,
   ROLE_LABELS,
   isListingCancelable,
   isListingEditable,
@@ -86,11 +95,9 @@ function ListingDetail() {
 
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   async function handleCancel() {
-    if (!confirm('Cancel this listing? Claimants won\'t see it anymore.')) {
-      return
-    }
     setError(null)
     setBusy(true)
     try {
@@ -100,6 +107,7 @@ function ListingDetail() {
       setError(err instanceof Error ? err.message : 'Failed to cancel listing')
     } finally {
       setBusy(false)
+      setConfirmOpen(false)
     }
   }
 
@@ -110,61 +118,55 @@ function ListingDetail() {
       user={user}
       organization={organization}
     >
-      <div className="mb-4 flex items-center justify-between">
-        <Link
-          to="/restaurant/listings"
-          className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to listings
-        </Link>
-        <span
-          className={`rounded-full px-2.5 py-1 text-xs font-medium ${LISTING_STATUS_BADGE_CLASSES[status] ?? ''}`}
-        >
-          {LISTING_STATUS_LABELS[status] ?? status}
-        </span>
-      </div>
+      <PageHeader
+        title={listing.title}
+        eyebrow="Listing"
+        back={{ to: '/restaurant/listings', label: 'Back to listings' }}
+        actions={<ListingStatusBadge status={status} />}
+      />
 
       {error ? (
-        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
+        <Alert tone="error" className="mb-4">
           {error}
-        </div>
+        </Alert>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           {listing.imageUrl ? (
             <img
               src={listing.imageUrl}
               alt={listing.title}
-              className="h-64 w-full rounded-xl object-cover ring-1 ring-gray-200"
+              className="h-64 w-full rounded-lg border border-gray-200 object-cover"
             />
           ) : null}
 
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-              Description
-            </h2>
-            <p className="mt-2 whitespace-pre-line text-sm text-gray-800">
-              {listing.description?.trim()
-                ? listing.description
-                : 'No description provided.'}
-            </p>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Description</CardTitle>
+            </CardHeader>
+            <CardBody>
+              <p className="whitespace-pre-line text-sm text-gray-800">
+                {listing.description?.trim()
+                  ? listing.description
+                  : 'No description provided.'}
+              </p>
+            </CardBody>
+          </Card>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <DetailCard
-              icon={<Utensils className="h-4 w-4" />}
+              icon={<Utensils className="h-3.5 w-3.5" />}
               label="Food"
               value={`${FOOD_CATEGORY_LABELS[listing.foodCategory as FoodCategory] ?? listing.foodCategory} · ${FOOD_TYPE_LABELS[listing.foodType as FoodType] ?? listing.foodType}`}
             />
             <DetailCard
-              icon={<Utensils className="h-4 w-4" />}
+              icon={<Utensils className="h-3.5 w-3.5" />}
               label="Quantity"
               value={`${listing.quantity} ${listing.quantityUnit}`}
             />
             <DetailCard
-              icon={<CalendarClock className="h-4 w-4" />}
+              icon={<CalendarClock className="h-3.5 w-3.5" />}
               label="Pickup window"
               value={
                 <>
@@ -177,17 +179,17 @@ function ListingDetail() {
               }
             />
             <DetailCard
-              icon={<Clock className="h-4 w-4" />}
+              icon={<Clock className="h-3.5 w-3.5" />}
               label="Expires"
               value={new Date(listing.expiryTime).toLocaleString()}
             />
             <DetailCard
-              icon={<MapPin className="h-4 w-4" />}
+              icon={<MapPin className="h-3.5 w-3.5" />}
               label="Location"
               value={`${listing.latitude.toFixed(5)}, ${listing.longitude.toFixed(5)}`}
             />
             <DetailCard
-              icon={<Clock className="h-4 w-4" />}
+              icon={<Clock className="h-3.5 w-3.5" />}
               label="Created"
               value={new Date(listing.createdAt).toLocaleString()}
             />
@@ -195,42 +197,68 @@ function ListingDetail() {
         </div>
 
         <aside className="space-y-3">
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-900">Actions</h3>
-            <p className="mt-1 text-xs text-gray-500">
-              {editable
-                ? 'You can edit this listing while it is still available.'
-                : 'This listing can no longer be edited.'}
-            </p>
-            <div className="mt-4 space-y-2">
-              <Link
-                to="/restaurant/listings/$id/edit"
-                params={{ id: listing.id }}
-                aria-disabled={!editable}
-                className={`flex w-full items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium ${
-                  editable
-                    ? 'border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100'
-                    : 'pointer-events-none border-gray-200 text-gray-400'
-                }`}
-              >
-                <Pencil className="h-4 w-4" />
-                Edit listing
-              </Link>
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={!cancelable || busy}
-                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100 disabled:pointer-events-none disabled:border-gray-200 disabled:bg-white disabled:text-gray-400"
-              >
-                <Ban className="h-4 w-4" />
-                {busy ? 'Cancelling…' : cancelable ? 'Cancel listing' : 'Not cancelable'}
-              </button>
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Actions</CardTitle>
+            </CardHeader>
+            <CardBody>
+              <p className="text-xs text-gray-500">
+                {editable
+                  ? 'You can edit this listing while it is still available.'
+                  : 'This listing can no longer be edited.'}
+              </p>
+              <div className="mt-3 space-y-2">
+                <Link
+                  to="/restaurant/listings/$id/edit"
+                  params={{ id: listing.id }}
+                  aria-disabled={!editable}
+                  className={
+                    editable
+                      ? 'block'
+                      : 'pointer-events-none block opacity-50'
+                  }
+                >
+                  <Button
+                    fullWidth
+                    variant="outline"
+                    leftIcon={<Pencil className="h-4 w-4" />}
+                    disabled={!editable}
+                  >
+                    Edit listing
+                  </Button>
+                </Link>
+                <Button
+                  fullWidth
+                  variant="destructive"
+                  onClick={() => setConfirmOpen(true)}
+                  disabled={!cancelable || busy}
+                  leftIcon={<Ban className="h-4 w-4" />}
+                >
+                  {busy
+                    ? 'Cancelling…'
+                    : cancelable
+                      ? 'Cancel listing'
+                      : 'Not cancelable'}
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
 
           <ListingMeta listing={listing} />
         </aside>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Cancel this listing?"
+        description="Claimants won't see it anymore. Any pending claim will also be released."
+        confirmLabel="Cancel listing"
+        cancelLabel="Keep active"
+        destructive
+        busy={busy}
+        onConfirm={handleCancel}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </DashboardShell>
   )
 }
@@ -245,8 +273,8 @@ function DetailCard({
   value: React.ReactNode
 }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-gray-500">
+    <div className="rounded-md border border-gray-200 bg-white p-3">
+      <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
         {icon}
         {label}
       </div>
@@ -257,8 +285,8 @@ function DetailCard({
 
 function ListingMeta({ listing }: { listing: ListingRow }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 text-xs text-gray-500 shadow-sm">
-      <div className="font-mono">{listing.id}</div>
+    <div className="rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-500">
+      <div className="font-mono break-all">{listing.id}</div>
       <div className="mt-1">
         Updated {new Date(listing.updatedAt).toLocaleString()}
       </div>

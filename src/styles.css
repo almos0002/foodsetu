@@ -19,3 +19,9 @@ body {
   margin: 0;
   font-family: var(--font-sans);
 }
+
+@utility scrollbar-hide {
+  &::-webkit-scrollbar { display: none; }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

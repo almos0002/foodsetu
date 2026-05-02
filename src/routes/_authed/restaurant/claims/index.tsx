@@ -1,9 +1,13 @@
 import { Link, createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ArrowLeft, History, ListChecks } from 'lucide-react'
+import { ClipboardList, History, Inbox, ListChecks } from 'lucide-react'
 import { DashboardShell } from '../../../../components/DashboardShell'
-import { TabBtn } from '../../../../components/food/ClaimDashboardWidgets'
 import { RestaurantClaimCard } from '../../../../components/food/RestaurantClaimCard'
+import { Alert } from '../../../../components/ui/Alert'
+import { Button } from '../../../../components/ui/Button'
+import { EmptyState } from '../../../../components/ui/EmptyState'
+import { PageHeader } from '../../../../components/ui/PageHeader'
+import { Tabs } from '../../../../components/ui/Tabs'
 import {
   acceptClaimFn,
   listClaimRequestsForRestaurantFn,
@@ -85,25 +89,21 @@ function RestaurantClaimsPage() {
       user={user}
       organization={organization}
     >
-      <div className="mb-4 flex items-center justify-between">
-        <Link
-          to="/restaurant/dashboard"
-          className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to dashboard
-        </Link>
-        <Link
-          to="/restaurant/listings"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          <ListChecks className="h-4 w-4" />
-          My listings
-        </Link>
-      </div>
+      <PageHeader
+        title="Claim requests"
+        description="Approve, reject, and verify pickups for your active listings."
+        back={{ to: '/restaurant/dashboard', label: 'Back to dashboard' }}
+        actions={
+          <Link to="/restaurant/listings">
+            <Button variant="outline" leftIcon={<ListChecks className="h-4 w-4" />}>
+              My listings
+            </Button>
+          </Link>
+        }
+      />
 
       {!canManage ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-sm text-gray-700 shadow-sm">
+        <div className="rounded-lg border border-gray-200 bg-white p-8 text-sm text-gray-700">
           {!isRestaurantOrg
             ? 'You need to own a restaurant organization to manage claim requests.'
             : 'Your organization must be verified before you can manage claim requests. An admin will review your profile shortly.'}
@@ -111,34 +111,46 @@ function RestaurantClaimsPage() {
       ) : (
         <>
           {error ? (
-            <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
+            <Alert tone="error" className="mb-4">
               {error}
-            </div>
+            </Alert>
           ) : null}
 
-          <div className="mb-4 inline-flex rounded-lg border border-gray-200 bg-white p-0.5 text-sm">
-            <TabBtn
-              active={tab === 'active'}
-              onClick={() => setTab('active')}
-              icon={<ListChecks className="h-4 w-4" />}
-              label="Active"
-              count={active.length}
-            />
-            <TabBtn
-              active={tab === 'history'}
-              onClick={() => setTab('history')}
-              icon={<History className="h-4 w-4" />}
-              label="History"
-              count={history.length}
+          <div className="mb-4">
+            <Tabs<Tab>
+              value={tab}
+              onChange={setTab}
+              tabs={[
+                {
+                  value: 'active',
+                  label: 'Active',
+                  icon: <ClipboardList className="h-4 w-4" />,
+                  count: active.length,
+                },
+                {
+                  value: 'history',
+                  label: 'History',
+                  icon: <History className="h-4 w-4" />,
+                  count: history.length,
+                },
+              ]}
             />
           </div>
 
           {rows.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center text-sm text-gray-500">
-              {tab === 'active'
-                ? 'No pending or accepted claims right now. New requests will appear here.'
-                : 'No past claims yet.'}
-            </div>
+            <EmptyState
+              icon={Inbox}
+              title={
+                tab === 'active'
+                  ? 'No pending requests'
+                  : 'No past claims yet'
+              }
+              description={
+                tab === 'active'
+                  ? 'New requests from NGOs and animal rescues will appear here.'
+                  : 'Completed and rejected claims will be archived here.'
+              }
+            />
           ) : (
             <div className="grid gap-3">
               {rows.map((claim) => (

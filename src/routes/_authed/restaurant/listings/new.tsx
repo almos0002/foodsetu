@@ -54,7 +54,7 @@ function NewListingPage() {
       </div>
 
       {!canPost ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-sm text-gray-700 shadow-sm">
+        <div className="rounded-lg border border-gray-200 bg-white p-8 text-sm text-gray-700">
           {!organization || organization.type !== 'RESTAURANT'
             ? 'You need to own a restaurant organization to post listings.'
             : isOrgVerified(organization)
@@ -62,7 +62,7 @@ function NewListingPage() {
               : 'Your organization must be verified before you can post listings. An admin will review your profile shortly.'}
         </div>
       ) : (
-        <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
+        <div className="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
           <ListingForm
             submitLabel="Publish listing"
             defaultLatitude={organization?.latitude ?? null}

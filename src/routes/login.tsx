@@ -54,14 +54,14 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 flex items-center justify-center p-6">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-6">
       <div className="w-full max-w-md">
         <Link to="/" className="mb-8 flex items-center justify-center gap-2 text-orange-600">
-          <Utensils className="h-8 w-8" />
-          <span className="text-2xl font-bold">FoodSetu</span>
+          <Utensils className="h-7 w-7" />
+          <span className="text-xl font-semibold">FoodSetu</span>
         </Link>
 
-        <div className="rounded-2xl bg-white p-8 shadow-sm">
+        <div className="rounded-lg border border-gray-200 bg-white p-6 sm:p-8">
           <h1 className="mb-1 text-2xl font-semibold text-gray-900">Welcome back</h1>
           <p className="mb-6 text-sm text-gray-600">Sign in to continue redistributing surplus food.</p>
 

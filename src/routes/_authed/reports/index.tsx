@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft, Flag } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
+import { EmptyState } from '../../../components/ui/EmptyState'
 import type { OrganizationRow } from '../../../lib/org-server'
 import {
   listMyVisibleReportsFn,
@@ -82,16 +83,17 @@ function MyReportsPage() {
       </p>
 
       {reports.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center text-sm text-gray-500">
-          No reports to show. If something went wrong with a pickup or a
-          listing, file a report from the relevant card.
-        </div>
+        <EmptyState
+          icon={Flag}
+          title="No reports to show"
+          description="If something went wrong with a pickup or a listing, file a report from the relevant card."
+        />
       ) : (
         <ul className="grid gap-3">
           {reports.map((r) => (
             <li
               key={r.id}
-              className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+              className="rounded-lg border border-gray-200 bg-white p-4"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">

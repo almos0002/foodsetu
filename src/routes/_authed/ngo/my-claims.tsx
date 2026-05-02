@@ -1,9 +1,12 @@
 import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ArrowLeft, History, ListChecks, Utensils } from 'lucide-react'
+import { ClipboardList, History, Inbox, Utensils } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
 import { MyClaimCard } from '../../../components/food/MyClaimCard'
-import { TabBtn } from '../../../components/food/ClaimDashboardWidgets'
+import { Button } from '../../../components/ui/Button'
+import { EmptyState } from '../../../components/ui/EmptyState'
+import { PageHeader } from '../../../components/ui/PageHeader'
+import { Tabs } from '../../../components/ui/Tabs'
 import { listMyClaimsFn } from '../../../lib/claim-server'
 import type { OrganizationRow } from '../../../lib/org-server'
 import {
@@ -51,50 +54,65 @@ function MyClaimsPage() {
       user={user}
       organization={organization}
     >
-      <div className="mb-4 flex items-center justify-between">
-        <Link
-          to="/ngo/dashboard"
-          className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to dashboard
-        </Link>
-        {canClaim ? (
-          <Link
-            to="/ngo/nearby-food"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700"
-          >
-            <Utensils className="h-4 w-4" />
-            Browse nearby food
-          </Link>
-        ) : null}
-      </div>
+      <PageHeader
+        title="My claims"
+        description="Track pickup status and report issues with your claims."
+        back={{ to: '/ngo/dashboard', label: 'Back to dashboard' }}
+        actions={
+          canClaim ? (
+            <Link to="/ngo/nearby-food">
+              <Button leftIcon={<Utensils className="h-4 w-4" />}>
+                Browse nearby food
+              </Button>
+            </Link>
+          ) : undefined
+        }
+      />
 
-      <div className="mb-4 inline-flex rounded-lg border border-gray-200 bg-white p-0.5 text-sm">
-        <TabBtn
-          active={tab === 'active'}
-          onClick={() => setTab('active')}
-          icon={<ListChecks className="h-4 w-4" />}
-          label="Active"
-          count={active.length}
-        />
-        <TabBtn
-          active={tab === 'history'}
-          onClick={() => setTab('history')}
-          icon={<History className="h-4 w-4" />}
-          label="History"
-          count={history.length}
+      <div className="mb-4">
+        <Tabs<Tab>
+          value={tab}
+          onChange={setTab}
+          tabs={[
+            {
+              value: 'active',
+              label: 'Active',
+              icon: <ClipboardList className="h-4 w-4" />,
+              count: active.length,
+            },
+            {
+              value: 'history',
+              label: 'History',
+              icon: <History className="h-4 w-4" />,
+              count: history.length,
+            },
+          ]}
         />
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center text-sm text-gray-500">
-          {tab === 'active'
-            ? canClaim
-              ? 'No active claims yet — browse nearby food to make your first claim.'
-              : 'No active claims. Verification pending.'
-            : 'No past claims yet.'}
-        </div>
+        <EmptyState
+          icon={Inbox}
+          title={
+            tab === 'active' ? 'No active claims' : 'No past claims yet'
+          }
+          description={
+            tab === 'active'
+              ? canClaim
+                ? 'Browse nearby food to make your first claim.'
+                : 'Verification pending — claims will appear here once approved.'
+              : 'Completed and rejected claims will be archived here.'
+          }
+          action={
+            tab === 'active' && canClaim ? (
+              <Link to="/ngo/nearby-food">
+                <Button leftIcon={<Utensils className="h-4 w-4" />}>
+                  Browse nearby food
+                </Button>
+              </Link>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid gap-3">
           {rows.map((claim) => (

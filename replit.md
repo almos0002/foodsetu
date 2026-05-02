@@ -6,6 +6,39 @@ A TanStack Start (React + Vite + Nitro SSR) web application with file-based rout
 
 FoodSetu connects restaurants/hotels/bakeries that have surplus food with verified NGOs, shelters, and animal rescue groups. See **[WORKFLOW.md](./WORKFLOW.md)** for the full end-to-end product flow.
 
+## UI / Design System
+
+Hybrid approach: **Airbnb-style consumer landing** + **Linear/Stripe-style enterprise dashboard shell**.
+
+### Landing page (`src/routes/index.tsx`) — Airbnb-style
+- Sticky pill nav with center search (`Anywhere · Any meal · Add filters`).
+- Full-bleed hero photo (`rounded-3xl`, `bg-black/35` overlay) with overlaid headline and floating search pill.
+- Category strip with `lucide-react` icons and underline-on-active.
+- Photo-first card grid (`rounded-2xl`, `aspect-[4/3]`, `hover:shadow-md`, image `scale-105` on hover).
+- Stats strip on `bg-gray-50`, then "How it works" step cards, then role photo cards (restaurants / NGOs / animals).
+- CTA: dark `bg-gray-900` rounded card with photo on the right.
+- Photos sourced from Unsplash CDN (auto-format, w=800–1600).
+- **Shadows are allowed only on photo cards (`hover:shadow-md`) and the search pill.** No background gradients (uses solid `bg-black/35` overlay).
+
+### Dashboard shell (`src/components/DashboardShell.tsx`) — Linear-style
+- Fixed 260px sidebar on desktop, mobile drawer (with body-scroll lock + Escape-to-close).
+- Role-driven nav (RESTAURANT / NGO / ANIMAL / ADMIN) with section labels.
+- Org card with verification dot. User menu with sign-out at bottom (closes on outside click + Escape).
+- Content max-width `1200px`.
+- No shadows, no gradients. Hierarchy via `border-gray-200` + tone shifts + typography.
+- `rounded-md` inputs/buttons/nav items, `rounded-lg` cards/panels.
+
+### Tokens (both surfaces)
+- **Primary**: `orange-600` (hover `orange-700`). Active nav `bg-orange-50 text-orange-700`.
+- **Numbers**: always `tabular-nums`. Dashboard KPI values `text-[28px]`.
+- **Eyebrow labels**: `text-[11px] font-semibold uppercase tracking-wider`.
+- **Font**: Poppins via Tailwind v4 `@theme`.
+- **Custom utility**: `scrollbar-hide` defined in `src/styles.css` for the category strip.
+
+### Other components
+- **AdminShell** (`src/components/admin/AdminShell.tsx`) — thin pass-through to DashboardShell that injects `role: 'ADMIN'`.
+- **DashboardStatsCard** — supports `tone`, `hint`, `to`, optional `trend` indicator.
+
 ## Architecture
 
 - **Framework**: TanStack Start (SSR React framework built on Vite + Nitro)

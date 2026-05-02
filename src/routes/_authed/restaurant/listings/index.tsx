@@ -1,12 +1,15 @@
 import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ChevronRight, History, ListChecks, Plus } from 'lucide-react'
+import { ChevronRight, History, ListChecks, Plus, ShoppingBag } from 'lucide-react'
 import { DashboardShell } from '../../../../components/DashboardShell'
+import { Button } from '../../../../components/ui/Button'
+import { ListingStatusBadge } from '../../../../components/ui/ClaimStatusBadge'
+import { EmptyState } from '../../../../components/ui/EmptyState'
+import { PageHeader } from '../../../../components/ui/PageHeader'
+import { Tabs } from '../../../../components/ui/Tabs'
 import { listMyListingsFn, type ListingRow } from '../../../../lib/listing-server'
 import type { OrganizationRow } from '../../../../lib/org-server'
 import {
-  LISTING_STATUS_BADGE_CLASSES,
-  LISTING_STATUS_LABELS,
   ROLE_LABELS,
   isOrgVerified,
   roleToDashboard,
@@ -49,69 +52,93 @@ function RestaurantListings() {
       user={user}
       organization={organization}
     >
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex rounded-lg border border-gray-200 bg-white p-0.5 text-sm">
-          <TabBtn
-            active={tab === 'active'}
-            onClick={() => setTab('active')}
-            icon={<ListChecks className="h-4 w-4" />}
-            label="Active"
-            count={active.length}
-          />
-          <TabBtn
-            active={tab === 'history'}
-            onClick={() => setTab('history')}
-            icon={<History className="h-4 w-4" />}
-            label="History"
-            count={history.length}
-          />
-        </div>
+      <PageHeader
+        title="Food listings"
+        description="Manage the surplus you're offering and review past posts."
+        back={{ to: '/restaurant/dashboard', label: 'Back to dashboard' }}
+        actions={
+          verified ? (
+            <Link to="/restaurant/listings/new">
+              <Button leftIcon={<Plus className="h-4 w-4" />}>New listing</Button>
+            </Link>
+          ) : (
+            <span className="text-xs text-gray-500">
+              Verify your organization to start posting listings.
+            </span>
+          )
+        }
+      />
 
-        {verified ? (
-          <Link
-            to="/restaurant/listings/new"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700"
-          >
-            <Plus className="h-4 w-4" />
-            New listing
-          </Link>
-        ) : (
-          <span className="text-xs text-gray-500">
-            Verify your organization to start posting listings.
-          </span>
-        )}
+      <div className="mb-4">
+        <Tabs<Tab>
+          value={tab}
+          onChange={setTab}
+          tabs={[
+            {
+              value: 'active',
+              label: 'Active',
+              icon: <ListChecks className="h-4 w-4" />,
+              count: active.length,
+            },
+            {
+              value: 'history',
+              label: 'History',
+              icon: <History className="h-4 w-4" />,
+              count: history.length,
+            },
+          ]}
+        />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-              <tr>
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Quantity</th>
-                <th className="px-4 py-3">Pickup window</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Open</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {rows.length === 0 ? (
+      {rows.length === 0 ? (
+        <EmptyState
+          icon={ShoppingBag}
+          title={
+            tab === 'active'
+              ? verified
+                ? 'No active listings yet'
+                : 'No active listings'
+              : 'No past listings yet'
+          }
+          description={
+            tab === 'active'
+              ? verified
+                ? 'Post your first surplus listing to start helping nearby orgs.'
+                : 'Verification pending — listings will appear here once you can post.'
+              : 'Completed and cancelled listings will be archived here.'
+          }
+          action={
+            tab === 'active' && verified ? (
+              <Link to="/restaurant/listings/new">
+                <Button leftIcon={<Plus className="h-4 w-4" />}>
+                  Post a listing
+                </Button>
+              </Link>
+            ) : undefined
+          }
+        />
+      ) : (
+        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 text-sm">
+              <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-gray-500">
-                    {tab === 'active'
-                      ? verified
-                        ? 'No active listings yet — post your first one!'
-                        : 'No active listings. Verification pending.'
-                      : 'No past listings yet.'}
-                  </td>
+                  <th className="px-4 py-3">Title</th>
+                  <th className="px-4 py-3">Quantity</th>
+                  <th className="px-4 py-3">Pickup window</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3 text-right">Open</th>
                 </tr>
-              ) : (
-                rows.map((row) => <ListingRowEl key={row.id} row={row} />)
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {rows.map((row) => (
+                  <ListingRowEl key={row.id} row={row} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </DashboardShell>
   )
 }
@@ -134,11 +161,7 @@ function ListingRowEl({ row }: { row: ListingRow }) {
         </div>
       </td>
       <td className="px-4 py-3">
-        <span
-          className={`rounded-full px-2 py-0.5 text-xs font-medium ${LISTING_STATUS_BADGE_CLASSES[status] ?? ''}`}
-        >
-          {LISTING_STATUS_LABELS[status] ?? status}
-        </span>
+        <ListingStatusBadge status={status} size="sm" />
       </td>
       <td className="px-4 py-3 text-right">
         <Link
@@ -151,41 +174,5 @@ function ListingRowEl({ row }: { row: ListingRow }) {
         </Link>
       </td>
     </tr>
-  )
-}
-
-function TabBtn({
-  active,
-  onClick,
-  icon,
-  label,
-  count,
-}: {
-  active: boolean
-  onClick: () => void
-  icon: React.ReactNode
-  label: string
-  count: number
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition ${
-        active
-          ? 'bg-orange-600 text-white'
-          : 'text-gray-700 hover:bg-gray-50'
-      }`}
-    >
-      {icon}
-      {label}
-      <span
-        className={`rounded-full px-1.5 text-[10px] ${
-          active ? 'bg-white/20' : 'bg-gray-100 text-gray-600'
-        }`}
-      >
-        {count}
-      </span>
-    </button>
   )
 }

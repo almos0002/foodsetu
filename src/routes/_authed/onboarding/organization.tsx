@@ -8,6 +8,8 @@ import {
   listCitiesFn,
 } from '../../../lib/org-server'
 import { ROLE_LABELS } from '../../../lib/permissions'
+import { Alert } from '../../../components/ui/Alert'
+import { Button } from '../../../components/ui/Button'
 
 export const Route = createFileRoute('/_authed/onboarding/organization')({
   loader: async () => ({ cities: await listCitiesFn() }),
@@ -77,43 +79,45 @@ function OnboardingOrganization() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100">
-      <header className="border-b border-orange-200/60 bg-white/70 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3">
+    <div className="min-h-screen bg-gray-50">
+      <header className="border-b border-gray-200 bg-white">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-2 text-orange-600">
-            <Utensils className="h-6 w-6" />
-            <span className="text-lg font-semibold">FoodSetu</span>
+            <Utensils className="h-5 w-5" />
+            <span className="text-base font-semibold">FoodSetu</span>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleSignOut}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            leftIcon={<LogOut className="h-4 w-4" />}
           >
-            <LogOut className="h-4 w-4" />
             Sign out
-          </button>
+          </Button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="mb-6 flex items-center gap-3">
-          <div className="rounded-xl bg-orange-600/10 p-2 text-orange-700">
-            <Building2 className="h-6 w-6" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-orange-50 text-orange-600">
+            <Building2 className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Set up your organization</h1>
-            <p className="text-sm text-gray-600">
+            <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">
+              Set up your organization
+            </h1>
+            <p className="mt-1 text-sm text-gray-600">
               Welcome, {user.name ?? user.email}. Tell us about your{' '}
               <span className="font-medium text-gray-800">{roleLabel}</span> so an admin can verify it.
             </p>
           </div>
         </div>
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
-          <div className="mb-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+        <div className="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+          <Alert tone="warning" className="mb-5">
             Your organization will be reviewed by an admin. You can sign in and view your dashboard
             immediately, but you won&apos;t be able to {user.role === 'RESTAURANT' ? 'post listings' : 'claim food'} until it&apos;s verified.
-          </div>
+          </Alert>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <Field label="Organization name" required>
@@ -128,7 +132,7 @@ function OnboardingOrganization() {
             </Field>
 
             <Field label="Type">
-              <div className="rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700 ring-1 ring-gray-200">
+              <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
                 {expectedType || '—'}
                 <span className="ml-2 text-xs text-gray-500">(matches your account role)</span>
               </div>
@@ -170,7 +174,7 @@ function OnboardingOrganization() {
                     ))}
                   </select>
                 ) : (
-                  <div className="rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-500 ring-1 ring-gray-200">
+                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500">
                     No cities seeded yet — leave blank for now.
                   </div>
                 )}
@@ -214,19 +218,11 @@ function OnboardingOrganization() {
               </Field>
             </div>
 
-            {error ? (
-              <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
-                {error}
-              </div>
-            ) : null}
+            {error ? <Alert tone="error">{error}</Alert> : null}
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-60"
-            >
+            <Button type="submit" disabled={submitting} size="lg" fullWidth>
               {submitting ? 'Submitting…' : 'Submit for verification'}
-            </button>
+            </Button>
           </form>
         </div>
       </main>

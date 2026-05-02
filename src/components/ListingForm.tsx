@@ -10,6 +10,8 @@ import {
   type QuantityUnit,
 } from '../lib/permissions'
 import type { ListingInput } from '../lib/listing-server'
+import { Alert } from './ui/Alert'
+import { Button } from './ui/Button'
 
 export type ListingFormInitial = Partial<{
   title: string
@@ -297,29 +299,17 @@ export function ListingForm({
         />
       </Field>
 
-      {error ? (
-        <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
-          {error}
-        </div>
-      ) : null}
+      {error ? <Alert tone="error">{error}</Alert> : null}
 
       <div className="flex items-center justify-end gap-2">
         {onCancel ? (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
-          </button>
+          </Button>
         ) : null}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-60"
-        >
+        <Button type="submit" disabled={submitting}>
           {submitting ? 'Saving…' : submitLabel}
-        </button>
+        </Button>
       </div>
     </form>
   )
