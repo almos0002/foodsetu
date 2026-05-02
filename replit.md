@@ -118,7 +118,7 @@ Domain tables reference `user.id` / `organization.id` as **soft text references*
 After editing `src/lib/auth.ts` (auth tables / plugins / additional fields):
 
 ```bash
-npx @better-auth/cli@latest migrate -y
+npx @better-auth/cli migrate -y   # uses pinned devDependency
 ```
 
 After editing `src/db/schema.ts` (domain tables):
@@ -136,6 +136,17 @@ For local apply without the SQL tool:
 ```bash
 psql "$DATABASE_URL" -f drizzle/<NNNN>_<name>.sql
 ```
+
+### Post-merge contract (`scripts/post-merge.sh`)
+
+Runs automatically after every task merge. Order matters:
+
+1. `npm install` — installs pinned versions including `@better-auth/cli` (devDep).
+2. `drizzle-kit migrate` — additive only. **Never use `drizzle-kit push --force`** here; it drops Better Auth tables (they're not in `src/db/schema.ts`).
+3. `@better-auth/cli migrate -y` — pinned version, syncs auth tables.
+4. Idempotent SQL patch — Better Auth maps `type: 'number'` to `integer`, but `organization.latitude/longitude` need decimal precision, so the script alters them to `numeric(10,7)` only when they're still integer.
+
+If a fresh DB ever loses migration tracking (existing tables but empty `drizzle.__drizzle_migrations`), backfill with the sha256 of each `drizzle/NNNN_*.sql` — keep this as a one-off runbook, **not** as a regular migration.
 
 ### Health check
 
