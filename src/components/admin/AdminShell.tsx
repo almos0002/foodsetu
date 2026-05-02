@@ -11,6 +11,7 @@ import {
 import type { ReactNode } from 'react'
 import { DashboardShell } from '../DashboardShell'
 import { ROLE_LABELS } from '../../lib/permissions'
+import { cn } from '../ui/cn'
 
 type NavItem = {
   to: string
@@ -45,29 +46,33 @@ export function AdminShell({ title, user, children }: Props) {
       user={user}
       organization={null}
     >
-      <div className="grid gap-6 md:grid-cols-[200px_1fr]">
-        <nav className="md:sticky md:top-6 md:self-start">
-          <ul className="flex flex-wrap gap-1 md:flex-col md:gap-0.5">
-            {NAV.map(({ to, label, icon: Icon }) => {
-              const active =
-                path === to || (to !== '/admin/dashboard' && path.startsWith(to))
-              return (
-                <li key={to}>
-                  <Link
-                    to={to}
-                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${
-                      active
-                        ? 'bg-orange-50 font-semibold text-orange-700 ring-1 ring-orange-200'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {label}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
+      <div className="grid gap-5 md:grid-cols-[210px_minmax(0,1fr)]">
+        <nav className="md:sticky md:top-20 md:self-start">
+          <div className="rounded-lg border border-gray-200 bg-white p-1.5 md:p-2">
+            <ul className="flex flex-wrap gap-1 md:flex-col md:gap-0.5">
+              {NAV.map(({ to, label, icon: Icon }) => {
+                const active =
+                  path === to ||
+                  (to !== '/admin/dashboard' && path.startsWith(to))
+                return (
+                  <li key={to} className="md:w-full">
+                    <Link
+                      to={to}
+                      className={cn(
+                        'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+                        active
+                          ? 'bg-orange-50 font-semibold text-orange-700'
+                          : 'text-gray-700 hover:bg-gray-50',
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
         </nav>
         <div className="min-w-0">{children}</div>
       </div>

@@ -1,8 +1,12 @@
 import { Link, createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ArrowLeft, ShoppingBag } from 'lucide-react'
+import { MapPin, PawPrint, ShoppingBag } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
-import { NearbyFoodCard } from '../../../components/food/NearbyFoodCard'
+import { Alert } from '../../../components/ui/Alert'
+import { Button } from '../../../components/ui/Button'
+import { EmptyState } from '../../../components/ui/EmptyState'
+import { FoodListingCard } from '../../../components/ui/FoodListingCard'
+import { PageHeader } from '../../../components/ui/PageHeader'
 import {
   createAnimalClaimFn,
   listNearbyAnimalFoodFn,
@@ -64,69 +68,84 @@ function NearbyAnimalFoodPage() {
       user={user}
       organization={organization}
     >
-      <div className="mb-4 flex items-center justify-between">
-        <Link
-          to="/animal/dashboard"
-          className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to dashboard
-        </Link>
-        <Link
-          to="/animal/my-claims"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          <ShoppingBag className="h-4 w-4" />
-          My claims
-        </Link>
-      </div>
+      <PageHeader
+        title="Nearby food"
+        description="Animal-safe surplus available within 10 km of your organization."
+        eyebrow="Animal rescue"
+        back={{ to: '/animal/dashboard', label: 'Back to dashboard' }}
+        actions={
+          <Link to="/animal/my-claims">
+            <Button
+              variant="outline"
+              leftIcon={<ShoppingBag className="h-4 w-4" />}
+            >
+              My claims
+            </Button>
+          </Link>
+        }
+      />
 
       {!canClaim ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-sm text-gray-700 shadow-sm">
+        <Alert tone="warning" title="Not available yet">
           {!organization || organization.type !== 'ANIMAL_RESCUE'
             ? 'You need to own an animal-rescue organization to claim animal-safe food.'
             : isOrgVerified(organization)
               ? 'Only animal-rescue accounts can claim animal-safe food.'
               : 'Your organization must be verified before you can claim food. An admin will review your profile shortly.'}
-        </div>
+        </Alert>
       ) : (
-        <>
+        <div className="space-y-4">
           {!hasOrgLocation ? (
-            <div className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 ring-1 ring-amber-200">
+            <Alert tone="warning" title="Location missing">
               Add a location to your organization profile to see nearby
               listings. We match within 10 km of your location.
-            </div>
+            </Alert>
           ) : null}
 
-          {error ? (
-            <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
-              {error}
-            </div>
-          ) : null}
+          {error ? <Alert tone="error">{error}</Alert> : null}
 
           {listings.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center text-sm text-gray-500">
-              {hasOrgLocation
-                ? 'No animal-safe food available within 10 km right now.'
-                : 'Set your organization location to see nearby food.'}
-              <div className="mt-1 text-xs">
-                Check back in a little while — restaurants post throughout the day.
-              </div>
-            </div>
+            <EmptyState
+              icon={PawPrint}
+              title={
+                hasOrgLocation
+                  ? 'No animal-safe food nearby right now'
+                  : 'Set your organization location'
+              }
+              description={
+                hasOrgLocation
+                  ? 'Restaurants post throughout the day — check back in a bit.'
+                  : 'We need your location to surface listings within 10 km.'
+              }
+              action={
+                <Link to="/animal/dashboard">
+                  <Button
+                    variant="outline"
+                    leftIcon={<MapPin className="h-4 w-4" />}
+                  >
+                    Back to dashboard
+                  </Button>
+                </Link>
+              }
+            />
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {listings.map((listing) => (
-                <NearbyFoodCard
+                <FoodListingCard
                   key={listing.id}
                   listing={listing}
-                  busy={busyId === listing.id}
-                  disabled={busyId !== null && busyId !== listing.id}
-                  onClaim={() => handleClaim(listing.id)}
+                  action={{
+                    label: 'Claim',
+                    busyLabel: 'Claiming…',
+                    busy: busyId === listing.id,
+                    disabled: busyId !== null && busyId !== listing.id,
+                    onClick: () => handleClaim(listing.id),
+                  }}
                 />
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
     </DashboardShell>
   )

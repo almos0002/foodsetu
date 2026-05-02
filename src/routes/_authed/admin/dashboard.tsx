@@ -1,6 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import {
-  AlertTriangle,
   Building2,
   CheckCircle2,
   Clock,
@@ -11,7 +10,9 @@ import {
   XCircle,
 } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
-import { StatCard } from '../../../components/admin/StatCard'
+import { Alert } from '../../../components/ui/Alert'
+import { DashboardStatsCard } from '../../../components/ui/DashboardStatsCard'
+import { PageHeader } from '../../../components/ui/PageHeader'
 import { getAdminStatsFn } from '../../../lib/admin-server'
 import { canAccessAdmin, roleToDashboard } from '../../../lib/permissions'
 
@@ -48,101 +49,109 @@ function AdminDashboard() {
 
   return (
     <AdminShell title="Admin dashboard" user={user}>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard
+      <PageHeader
+        title="Admin dashboard"
+        description="Overview of the FoodSetu platform"
+      />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <DashboardStatsCard
           label="Total users"
           value={stats.totalUsers}
           icon={Users}
           to="/admin/users"
+          tone="default"
         />
-        <StatCard
+        <DashboardStatsCard
           label="Restaurants"
           value={stats.totalRestaurants}
           icon={Building2}
           to="/admin/organizations"
+          tone="orange"
           hint="Verified + pending"
         />
-        <StatCard
+        <DashboardStatsCard
           label="NGOs"
           value={stats.totalNgos}
           icon={Building2}
           to="/admin/organizations"
+          tone="blue"
         />
-        <StatCard
+        <DashboardStatsCard
           label="Animal rescue groups"
           value={stats.totalAnimalRescues}
           icon={Building2}
           to="/admin/organizations"
+          tone="green"
         />
-        <StatCard
+        <DashboardStatsCard
           label="Active food listings"
           value={stats.activeListings}
           icon={ShoppingBag}
           to="/admin/listings"
-          tone="success"
-          hint="Available, claim-requested, or claimed"
+          tone="green"
+          hint="Available, requested, or claimed"
         />
-        <StatCard
+        <DashboardStatsCard
           label="Completed pickups"
           value={stats.completedPickups}
           icon={PackageCheck}
           to="/admin/listings"
-          tone="success"
+          tone="purple"
         />
-        <StatCard
+        <DashboardStatsCard
           label="Expired listings"
           value={stats.expiredListings}
           icon={XCircle}
           to="/admin/listings"
-          tone="warning"
+          tone="amber"
         />
-        <StatCard
+        <DashboardStatsCard
           label="Pending verifications"
           value={stats.pendingVerificationRequests}
           icon={Clock}
           to="/admin/organizations"
           tone={
-            stats.pendingVerificationRequests > 0 ? 'warning' : 'default'
+            stats.pendingVerificationRequests > 0 ? 'amber' : 'default'
           }
           hint="Organizations awaiting review"
         />
-        <StatCard
+        <DashboardStatsCard
           label="Estimated rescued food"
           value={rescuedSummary}
           icon={Leaf}
           to="/admin/listings"
-          tone="success"
+          tone="green"
           hint="Sum across completed pickups"
         />
       </div>
 
-      {stats.pendingVerificationRequests > 0 ? (
-        <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-          <div>
-            <div className="font-semibold">
-              {stats.pendingVerificationRequests} organization
-              {stats.pendingVerificationRequests === 1 ? '' : 's'} waiting for
-              review
-            </div>
-            <div className="mt-0.5">
-              Head to{' '}
-              <a
-                href="/admin/organizations"
-                className="font-medium text-amber-900 underline"
-              >
-                Organizations
-              </a>{' '}
-              to verify, reject, or suspend them.
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="mt-6 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-          <CheckCircle2 className="h-4 w-4" />
-          <span>No organizations are awaiting verification.</span>
-        </div>
-      )}
+      <div className="mt-5">
+        {stats.pendingVerificationRequests > 0 ? (
+          <Alert
+            tone="warning"
+            title={`${stats.pendingVerificationRequests} organization${
+              stats.pendingVerificationRequests === 1 ? '' : 's'
+            } waiting for review`}
+          >
+            Head to{' '}
+            <a
+              href="/admin/organizations"
+              className="font-medium underline"
+            >
+              Organizations
+            </a>{' '}
+            to verify, reject, or suspend them.
+          </Alert>
+        ) : (
+          <Alert tone="success" title="All caught up">
+            <span className="inline-flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              No organizations are awaiting verification.
+            </span>
+          </Alert>
+        )}
+      </div>
     </AdminShell>
   )
 }

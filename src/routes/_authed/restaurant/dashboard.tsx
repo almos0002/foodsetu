@@ -1,12 +1,29 @@
 import { Link, createFileRoute, redirect } from '@tanstack/react-router'
-import { History, Inbox, ListChecks, Plus } from 'lucide-react'
+import {
+  ChevronRight,
+  History,
+  Inbox,
+  ListChecks,
+  Plus,
+  ShoppingBag,
+  Utensils,
+} from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
+import { Button } from '../../../components/ui/Button'
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/Card'
+import { ListingStatusBadge } from '../../../components/ui/ClaimStatusBadge'
+import { DashboardStatsCard } from '../../../components/ui/DashboardStatsCard'
+import { EmptyState } from '../../../components/ui/EmptyState'
+import { PageHeader } from '../../../components/ui/PageHeader'
 import { listClaimRequestsForRestaurantFn } from '../../../lib/claim-server'
 import { listMyListingsFn } from '../../../lib/listing-server'
 import type { OrganizationRow } from '../../../lib/org-server'
 import {
-  LISTING_STATUS_BADGE_CLASSES,
-  LISTING_STATUS_LABELS,
   ROLE_LABELS,
   canCreateFoodListing,
   isOrgVerified,
@@ -22,9 +39,6 @@ export const Route = createFileRoute('/_authed/restaurant/dashboard')({
     }
   },
   loader: async () => {
-    // Active+history listings power the small dashboard widget. Restaurants
-    // who can't post (unverified / wrong org type) get [] back. Active
-    // claim requests power the inbox-style "claim requests" stat.
     const [active, history, activeClaims] = await Promise.all([
       listMyListingsFn({ data: { scope: 'active' } }),
       listMyListingsFn({ data: { scope: 'history' } }),
@@ -45,8 +59,9 @@ function RestaurantDashboard() {
   }
   const verified = isOrgVerified(organization)
   const canPost = canCreateFoodListing(user, organization)
-  const recent = active.slice(0, 3)
+  const recent = active.slice(0, 4)
   const pendingClaims = activeClaims.filter((c) => c.status === 'PENDING')
+  const acceptedClaims = activeClaims.length - pendingClaims.length
 
   return (
     <DashboardShell
@@ -55,82 +70,101 @@ function RestaurantDashboard() {
       user={user}
       organization={organization}
     >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Active listings" value={active.length} />
-        <StatCard label="Past listings" value={history.length} />
-        <Link
-          to="/restaurant/claims"
-          className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-orange-300 hover:shadow"
-        >
-          <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-gray-500">
-            <span>Pending claims</span>
-            <Inbox className="h-4 w-4 text-gray-400 group-hover:text-orange-600" />
-          </div>
-          <div className="mt-1 text-2xl font-semibold text-gray-900">
-            {pendingClaims.length}
-          </div>
-          {activeClaims.length > pendingClaims.length ? (
-            <div className="mt-1 text-[11px] text-gray-500">
-              {activeClaims.length - pendingClaims.length} accepted in progress
-            </div>
-          ) : null}
-        </Link>
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <div className="text-xs font-medium uppercase tracking-wide text-gray-500">
-            Quick actions
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {canPost ? (
-              <Link
-                to="/restaurant/listings/new"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700"
-              >
-                <Plus className="h-4 w-4" />
+      <PageHeader
+        title="Restaurant dashboard"
+        description={
+          organization?.name
+            ? `Welcome back, ${organization.name}`
+            : 'Surplus food at a glance'
+        }
+        actions={
+          canPost ? (
+            <Link to="/restaurant/listings/new">
+              <Button leftIcon={<Plus className="h-4 w-4" />}>
                 New listing
-              </Link>
-            ) : null}
-            <Link
-              to="/restaurant/listings"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              <ListChecks className="h-4 w-4" />
-              Listings
+              </Button>
             </Link>
-            <Link
-              to="/restaurant/claims"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              <Inbox className="h-4 w-4" />
-              Claims
-              {pendingClaims.length > 0 ? (
-                <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[10px] font-semibold text-orange-700">
-                  {pendingClaims.length}
-                </span>
-              ) : null}
-            </Link>
-          </div>
-        </div>
+          ) : null
+        }
+      />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <DashboardStatsCard
+          label="Active listings"
+          value={active.length}
+          icon={ShoppingBag}
+          tone="orange"
+          to="/restaurant/listings"
+        />
+        <DashboardStatsCard
+          label="Past listings"
+          value={history.length}
+          icon={History}
+          tone="default"
+          to="/restaurant/listings"
+        />
+        <DashboardStatsCard
+          label="Pending claims"
+          value={pendingClaims.length}
+          icon={Inbox}
+          tone="amber"
+          to="/restaurant/claims"
+          hint={
+            acceptedClaims > 0
+              ? `${acceptedClaims} accepted in progress`
+              : undefined
+          }
+        />
+        <DashboardStatsCard
+          label="Total in pipeline"
+          value={active.length + activeClaims.length}
+          icon={ListChecks}
+          tone="blue"
+          hint="Listings + open claims"
+        />
       </div>
 
-      <section className="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-900">Recent active listings</h2>
-          <Link
-            to="/restaurant/listings"
-            className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700"
-          >
-            <History className="h-3.5 w-3.5" />
-            See all
-          </Link>
-        </div>
-        {recent.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-sm text-gray-600">
-            {canPost
-              ? 'No active listings yet — post your first one!'
-              : verified
-                ? 'No active listings yet.'
-                : 'Posting listings is locked until your organization is verified.'}
+      <Card className="mt-6">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle>Recent active listings</CardTitle>
+            <Link
+              to="/restaurant/listings"
+              className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700"
+            >
+              See all
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
+        </CardHeader>
+        {recent.length === 0 ? (
+          <EmptyState
+            bare
+            icon={Utensils}
+            title={
+              canPost
+                ? 'No active listings yet'
+                : verified
+                  ? 'No active listings yet'
+                  : 'Posting is locked'
+            }
+            description={
+              canPost
+                ? 'Post your first surplus food listing to get started.'
+                : verified
+                  ? 'Once you post a listing it will show up here.'
+                  : 'Verification of your organization is required before you can post.'
+            }
+            action={
+              canPost ? (
+                <Link to="/restaurant/listings/new">
+                  <Button leftIcon={<Plus className="h-4 w-4" />}>
+                    Create listing
+                  </Button>
+                </Link>
+              ) : null
+            }
+          />
         ) : (
           <ul className="divide-y divide-gray-100">
             {recent.map((row) => {
@@ -140,7 +174,7 @@ function RestaurantDashboard() {
                   <Link
                     to="/restaurant/listings/$id"
                     params={{ id: row.id }}
-                    className="flex items-center justify-between gap-3 py-3 hover:bg-gray-50"
+                    className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-gray-50 sm:px-5"
                   >
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium text-gray-900">
@@ -148,32 +182,48 @@ function RestaurantDashboard() {
                       </div>
                       <div className="text-xs text-gray-500">
                         {row.quantity} {row.quantityUnit} · pickup{' '}
-                        {new Date(row.pickupStartTime).toLocaleString()}
+                        {new Date(row.pickupStartTime).toLocaleString(
+                          undefined,
+                          {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          },
+                        )}
                       </div>
                     </div>
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${LISTING_STATUS_BADGE_CLASSES[status] ?? ''}`}
-                    >
-                      {LISTING_STATUS_LABELS[status] ?? status}
-                    </span>
+                    <ListingStatusBadge status={status} size="sm" />
                   </Link>
                 </li>
               )
             })}
           </ul>
         )}
-      </section>
-    </DashboardShell>
-  )
-}
+      </Card>
 
-function StatCard({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="text-xs font-medium uppercase tracking-wide text-gray-500">
-        {label}
-      </div>
-      <div className="mt-1 text-2xl font-semibold text-gray-900">{value}</div>
-    </div>
+      {pendingClaims.length > 0 ? (
+        <Card className="mt-4">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle>Awaiting your decision</CardTitle>
+              <Link
+                to="/restaurant/claims"
+                className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700"
+              >
+                Review all
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </CardHeader>
+          <CardBody>
+            <p className="text-sm text-gray-600">
+              You have <span className="font-semibold text-gray-900">{pendingClaims.length}</span>{' '}
+              new claim request{pendingClaims.length === 1 ? '' : 's'}.
+            </p>
+          </CardBody>
+        </Card>
+      ) : null}
+    </DashboardShell>
   )
 }
