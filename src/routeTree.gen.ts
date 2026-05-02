@@ -9,9 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AuthedRestaurantDashboardRouteImport } from './routes/_authed/restaurant/dashboard'
+import { Route as AuthedNgoDashboardRouteImport } from './routes/_authed/ngo/dashboard'
+import { Route as AuthedAnimalDashboardRouteImport } from './routes/_authed/animal/dashboard'
+import { Route as AuthedAdminDashboardRouteImport } from './routes/_authed/admin/dashboard'
 
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -22,35 +43,125 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedRestaurantDashboardRoute =
+  AuthedRestaurantDashboardRouteImport.update({
+    id: '/restaurant/dashboard',
+    path: '/restaurant/dashboard',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedNgoDashboardRoute = AuthedNgoDashboardRouteImport.update({
+  id: '/ngo/dashboard',
+  path: '/ngo/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAnimalDashboardRoute = AuthedAnimalDashboardRouteImport.update({
+  id: '/animal/dashboard',
+  path: '/animal/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAdminDashboardRoute = AuthedAdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/admin/dashboard': typeof AuthedAdminDashboardRoute
+  '/animal/dashboard': typeof AuthedAnimalDashboardRoute
+  '/ngo/dashboard': typeof AuthedNgoDashboardRoute
+  '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/admin/dashboard': typeof AuthedAdminDashboardRoute
+  '/animal/dashboard': typeof AuthedAnimalDashboardRoute
+  '/ngo/dashboard': typeof AuthedNgoDashboardRoute
+  '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authed': typeof AuthedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/_authed/admin/dashboard': typeof AuthedAdminDashboardRoute
+  '/_authed/animal/dashboard': typeof AuthedAnimalDashboardRoute
+  '/_authed/ngo/dashboard': typeof AuthedNgoDashboardRoute
+  '/_authed/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/admin/dashboard'
+    | '/animal/dashboard'
+    | '/ngo/dashboard'
+    | '/restaurant/dashboard'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/auth/$'
-  id: '__root__' | '/' | '/api/auth/$'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/admin/dashboard'
+    | '/animal/dashboard'
+    | '/ngo/dashboard'
+    | '/restaurant/dashboard'
+    | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authed'
+    | '/login'
+    | '/register'
+    | '/_authed/admin/dashboard'
+    | '/_authed/animal/dashboard'
+    | '/_authed/ngo/dashboard'
+    | '/_authed/restaurant/dashboard'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthedRoute: typeof AuthedRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -65,11 +176,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/restaurant/dashboard': {
+      id: '/_authed/restaurant/dashboard'
+      path: '/restaurant/dashboard'
+      fullPath: '/restaurant/dashboard'
+      preLoaderRoute: typeof AuthedRestaurantDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/ngo/dashboard': {
+      id: '/_authed/ngo/dashboard'
+      path: '/ngo/dashboard'
+      fullPath: '/ngo/dashboard'
+      preLoaderRoute: typeof AuthedNgoDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/animal/dashboard': {
+      id: '/_authed/animal/dashboard'
+      path: '/animal/dashboard'
+      fullPath: '/animal/dashboard'
+      preLoaderRoute: typeof AuthedAnimalDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admin/dashboard': {
+      id: '/_authed/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AuthedAdminDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
+interface AuthedRouteChildren {
+  AuthedAdminDashboardRoute: typeof AuthedAdminDashboardRoute
+  AuthedAnimalDashboardRoute: typeof AuthedAnimalDashboardRoute
+  AuthedNgoDashboardRoute: typeof AuthedNgoDashboardRoute
+  AuthedRestaurantDashboardRoute: typeof AuthedRestaurantDashboardRoute
+}
+
+const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedAdminDashboardRoute: AuthedAdminDashboardRoute,
+  AuthedAnimalDashboardRoute: AuthedAnimalDashboardRoute,
+  AuthedNgoDashboardRoute: AuthedNgoDashboardRoute,
+  AuthedRestaurantDashboardRoute: AuthedRestaurantDashboardRoute,
+}
+
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthedRoute: AuthedRouteWithChildren,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

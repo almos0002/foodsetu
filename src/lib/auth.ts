@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth'
+import { createAuthMiddleware } from 'better-auth/api'
 import { organization } from 'better-auth/plugins/organization'
 import { Pool } from 'pg'
 
@@ -53,9 +54,53 @@ export const auth = betterAuth({
         type: 'string',
         required: false,
         defaultValue: 'RESTAURANT',
-        input: false,
+        input: true,
       },
     },
+  },
+  // Defense in depth: also enforced in the request-level hooks below.
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          const ALLOWED = ['RESTAURANT', 'NGO', 'ANIMAL_RESCUE'] as const
+          const requested = (user as { role?: string }).role
+          const safeRole = (ALLOWED as readonly string[]).includes(
+            requested ?? '',
+          )
+            ? requested
+            : 'RESTAURANT'
+          return { data: { ...user, role: safeRole } }
+        },
+      },
+    },
+  },
+  // Request-level guards — fire BEFORE Better Auth applies additionalFields,
+  // so they reliably block role tampering on update-user (which databaseHooks
+  // does not catch for additionalFields like `role`).
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      const path = ctx.path
+      // Sanitize role on signup. ADMIN may never be self-assigned.
+      if (path.startsWith('/sign-up/email')) {
+        const ALLOWED = ['RESTAURANT', 'NGO', 'ANIMAL_RESCUE']
+        const body = ctx.body as Record<string, unknown> | undefined
+        if (body) {
+          const requested =
+            typeof body.role === 'string' ? body.role : undefined
+          if (!requested || !ALLOWED.includes(requested)) {
+            body.role = 'RESTAURANT'
+          }
+        }
+      }
+      // Strip role from any user update — role is server-managed only.
+      if (path.startsWith('/update-user')) {
+        const body = ctx.body as Record<string, unknown> | undefined
+        if (body && 'role' in body) {
+          delete body.role
+        }
+      }
+    }),
   },
   plugins: [
     organization({

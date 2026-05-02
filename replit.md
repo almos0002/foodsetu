@@ -97,6 +97,34 @@ psql "$DATABASE_URL" -f drizzle/<NNNN>_<name>.sql
 
 `GET /api/auth/ok` → `{"ok":true}`.
 
+## Routes & role-based access
+
+Public routes (under `src/routes/`):
+- `/` — landing page (shows different nav based on `useSession()`)
+- `/login`, `/register` — auth pages; if already signed in, redirect to the user's dashboard
+- `/api/auth/$` — Better Auth handler (catch-all)
+
+Protected routes live under the pathless layout `src/routes/_authed.tsx`. Its `beforeLoad` calls a server function (`getServerSession` in `src/lib/auth-server.ts`) which reads the cookie via `auth.api.getSession({ headers })`. If no session, it redirects to `/login?redirect=<original-href>` and the login page honors that on success. On success it returns `{ user, sessionId }` into route context.
+
+Each dashboard route adds its own `beforeLoad` calling the matching `canX(user)` helper from `src/lib/permissions.ts` and redirecting to `roleToDashboard(user.role)` on mismatch:
+
+| Route | Allowed roles |
+|-------|---------------|
+| `/admin/dashboard` | `canAccessAdmin` → ADMIN only |
+| `/restaurant/dashboard` | `canCreateFoodListing` → RESTAURANT, ADMIN |
+| `/ngo/dashboard` | `canClaimHumanFood` → NGO, ADMIN |
+| `/animal/dashboard` | `canClaimAnimalFood` → ANIMAL_RESCUE, ADMIN |
+
+After `signIn.email`, the login page navigates to `roleToDashboard(user.role)`. Same after `signUp.email` (auto-sign-in is enabled).
+
+### Self-signup role coercion
+
+The register form lets users pick RESTAURANT / NGO / ANIMAL_RESCUE. The `databaseHooks.user.create.before` in `src/lib/auth.ts` coerces any role outside that set (e.g. `ADMIN`, garbage values, missing) to `RESTAURANT`. ADMINs must be promoted manually via SQL — never via signup.
+
+### Sign-out
+
+The header in `src/components/DashboardShell.tsx` calls `signOut()` from `auth-client`, invalidates the router, and navigates to `/login`. Better Auth requires a matching `Origin` header — the browser sends this automatically; for curl tests use `-H "Origin: https://$REPLIT_DEV_DOMAIN"`.
+
 ### Required env vars
 
 | Var | Purpose |
