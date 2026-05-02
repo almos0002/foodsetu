@@ -14,14 +14,52 @@ FoodSetu connects restaurants/hotels/bakeries that have surplus food with verifi
 
 ## UI / Design System
 
-Two distinct visual surfaces — kept separate on purpose:
+The **entire site** uses a single minimal product-site aesthetic in the
+Linear / Vercel / Notion family — quiet monochrome surfaces with a single
+deep emerald accent (`--color-accent: #0a7a3f`). This applies to public
+marketing (`/`), auth pages (`/login`, `/register`), public listings
+(`/listings`), and every authenticated dashboard.
 
-1. **Public marketing route** (`/`) — **minimal product-site** direction (Linear / Vercel / Notion family).
-2. **Other public routes (`/listings`, `/login`, `/register`) and authenticated dashboards** — older orange-accented surface, kept compatible via aliased tokens until they are redesigned.
+Hierarchy comes from typography, hairline borders, generous whitespace,
+and (on `/` only) a faint background grid — never from shadows or color
+floods.
+
+**Hard "do not" list (enforced across every page):**
+
+- ❌ no rotated stickers, chips, or cards (`-rotate-3`/`-rotate-6` were
+  swept out of the codebase)
+- ❌ no oversized rounded-`[28px]`/`[32px]` radii — use
+  `rounded-lg`/`rounded-xl`/`rounded-2xl`
+- ❌ no `border-[1.5px]` or other off-spec border widths
+- ❌ no dotgrid backgrounds on dashboards
+- ❌ no editorial/magazine devices (Roman numerals, paper grain,
+  oversized italics, dotted column rules)
+- ❌ no cartoon mascots, blob shapes, squiggles, or rainbow palettes
+- ❌ no soft glows or large drop shadows; only `shadow-sm` on small
+  floating chips is allowed
+- ❌ no hover-lift transforms (`hover:-translate-y-0.5`)
+- ✅ one accent color only (`--color-accent`); everything else is ink + line + bg
+- ✅ `rounded-full` for pills/dots, `rounded-xl`/`rounded-2xl` for cards,
+  `rounded-md`/`rounded-lg` for inputs/buttons/nav items
+- ✅ all photos use Unsplash with `w=800–1600&auto=format&fit=crop&q=80`
+- ✅ footer year on `/` is a **static literal** (not
+  `new Date().getFullYear()`) to avoid SSR/timezone drift
+
+Legacy color tokens (`--color-coral`, `--color-mint`, `--color-sun`,
+`--color-berry`, `--color-sky`, `--color-paper*`, `--color-ember`,
+`--color-cream`, `--color-ink-700/500/300`) are still **defined** in
+`src/styles.css` but aliased to the new minimal palette so unconverted
+class names render correctly. Do **not** use them in new work — use the
+canonical tokens listed below.
+
+Legacy "decorative" utilities (`dotgrid`, `squiggle`, `wavey-link`,
+`bubble`, `sticker`, `chip`, `pill`, `bouncy-card`) are kept defined as
+flat no-op backstops so any stragglers render harmlessly; they should
+not be reintroduced.
 
 ### Public homepage (`src/routes/index.tsx`) — minimal product-site
 
-Quiet, monochrome layout with one emerald accent. Hierarchy comes from typography, hairline borders, generous whitespace, and a faint background grid — not from shadows or color floods.
+Quiet, monochrome layout with one emerald accent.
 
 **Type system** (loaded in `src/routes/__root.tsx`)
 
@@ -66,27 +104,68 @@ Legacy aliases (`--color-paper*`, `--color-rule`, `--color-ember`, `--color-ink-
 - ✅ all photos use Unsplash with `w=800–1600&auto=format&fit=crop&q=80`
 - ✅ footer year is a **static literal** (not `new Date().getFullYear()`) to avoid SSR/timezone drift
 
-### Dashboard shell (`src/components/DashboardShell.tsx`) — Linear-style
+### Auth & public-listings pages (`src/routes/login.tsx`, `register.tsx`, `listings.tsx`)
 
-- Fixed 260px sidebar on desktop, mobile drawer (with body-scroll lock + Escape-to-close).
-- Role-driven nav (RESTAURANT / NGO / ANIMAL / ADMIN) with section labels.
-- Org card with verification dot. User menu with sign-out at bottom (closes on outside click + Escape).
-- Content max-width `1200px`.
-- No shadows, no gradients. Hierarchy via `border-gray-200` + tone shifts + typography.
-- `rounded-md` inputs/buttons/nav items, `rounded-lg` cards/panels.
+- Same NavBar (and `BowlMascot` monogram) as the homepage.
+- Card surface on `bg-canvas-2`/`bg-canvas-3` with hairline border.
+- Primary action = `Button` default (ink). Emerald `accent` variant is
+  reserved for "Claim"/"Accept"/"Verify" semantics only.
+- Role pickers on `register.tsx` use a tone-tinted `activeBg` + ink
+  outline ring instead of rotated stickers.
+- All date/time uses `Intl.DateTimeFormat` with
+  `timeZone: 'Asia/Kolkata'` (see `formatPickup` helpers).
 
-### Tokens (both surfaces)
+### Dashboard shell & primitives — Linear-style
 
-- **Primary**: `orange-600` (hover `orange-700`). Active nav `bg-orange-50 text-orange-700`.
-- **Numbers**: always `tabular-nums`. Dashboard KPI values `text-[28px]`.
+`src/components/DashboardShell.tsx`
+
+- Fixed `248px` sidebar on desktop, mobile drawer (body-scroll lock +
+  Escape-to-close).
+- Role-driven nav (RESTAURANT / NGO / ANIMAL / ADMIN) with section
+  labels. Active nav item uses a role-toned soft `activeBg` + ink text.
+- Org card with verification dot. User menu with sign-out at bottom
+  (closes on outside click + Escape).
+- Content max-width `1200px`. No shadows, no gradients.
+- `rounded-md` inputs/buttons/nav items, `rounded-lg`/`rounded-xl`
+  cards/panels.
+
+Dashboard primitives (all rewritten in this same minimal direction):
+
+- `DashboardWelcomeBanner` — eyebrow + `font-display text-2xl
+  font-semibold` title + optional chips + actions slot.
+- `DashboardStatsCard` — hairline-bordered tile, optional tone, KPI
+  uses `numeric` utility, optional `to` link, optional `hint`/`trend`.
+- `DashboardListingCard`, `FoodListingCard`, `MyClaimCard`,
+  `RestaurantClaimCard` — image-first cards with category dot chip,
+  `rounded-2xl`, hairline border, no rotations.
+- `AdminTable`, `admin/StatCard`, `admin/StatusPill` — admin surfaces
+  matching the same language.
+- `ListingForm` — uses the `field` utility (`@utility field` in
+  `src/styles.css`) for inputs, with a nested `&:focus` rule (Tailwind
+  v4 only allows plain identifiers after `@utility`, so the focus state
+  must be nested — `@utility field:focus { … }` is invalid and crashes
+  the dev server).
+- **AdminShell** (`src/components/admin/AdminShell.tsx`) — thin
+  pass-through to DashboardShell that injects `role: 'ADMIN'`.
+
+### Canonical tokens (entire site)
+
+- **Accent (sparingly)**: `--color-accent: #0a7a3f` (deep emerald).
+- **Ink scale**: `--color-ink` `#0a0a0a` → `--color-ink-2` `#525252` →
+  `--color-ink-3` `#6b6b68` → `--color-ink-4` `#b8b8b3`.
+- **Surfaces**: `--color-bg` (white), `--color-bg-2`/`--color-bg-3`
+  (off-white), plus `--color-canvas`/`--color-canvas-2`/`--color-canvas-3`
+  legacy aliases that map onto the same scale.
+- **Lines**: `--color-line`, `--color-line-2`, `--color-line-strong`.
+- **Numbers**: always `tabular-nums` via the `numeric` utility.
+  Dashboard KPI values use `text-2xl font-semibold` (or larger on
+  hero/stat-band sections).
 - **Eyebrow labels**: `text-[11px] font-semibold uppercase tracking-wider`.
-- **Font**: Poppins via Tailwind v4 `@theme`.
-- **Custom utility**: `scrollbar-hide` defined in `src/styles.css` for the category strip.
-
-### Other components
-
-- **AdminShell** (`src/components/admin/AdminShell.tsx`) — thin pass-through to DashboardShell that injects `role: 'ADMIN'`.
-- **DashboardStatsCard** — supports `tone`, `hint`, `to`, optional `trend` indicator.
+- **Display headings**: `font-display text-2xl font-semibold` for
+  dashboard section titles. Hero is the only place that goes larger.
+- **Custom utilities** in `src/styles.css`: `numeric`, `live-dot`,
+  `grid-bg` (homepage only), `mask-fade-x`, `marquee`, `field`,
+  `scrollbar-hide`.
 
 ## Architecture
 

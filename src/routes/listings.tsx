@@ -4,12 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Clock,
-  LogIn,
   MapPin,
-  PawPrint,
-  Salad,
-  ShieldCheck,
-  Sparkles,
   Utensils,
 } from 'lucide-react'
 import { useSession } from '../lib/auth-client'
@@ -66,37 +61,37 @@ function BrowseListings() {
 
   return (
     <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-ink)] antialiased">
-      <header className="sticky top-0 z-30 border-b-[1.5px] border-[var(--color-line)] bg-[var(--color-canvas)]/95 backdrop-blur">
-        <div className="mx-auto flex h-[68px] max-w-[1280px] items-center justify-between gap-6 px-5 sm:px-8">
+      <header className="sticky top-0 z-30 border-b border-[var(--color-line)] bg-[var(--color-canvas)]/85 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-6 px-5 sm:px-8">
           <Link to="/" className="flex items-center gap-2.5">
-            <BowlMascot className="h-9 w-9" />
-            <span className="font-display text-[22px] font-bold tracking-tight">
+            <BowlMascot className="h-7 w-7" />
+            <span className="text-[15px] font-semibold tracking-tight">
               FoodSetu
             </span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {!isPending && user ? (
               <Link
                 to={ctaForUser?.to ?? roleToDashboard(user.role)}
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-[var(--color-coral)] px-5 text-sm font-semibold text-white hover:bg-[var(--color-coral-2)]"
+                className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
               >
                 {ctaForUser?.label ?? 'Open dashboard'}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             ) : (
               <>
                 <Link
                   to="/login"
-                  className="hidden h-11 items-center gap-1.5 rounded-full px-4 text-sm font-semibold hover:bg-[var(--color-cream)] sm:inline-flex"
+                  className="hidden h-9 items-center rounded-md px-3 text-[13px] font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)] sm:inline-flex"
                 >
-                  <LogIn className="h-4 w-4" />
                   Sign in
                 </Link>
                 <Link
                   to="/register"
-                  className="inline-flex h-11 items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-5 text-sm font-semibold text-white hover:bg-[var(--color-coral)]"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
                 >
-                  Sign up
+                  Get started
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </>
             )}
@@ -104,131 +99,110 @@ function BrowseListings() {
         </div>
       </header>
 
-      {/* Page header — bright + warm, sticker-style */}
-      <section className="bg-[var(--color-cream)]">
-        <div className="mx-auto max-w-[1280px] px-5 pb-10 pt-10 sm:px-8 lg:pt-16">
+      {/* Page header */}
+      <section className="border-b border-[var(--color-line)]">
+        <div className="mx-auto max-w-[1200px] px-5 pb-12 pt-10 sm:px-8 lg:pt-14">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-ink-2)] hover:text-[var(--color-coral)]"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-ink-2)] transition-colors hover:text-[var(--color-ink)]"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to home
           </Link>
-          <div className="mt-5 grid gap-8 lg:grid-cols-12 lg:items-end">
+          <div className="mt-6 grid gap-8 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-8">
-              <span className="bubble">
-                <span className="h-2 w-2 rounded-full bg-[var(--color-mint)]" />
-                {listings.length} live · {cities.size > 0 ? cities.size : 1}{' '}
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-ink-2)]">
+                <span className="live-dot" />
+                <span className="text-[var(--color-ink)]">
+                  {listings.length} live
+                </span>
+                <span className="h-2.5 w-px bg-[var(--color-line)]" />
+                {cities.size > 0 ? cities.size : 1}{' '}
                 {cities.size === 1 ? 'city' : 'cities'}
               </span>
-              <h1 className="font-display mt-5 text-[clamp(2.25rem,5.5vw,4.5rem)] font-bold leading-[0.95] tracking-tight">
-                Pick a meal,
-                <br />
-                <span className="relative inline-block">
-                  <span className="relative z-10 text-[var(--color-coral)]">
-                    save a meal
-                  </span>
-                  <span
-                    className="absolute inset-x-0 bottom-2 z-0 h-3 bg-[var(--color-sun)]"
-                    aria-hidden="true"
-                  />
-                </span>
-                .
+              <h1 className="font-display mt-5 text-[clamp(2rem,4.4vw,3.25rem)] leading-[1.05]">
+                Live listings
               </h1>
-              <p className="mt-5 max-w-xl text-[15px] text-[var(--color-ink-2)]">
-                Live entries from partner kitchens. Verified NGOs and animal
-                rescues can claim — restaurant phone is revealed only after the
-                claim is accepted.
+              <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-[var(--color-ink-2)]">
+                Real-time entries from partner kitchens. Verified NGOs and
+                animal rescues can claim — restaurant phone is revealed only
+                after the claim is accepted.
               </p>
             </div>
             {!user ? (
               <div className="lg:col-span-4 lg:text-right">
                 <Link
                   to="/register"
-                  className="inline-flex h-12 items-center gap-2 rounded-full bg-[var(--color-coral)] px-6 text-sm font-semibold text-white transition-all hover:bg-[var(--color-coral-2)] hover:-translate-y-0.5"
+                  className="inline-flex h-11 items-center gap-2 rounded-md bg-[var(--color-ink)] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
                 >
-                  <Sparkles className="h-4 w-4" />
                   Sign up to claim
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             ) : null}
           </div>
         </div>
-        <div className="squiggle-mint" aria-hidden="true" />
       </section>
 
-      {/* Filter chips */}
-      <section className="bg-[var(--color-canvas)]">
-        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-2 px-5 py-6 sm:px-8">
+      {/* Filter tabs */}
+      <section className="border-b border-[var(--color-line)] bg-[var(--color-canvas-2)]">
+        <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-2 px-5 py-4 sm:px-8">
           <span className="tiny-cap mr-2 text-[var(--color-ink-3)]">
-            Showing
+            Filter
           </span>
-          {(
-            [
-              { key: 'ALL', label: 'Everything', icon: Utensils, tone: 'coral' },
-              {
-                key: 'HUMAN_SAFE',
-                label: 'Human-safe',
-                icon: Salad,
-                tone: 'mint',
-              },
-              {
-                key: 'ANIMAL_SAFE',
-                label: 'Animal-safe',
-                icon: PawPrint,
-                tone: 'sun',
-              },
-            ] as const
-          ).map((tab) => {
-            const active = filter === tab.key
-            const Icon = tab.icon
-            const count = counts[tab.key]
-            const activeBg =
-              tab.tone === 'coral'
-                ? 'bg-[var(--color-coral)] text-white border-[var(--color-coral)]'
-                : tab.tone === 'mint'
-                  ? 'bg-[var(--color-mint)] text-white border-[var(--color-mint)]'
-                  : 'bg-[var(--color-sun)] text-[var(--color-sun-ink)] border-[var(--color-sun)]'
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setFilter(tab.key)}
-                className={`pill border-[1.5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-coral)] focus-visible:ring-offset-2 ${
-                  active
-                    ? activeBg
-                    : 'border-[var(--color-line)] bg-white text-[var(--color-ink)] hover:border-[var(--color-line-strong)]'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                <span
-                  className={`ml-1 inline-flex h-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums ${
+          <div className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] p-1">
+            {(
+              [
+                { key: 'ALL', label: 'All' },
+                { key: 'HUMAN_SAFE', label: 'Human-safe' },
+                { key: 'ANIMAL_SAFE', label: 'Animal-safe' },
+              ] as const
+            ).map((tab) => {
+              const active = filter === tab.key
+              const count = counts[tab.key]
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setFilter(tab.key)}
+                  className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
                     active
-                      ? 'bg-white/25 text-current'
-                      : 'bg-[var(--color-cream)] text-[var(--color-ink-2)]'
+                      ? 'bg-[var(--color-ink)] text-white'
+                      : 'text-[var(--color-ink-2)] hover:text-[var(--color-ink)]'
                   }`}
                 >
-                  {count}
-                </span>
-              </button>
-            )
-          })}
+                  {tab.label}
+                  <span
+                    className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-medium tabular-nums ${
+                      active
+                        ? 'bg-white/20 text-white'
+                        : 'bg-[var(--color-canvas-3)] text-[var(--color-ink-3)]'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
         </div>
       </section>
 
       {/* Grid */}
       <section className="bg-[var(--color-canvas)]">
-        <div className="mx-auto max-w-[1280px] px-5 pb-20 sm:px-8">
+        <div className="mx-auto max-w-[1200px] px-5 pb-20 pt-10 sm:px-8">
           {filtered.length === 0 ? (
-            <div className="rounded-[28px] border-[1.5px] border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)] p-14 text-center">
-              <div className="mx-auto h-16 w-16">
-                <BowlMascot className="h-full w-full" sleepy />
+            <div className="rounded-2xl border border-dashed border-[var(--color-line-strong)] bg-[var(--color-canvas-2)] p-12 text-center">
+              <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-canvas)]">
+                <Utensils
+                  className="h-5 w-5 text-[var(--color-ink-3)]"
+                  strokeWidth={1.5}
+                />
               </div>
-              <p className="font-display mt-5 text-2xl font-bold tracking-tight">
-                Nothing in this category yet.
+              <p className="mt-5 text-[18px] font-semibold tracking-tight">
+                Nothing in this category yet
               </p>
-              <p className="mt-2 text-sm text-[var(--color-ink-2)]">
+              <p className="mt-1.5 text-[13.5px] text-[var(--color-ink-2)]">
                 New entries arrive throughout the day. Check back shortly.
               </p>
             </div>
@@ -242,20 +216,31 @@ function BrowseListings() {
         </div>
       </section>
 
-      <footer className="border-t-[1.5px] border-[var(--color-line)] bg-[var(--color-canvas)]">
-        <div className="mx-auto flex max-w-[1280px] flex-col gap-3 px-5 py-8 text-sm text-[var(--color-ink-2)] sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <footer className="border-t border-[var(--color-line)] bg-[var(--color-canvas-2)]">
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-3 px-5 py-8 text-sm text-[var(--color-ink-2)] sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <div className="flex items-center gap-2.5">
-            <BowlMascot className="h-7 w-7" />
-            <span className="font-display text-base font-bold">FoodSetu</span>
+            <BowlMascot className="h-6 w-6" />
+            <span className="text-[14px] font-semibold tracking-tight text-[var(--color-ink)]">
+              FoodSetu
+            </span>
           </div>
-          <div className="flex gap-5">
-            <Link to="/" className="wavey-link">
+          <div className="flex gap-5 text-[13px]">
+            <Link
+              to="/"
+              className="text-[var(--color-ink-2)] transition-colors hover:text-[var(--color-ink)]"
+            >
               Home
             </Link>
-            <Link to="/login" className="wavey-link">
+            <Link
+              to="/login"
+              className="text-[var(--color-ink-2)] transition-colors hover:text-[var(--color-ink)]"
+            >
               Sign in
             </Link>
-            <Link to="/register" className="wavey-link">
+            <Link
+              to="/register"
+              className="text-[var(--color-ink-2)] transition-colors hover:text-[var(--color-ink)]"
+            >
               Sign up
             </Link>
           </div>
@@ -293,42 +278,38 @@ function ListingCard({
   const isAnimal = listing.foodCategory === 'ANIMAL_SAFE'
   const pickup = formatPickup(listing.pickupStartTime, listing.pickupEndTime)
   return (
-    <article className="group flex flex-col overflow-hidden rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white transition-all hover:-translate-y-1 hover:border-[var(--color-line-strong)]">
-      <div className="relative aspect-[5/4] overflow-hidden bg-[var(--color-cream-2)]">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-canvas)] transition-colors hover:border-[var(--color-line-strong)]">
+      <div className="relative aspect-[5/4] overflow-hidden bg-[var(--color-canvas-3)]">
         <img
           src={listing.imageUrl ?? FALLBACK_IMG}
           alt={listing.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        <span
-          className={`sticker absolute left-3 top-3 rotate-[-3deg] ${
-            isAnimal
-              ? 'bg-[var(--color-sun-soft)]'
-              : 'bg-[var(--color-mint-soft)]'
-          }`}
-        >
-          {isAnimal ? (
-            <PawPrint className="h-3.5 w-3.5 text-[var(--color-sun-ink)]" />
-          ) : (
-            <ShieldCheck className="h-3.5 w-3.5 text-[var(--color-mint-ink)]" />
-          )}
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] bg-[var(--color-paper)]/95 px-2 py-1 text-[10.5px] font-medium text-[var(--color-ink)] backdrop-blur">
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${
+              isAnimal
+                ? 'bg-[var(--color-warn)]'
+                : 'bg-[var(--color-accent)]'
+            }`}
+          />
           {isAnimal ? 'Animal-safe' : 'Human-safe'}
         </span>
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="font-display line-clamp-2 text-xl font-bold leading-tight tracking-tight">
+        <h3 className="line-clamp-2 text-[15.5px] font-semibold leading-tight tracking-tight">
           {listing.title}
         </h3>
-        <div className="mt-2 flex items-center gap-3 text-xs text-[var(--color-ink-2)]">
+        <div className="mt-2 flex items-center gap-3 text-[12px] text-[var(--color-ink-2)]">
           <span className="inline-flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" />
+            <MapPin className="h-3 w-3 text-[var(--color-ink-3)]" />
             {listing.cityName ?? listing.orgName ?? 'Pickup on claim'}
           </span>
         </div>
-        <dl className="mt-4 grid grid-cols-2 gap-3 border-y-[1.5px] border-dashed border-[var(--color-line)] py-3 text-sm">
+        <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 border-y border-[var(--color-line)] py-3 text-sm">
           <div>
             <dt className="tiny-cap text-[var(--color-ink-3)]">Quantity</dt>
-            <dd className="mt-1 font-semibold tabular-nums">
+            <dd className="mt-1 text-[14px] font-medium tabular-nums">
               {listing.quantity}{' '}
               <span className="font-normal text-[var(--color-ink-2)]">
                 {listing.quantityUnit.toLowerCase()}
@@ -340,27 +321,27 @@ function ListingCard({
               <Clock className="h-3 w-3" />
               Pickup
             </dt>
-            <dd className="mt-1 truncate text-sm font-semibold tabular-nums">
+            <dd className="mt-1 truncate text-[14px] font-medium tabular-nums">
               {pickup}
             </dd>
           </div>
         </dl>
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex items-center justify-end">
           {ctaHref ? (
             <Link
               to={ctaHref.to}
-              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[var(--color-coral)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-coral-2)]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
             >
               {ctaHref.label}
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           ) : (
             <Link
               to="/register"
-              className="inline-flex h-10 items-center gap-1.5 rounded-full border-[1.5px] border-[var(--color-ink)] bg-white px-4 text-sm font-semibold transition-all hover:bg-[var(--color-coral)] hover:text-white hover:border-[var(--color-coral)]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-[var(--color-line-strong)] bg-[var(--color-canvas)] px-3.5 text-[13px] font-medium transition-colors hover:bg-[var(--color-canvas-2)]"
             >
               Sign up to claim
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           )}
         </div>

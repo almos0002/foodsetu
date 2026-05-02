@@ -1,6 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import type { LucideIcon } from 'lucide-react'
 
+/** `tone` is accepted for backwards-compat with older callsites but
+ *  rendered identically — the design language is single-accent monochrome. */
 type Props = {
   label: string
   value: string | number
@@ -10,44 +12,26 @@ type Props = {
   tone?: 'default' | 'warning' | 'success' | 'danger'
 }
 
-const TONE: Record<NonNullable<Props['tone']>, string> = {
-  default:
-    'bg-[var(--color-coral)] text-white border-[var(--color-coral)]',
-  warning:
-    'bg-[var(--color-sun)] text-[var(--color-sun-ink)] border-[var(--color-sun)]',
-  success:
-    'bg-[var(--color-mint)] text-white border-[var(--color-mint)]',
-  danger:
-    'bg-[var(--color-berry)] text-white border-[var(--color-berry)]',
-}
-
-export function StatCard({ label, value, icon: Icon, hint, to, tone }: Props) {
+export function StatCard({ label, value, icon: Icon, hint, to }: Props) {
   const inner = (
     <div className="flex items-start gap-3">
-      <div
-        className={`-rotate-3 rounded-2xl border-[1.5px] p-2.5 ${TONE[tone ?? 'default']}`}
-      >
-        <Icon className="h-5 w-5" />
-      </div>
-      <div className="min-w-0">
-        <div className="tiny-cap text-[var(--color-ink-2)]">{label}</div>
-        <div className="font-display mt-1 text-3xl font-bold leading-none tabular-nums text-[var(--color-ink)]">
+      <Icon className="mt-1 h-4 w-4 flex-shrink-0 text-[var(--color-ink-3)]" />
+      <div className="min-w-0 flex-1">
+        <div className="tiny-cap text-[var(--color-ink-3)]">{label}</div>
+        <div className="mt-1.5 text-[26px] font-semibold leading-none tabular-nums tracking-tight text-[var(--color-ink)]">
           {value}
         </div>
         {hint ? (
-          <div className="mt-1 text-xs text-[var(--color-ink-2)]">{hint}</div>
+          <div className="mt-1 text-xs text-[var(--color-ink-3)]">{hint}</div>
         ) : null}
       </div>
     </div>
   )
   const cls =
-    'rounded-[24px] border-[1.5px] border-[var(--color-line)] bg-white p-5 transition-all'
+    'rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-5 transition-colors'
   if (to) {
     return (
-      <Link
-        to={to}
-        className={`${cls} hover:-translate-y-1 hover:border-[var(--color-line-strong)]`}
-      >
+      <Link to={to} className={`${cls} hover:border-[var(--color-line-strong)]`}>
         {inner}
       </Link>
     )

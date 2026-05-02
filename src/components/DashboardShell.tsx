@@ -167,13 +167,11 @@ export function DashboardShell({
   const status = (organization?.verificationStatus ??
     null) as VerificationStatus | null
 
-  // Close drawer + menus on route change
   useEffect(() => {
     setMobileOpen(false)
     setUserMenuOpen(false)
   }, [location.pathname])
 
-  // Lock body scroll + handle Escape while mobile drawer is open
   useEffect(() => {
     if (!mobileOpen) return
     const previousOverflow = document.body.style.overflow
@@ -188,7 +186,6 @@ export function DashboardShell({
     }
   }, [mobileOpen])
 
-  // Close user menu on outside click + Escape
   useEffect(() => {
     if (!userMenuOpen) return
     function onKey(e: KeyboardEvent) {
@@ -215,20 +212,18 @@ export function DashboardShell({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-cream)] text-[var(--color-ink)]">
+    <div className="min-h-screen overflow-x-clip bg-[var(--color-canvas)] text-[var(--color-ink)]">
       {/* Mobile top bar */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b-[1.5px] border-[var(--color-line)] bg-white px-4 lg:hidden">
-        <Link to="/" className="flex items-center gap-2.5">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-[var(--color-line)] bg-[var(--color-canvas)] px-4 lg:hidden">
+        <Link to="/" className="flex items-center gap-2">
           <BrandMark />
-          <span className="font-display text-lg font-bold tracking-tight">
-            FoodSetu
-          </span>
+          <span className="text-sm font-semibold tracking-tight">FoodSetu</span>
         </Link>
         <button
           type="button"
           aria-label="Open navigation"
           onClick={() => setMobileOpen(true)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-[var(--color-line-strong)] bg-white text-[var(--color-ink)] hover:bg-[var(--color-cream)]"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] text-[var(--color-ink)] hover:bg-[var(--color-canvas-2)]"
         >
           <Menu className="h-4 w-4" />
         </button>
@@ -240,14 +235,14 @@ export function DashboardShell({
           <button
             type="button"
             aria-label="Close navigation"
-            className="absolute inset-0 bg-[var(--color-ink)]/55"
+            className="absolute inset-0 bg-[var(--color-ink)]/40"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-[280px] flex-col border-r-[1.5px] border-[var(--color-line)] bg-white">
-            <div className="flex h-16 items-center justify-between border-b-[1.5px] border-[var(--color-line)] px-4">
-              <Link to="/" className="flex items-center gap-2.5">
+          <aside className="absolute inset-y-0 left-0 flex w-[280px] flex-col border-r border-[var(--color-line)] bg-[var(--color-canvas)]">
+            <div className="flex h-14 items-center justify-between border-b border-[var(--color-line)] px-4">
+              <Link to="/" className="flex items-center gap-2">
                 <BrandMark />
-                <span className="font-display text-lg font-bold tracking-tight">
+                <span className="text-sm font-semibold tracking-tight">
                   FoodSetu
                 </span>
               </Link>
@@ -255,7 +250,7 @@ export function DashboardShell({
                 type="button"
                 aria-label="Close navigation"
                 onClick={() => setMobileOpen(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-[var(--color-line)] text-[var(--color-ink-2)] hover:bg-[var(--color-cream)]"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-line)] text-[var(--color-ink-2)] hover:bg-[var(--color-canvas-2)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -274,16 +269,11 @@ export function DashboardShell({
       ) : null}
 
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-[272px] flex-col border-r-[1.5px] border-[var(--color-line)] bg-white lg:flex">
-        <div className="flex h-20 items-center gap-3 border-b-[1.5px] border-[var(--color-line)] px-6">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-[248px] flex-col border-r border-[var(--color-line)] bg-[var(--color-canvas-2)] lg:flex">
+        <div className="flex h-14 items-center gap-2.5 border-b border-[var(--color-line)] px-5">
           <BrandMark />
-          <div className="leading-tight">
-            <div className="font-display text-xl font-bold tracking-tight text-[var(--color-ink)]">
-              FoodSetu
-            </div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-coral)]">
-              Surplus, picked up fast
-            </div>
+          <div className="text-[15px] font-semibold tracking-tight text-[var(--color-ink)]">
+            FoodSetu
           </div>
         </div>
         <SidebarBody
@@ -300,8 +290,8 @@ export function DashboardShell({
       </aside>
 
       {/* Main */}
-      <div className="lg:pl-[272px]">
-        <main className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+      <div className="min-w-0 lg:pl-[248px]">
+        <main className="mx-auto w-full min-w-0 max-w-[1200px] overflow-x-clip px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
           {status && status !== 'VERIFIED' ? (
             <VerificationBanner status={status} />
           ) : null}
@@ -336,11 +326,11 @@ function SidebarBody({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {organization?.name ? (
-        <div className="border-b-[1.5px] border-dashed border-[var(--color-line)] px-5 py-4">
+        <div className="border-b border-[var(--color-line)] px-5 py-4">
           <div className="tiny-cap text-[var(--color-ink-3)]">Organization</div>
           <div className="mt-2 flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <div className="truncate text-sm font-bold text-[var(--color-ink)]">
+              <div className="truncate text-sm font-semibold text-[var(--color-ink)]">
                 {organization.name}
               </div>
               <div className="text-xs text-[var(--color-ink-2)]">
@@ -352,14 +342,14 @@ function SidebarBody({
         </div>
       ) : null}
 
-      <nav className="flex-1 overflow-y-auto px-4 py-5">
-        <div className="space-y-6">
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <div className="space-y-5">
           {sections.map((section) => (
             <div key={section.label}>
               <div className="px-3 tiny-cap text-[var(--color-ink-3)]">
                 {section.label}
               </div>
-              <ul className="mt-2 space-y-1">
+              <ul className="mt-1.5 space-y-0.5">
                 {section.items.map((item) => {
                   const isOverview = item.label === 'Overview'
                   const active = isActive(path, item.to, isOverview)
@@ -369,18 +359,18 @@ function SidebarBody({
                       <Link
                         to={item.to}
                         className={cn(
-                          'group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-colors',
+                          'group flex items-center gap-2.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors',
                           active
-                            ? 'bg-[var(--color-coral)] text-white'
-                            : 'text-[var(--color-ink-2)] hover:bg-[var(--color-cream)] hover:text-[var(--color-ink)]',
+                            ? 'bg-[var(--color-canvas)] text-[var(--color-ink)] shadow-[0_1px_0_rgba(0,0,0,0.04)] ring-1 ring-[var(--color-line)]'
+                            : 'text-[var(--color-ink-2)] hover:bg-[var(--color-canvas-3)] hover:text-[var(--color-ink)]',
                         )}
                       >
                         <Icon
                           className={cn(
                             'h-4 w-4 flex-shrink-0',
                             active
-                              ? 'text-white'
-                              : 'text-[var(--color-ink-3)] group-hover:text-[var(--color-coral)]',
+                              ? 'text-[var(--color-ink)]'
+                              : 'text-[var(--color-ink-3)] group-hover:text-[var(--color-ink)]',
                           )}
                         />
                         <span className="truncate">{item.label}</span>
@@ -394,7 +384,7 @@ function SidebarBody({
         </div>
       </nav>
 
-      <div className="border-t-[1.5px] border-[var(--color-line)] p-3">
+      <div className="border-t border-[var(--color-line)] p-3">
         <div className="relative" data-user-menu>
           <button
             type="button"
@@ -402,20 +392,20 @@ function SidebarBody({
             aria-expanded={userMenuOpen ?? false}
             onClick={() => setUserMenuOpen?.((v) => !v)}
             className={cn(
-              'flex w-full items-center gap-3 rounded-2xl px-2.5 py-2 text-left transition-colors',
+              'flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors',
               userMenuOpen
-                ? 'bg-[var(--color-cream)]'
-                : 'hover:bg-[var(--color-cream)]',
+                ? 'bg-[var(--color-canvas-3)]'
+                : 'hover:bg-[var(--color-canvas-3)]',
             )}
           >
-            <div className="flex h-9 w-9 -rotate-3 flex-shrink-0 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-mint)] text-xs font-bold text-white">
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-[var(--color-ink)] text-[10px] font-semibold text-white">
               {initials(user.name, user.email)}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-bold text-[var(--color-ink)]">
+              <div className="truncate text-[13px] font-medium text-[var(--color-ink)]">
                 {user.name ?? user.email}
               </div>
-              <div className="truncate text-xs text-[var(--color-ink-2)]">
+              <div className="truncate text-[11px] text-[var(--color-ink-3)]">
                 {roleLabel}
               </div>
             </div>
@@ -427,13 +417,13 @@ function SidebarBody({
             />
           </button>
           {userMenuOpen ? (
-            <div className="absolute bottom-full left-0 right-0 mb-2 overflow-hidden rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-white">
+            <div className="absolute bottom-full left-0 right-0 mb-2 overflow-hidden rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] shadow-sm">
               <button
                 type="button"
                 onClick={onSignOut}
-                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-cream)]"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] font-medium text-[var(--color-ink)] hover:bg-[var(--color-canvas-2)]"
               >
-                <LogOut className="h-4 w-4 text-[var(--color-coral)]" />
+                <LogOut className="h-3.5 w-3.5 text-[var(--color-ink-3)]" />
                 Sign out
               </button>
             </div>
@@ -441,7 +431,7 @@ function SidebarBody({
             <button
               type="button"
               onClick={onSignOut}
-              className="mt-1 flex w-full items-center gap-2 rounded-2xl px-3 py-1.5 text-xs font-semibold text-[var(--color-ink-2)] hover:bg-[var(--color-cream)] hover:text-[var(--color-ink)] lg:hidden"
+              className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--color-ink-2)] hover:bg-[var(--color-canvas-3)] hover:text-[var(--color-ink)] lg:hidden"
             >
               <LogOut className="h-3.5 w-3.5" />
               Sign out
@@ -454,48 +444,11 @@ function SidebarBody({
 }
 
 function BrandMark() {
-  // Tiny bowl mascot — friendly, rotated for personality.
+  // Minimal monogram — same as homepage NavBar.
   return (
-    <div className="relative flex h-10 w-10 -rotate-6 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-coral)]">
-      <svg viewBox="0 0 32 32" className="h-6 w-6" aria-hidden>
-        <path
-          d="M5 16 Q 5 24 16 25 Q 27 24 27 16 Z"
-          fill="white"
-          stroke="#1a1f2e"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-        <circle cx="13" cy="19" r="1.4" fill="#1a1f2e" />
-        <circle cx="19" cy="19" r="1.4" fill="#1a1f2e" />
-        <path
-          d="M14 22 Q 16 23.5 18 22"
-          fill="none"
-          stroke="#1a1f2e"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-        />
-        <path
-          d="M11 12 Q 12 9 11 7"
-          fill="none"
-          stroke="white"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-        <path
-          d="M16 11 Q 17 8 16 6"
-          fill="none"
-          stroke="white"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-        <path
-          d="M21 12 Q 22 9 21 7"
-          fill="none"
-          stroke="white"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
+    <div className="relative flex h-7 w-7 items-center justify-center rounded-md bg-[var(--color-ink)] text-[12px] font-semibold tracking-tight text-white">
+      F
+      <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[var(--color-accent)] ring-2 ring-[var(--color-canvas-2)]" />
     </div>
   )
 }
@@ -506,17 +459,17 @@ function VerificationDot({ status }: { status: VerificationStatus }) {
     { color: string; label: string; icon: typeof CheckCircle2 }
   > = {
     VERIFIED: {
-      color: 'bg-[var(--color-mint)]',
+      color: 'bg-[var(--color-accent)]',
       label: VERIFICATION_LABELS.VERIFIED,
       icon: CheckCircle2,
     },
     PENDING: {
-      color: 'bg-[var(--color-sun)]',
+      color: 'bg-[var(--color-warn)]',
       label: VERIFICATION_LABELS.PENDING,
       icon: Clock,
     },
     REJECTED: {
-      color: 'bg-[var(--color-coral)]',
+      color: 'bg-[var(--color-danger)]',
       label: VERIFICATION_LABELS.REJECTED,
       icon: XCircle,
     },
@@ -530,14 +483,9 @@ function VerificationDot({ status }: { status: VerificationStatus }) {
   return (
     <span
       title={c.label}
-      className="inline-flex h-2.5 w-2.5 flex-shrink-0 items-center justify-center"
+      className="inline-flex h-2 w-2 flex-shrink-0 items-center justify-center"
     >
-      <span
-        className={cn(
-          'h-2.5 w-2.5 rounded-full ring-2 ring-white',
-          c.color,
-        )}
-      />
+      <span className={cn('h-2 w-2 rounded-full', c.color)} />
     </span>
   )
 }

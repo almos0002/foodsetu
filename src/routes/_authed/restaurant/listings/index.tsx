@@ -123,7 +123,7 @@ function RestaurantListings() {
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-[24px] border-[1.5px] border-[var(--color-line)] bg-white">
+        <div className="overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-white">
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead className="border-b-[1.5px] border-[var(--color-line)] bg-[var(--color-cream)] text-left">

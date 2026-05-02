@@ -10,6 +10,7 @@ import {
   ShoppingBag,
   Utensils,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
 import { Button } from '../../../components/ui/Button'
 import { ListingStatusBadge } from '../../../components/ui/ClaimStatusBadge'
@@ -92,12 +93,11 @@ function RestaurantDashboard() {
         }
       />
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <DashboardStatsCard
           label="Active listings"
           value={active.length}
           icon={ShoppingBag}
-          tone="orange"
           to="/restaurant/listings"
           hint="Live and visible to partners"
         />
@@ -105,7 +105,6 @@ function RestaurantDashboard() {
           label="Pending claims"
           value={pendingClaims.length}
           icon={Inbox}
-          tone="amber"
           to="/restaurant/claims"
           hint={
             acceptedClaims > 0
@@ -117,42 +116,28 @@ function RestaurantDashboard() {
           label="In pipeline"
           value={active.length + activeClaims.length}
           icon={ListChecks}
-          tone="blue"
           hint="Listings + open claims"
         />
         <DashboardStatsCard
           label="Past listings"
           value={history.length}
           icon={History}
-          tone="default"
           to="/restaurant/listings"
           hint="Completed or cancelled"
         />
       </div>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-3">
+      <div className="mt-8 grid gap-6 lg:grid-cols-3">
         {/* Recent listings */}
         <div className="lg:col-span-2">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--color-ink)]">
-                Recent listings
-              </h2>
-              <p className="mt-1 text-sm text-[var(--color-ink-2)]">
-                The latest surplus posted by your kitchen
-              </p>
-            </div>
-            <Link
-              to="/restaurant/listings"
-              className="inline-flex items-center gap-1 text-sm font-bold text-[var(--color-ink)] hover:text-[var(--color-coral)]"
-            >
-              View all
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+          <SectionHead
+            title="Recent listings"
+            subtitle="The latest surplus posted by your kitchen"
+            link={{ to: '/restaurant/listings', label: 'View all' }}
+          />
 
           {recent.length === 0 ? (
-            <div className="dotgrid mt-4 rounded-[28px] border-[1.5px] border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)]">
+            <div className="mt-4 rounded-xl border border-dashed border-[var(--color-line)] bg-[var(--color-canvas-2)]">
               <EmptyState
                 bare
                 icon={Utensils}
@@ -204,111 +189,139 @@ function RestaurantDashboard() {
         {/* Side panel */}
         <div className="space-y-4">
           <QuickActionsPanel canPost={canPost} />
-
-          {pendingClaims.length > 0 ? (
-            <div className="rounded-[28px] border-[1.5px] border-[var(--color-sun)] bg-[var(--color-sun-soft)] p-6">
-              <div className="flex h-11 w-11 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-sun)] text-[var(--color-ink)]">
-                <Inbox className="h-5 w-5" />
-              </div>
-              <div className="tiny-cap mt-4 text-[var(--color-sun-ink)]">
-                Needs your attention
-              </div>
-              <p className="mt-2 text-sm text-[var(--color-ink-2)]">
-                <span className="font-display text-3xl font-bold tabular-nums text-[var(--color-ink)]">
-                  {pendingClaims.length}
-                </span>{' '}
-                new claim request
-                {pendingClaims.length === 1 ? '' : 's'} awaiting your decision.
-              </p>
-              <Link
-                to="/restaurant/claims"
-                className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-[var(--color-sun-ink)] hover:underline"
-              >
-                Review now
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          ) : (
-            <div className="rounded-[28px] border-[1.5px] border-[var(--color-mint)] bg-[var(--color-mint-soft)] p-6">
-              <div className="flex h-11 w-11 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-mint)] text-white">
-                <ListChecks className="h-5 w-5" />
-              </div>
-              <div className="tiny-cap mt-4 text-[var(--color-mint-ink)]">
-                All caught up
-              </div>
-              <p className="mt-2 text-sm text-[var(--color-ink-2)]">
-                No pending claim requests right now.
-              </p>
-            </div>
-          )}
+          <ClaimStatusPanel
+            pendingCount={pendingClaims.length}
+            acceptedCount={acceptedClaims}
+          />
         </div>
       </div>
     </DashboardShell>
   )
 }
 
+function SectionHead({
+  title,
+  subtitle,
+  link,
+}: {
+  title: string
+  subtitle: string
+  link?: { to: string; label: string }
+}) {
+  return (
+    <div className="flex items-end justify-between gap-3">
+      <div>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-[var(--color-ink)]">
+          {title}
+        </h2>
+        <p className="mt-1 text-sm text-[var(--color-ink-2)]">{subtitle}</p>
+      </div>
+      {link ? (
+        <Link
+          to={link.to}
+          className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-ink-2)] transition-colors hover:text-[var(--color-ink)]"
+        >
+          {link.label}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      ) : null}
+    </div>
+  )
+}
+
 function QuickActionsPanel({ canPost }: { canPost: boolean }) {
   return (
-    <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white p-6">
+    <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
       <div className="tiny-cap text-[var(--color-ink-3)]">Quick actions</div>
-      <div className="mt-3 grid grid-cols-2 gap-2.5">
+      <div className="mt-3 space-y-1">
         {canPost ? (
-          <ActionTile
+          <ActionRow
             to="/restaurant/listings/new"
             icon={Plus}
             label="New listing"
-            bg="bg-[var(--color-coral-soft)]"
-            fg="text-[var(--color-coral-ink)]"
-            border="border-[var(--color-coral)]"
           />
         ) : null}
-        <ActionTile
+        <ActionRow
           to="/restaurant/claims"
           icon={ClipboardList}
           label="Claim requests"
-          bg="bg-[var(--color-sky-soft)]"
-          fg="text-[var(--color-sky-ink)]"
-          border="border-[var(--color-sky)]"
         />
-        <ActionTile
+        <ActionRow
           to="/restaurant/listings"
           icon={ShoppingBag}
           label="All listings"
-          bg="bg-[var(--color-mint-soft)]"
-          fg="text-[var(--color-mint-ink)]"
-          border="border-[var(--color-mint)]"
         />
       </div>
     </div>
   )
 }
 
-function ActionTile({
+function ClaimStatusPanel({
+  pendingCount,
+  acceptedCount,
+}: {
+  pendingCount: number
+  acceptedCount: number
+}) {
+  if (pendingCount > 0) {
+    return (
+      <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-warn)]" />
+          <div className="tiny-cap text-[var(--color-ink-3)]">
+            Needs attention
+          </div>
+        </div>
+        <div className="mt-3 text-[26px] font-semibold leading-none tabular-nums tracking-tight text-[var(--color-ink)]">
+          {pendingCount}
+        </div>
+        <p className="mt-2 text-sm text-[var(--color-ink-2)]">
+          new claim request{pendingCount === 1 ? '' : 's'} awaiting your
+          decision.
+        </p>
+        <Link
+          to="/restaurant/claims"
+          className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--color-ink)] hover:text-[var(--color-ink-2)]"
+        >
+          Review now
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+    )
+  }
+  return (
+    <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
+      <div className="flex items-center gap-2">
+        <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
+        <div className="tiny-cap text-[var(--color-ink-3)]">All caught up</div>
+      </div>
+      <p className="mt-3 text-sm text-[var(--color-ink-2)]">
+        No pending claim requests right now.
+        {acceptedCount > 0
+          ? ` ${acceptedCount} claim${acceptedCount === 1 ? '' : 's'} in progress.`
+          : ''}
+      </p>
+    </div>
+  )
+}
+
+function ActionRow({
   to,
   icon: Icon,
   label,
-  bg,
-  fg,
-  border,
 }: {
   to: string
-  icon: typeof Plus
+  icon: LucideIcon
   label: string
-  bg: string
-  fg: string
-  border: string
 }) {
   return (
     <Link
       to={to}
-      className="group flex flex-col items-start gap-2 rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white p-3 transition-transform hover:-translate-y-0.5 hover:border-[var(--color-line-strong)]"
+      className="group flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)]"
     >
-      <div
-        className={`flex h-9 w-9 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] ${border} ${bg} ${fg}`}
-      >
-        <Icon className="h-4 w-4" />
-      </div>
-      <span className="text-xs font-bold text-[var(--color-ink)]">{label}</span>
+      <Icon className="h-4 w-4 flex-shrink-0 text-[var(--color-ink-3)] group-hover:text-[var(--color-ink)]" />
+      <span className="flex-1 truncate">{label}</span>
+      <ArrowRight className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-ink-4)] transition-colors group-hover:text-[var(--color-ink-2)]" />
     </Link>
   )
 }

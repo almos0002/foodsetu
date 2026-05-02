@@ -25,7 +25,7 @@ export function Tabs<TValue extends string>({
     <div
       role="tablist"
       className={cn(
-        'inline-flex flex-wrap items-center gap-1.5 rounded-full border-[1.5px] border-[var(--color-line)] bg-white p-1',
+        'inline-flex flex-wrap items-center gap-1 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas-2)] p-1',
         className,
       )}
     >
@@ -39,10 +39,10 @@ export function Tabs<TValue extends string>({
             aria-selected={active}
             onClick={() => onChange(t.value)}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)]',
+              'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)]',
               active
-                ? 'bg-[var(--color-ink)] text-white'
-                : 'text-[var(--color-ink-2)] hover:bg-[var(--color-cream)] hover:text-[var(--color-ink)]',
+                ? 'bg-[var(--color-canvas)] text-[var(--color-ink)] shadow-sm'
+                : 'text-[var(--color-ink-2)] hover:text-[var(--color-ink)]',
             )}
           >
             {t.icon}
@@ -50,10 +50,10 @@ export function Tabs<TValue extends string>({
             {typeof t.count === 'number' ? (
               <span
                 className={cn(
-                  'ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums',
+                  'ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-medium tabular-nums',
                   active
-                    ? 'bg-white/20 text-white'
-                    : 'bg-[var(--color-cream)] text-[var(--color-ink-2)]',
+                    ? 'bg-[var(--color-canvas-3)] text-[var(--color-ink)]'
+                    : 'bg-[var(--color-canvas)] text-[var(--color-ink-3)] border border-[var(--color-line)]',
                 )}
               >
                 {t.count}

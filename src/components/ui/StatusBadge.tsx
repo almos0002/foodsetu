@@ -12,21 +12,31 @@ export type BadgeTone =
   | 'indigo'
   | 'teal'
 
+/**
+ * In the minimal palette we no longer rely on saturated chips for each tone.
+ * Most badges share a neutral surface and are differentiated by a coloured
+ * dot/text. The "loud" tones (success/warn/info/danger) keep a soft tinted
+ * background since the colour itself carries meaning.
+ */
 const TONES: Record<BadgeTone, string> = {
-  gray: 'bg-[var(--color-cream)] text-[var(--color-ink-2)] border-[var(--color-line-strong)]',
+  gray:
+    'bg-[var(--color-canvas-2)] text-[var(--color-ink-2)] border-[var(--color-line)]',
   orange:
-    'bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)] border-[var(--color-coral)]',
+    'bg-[var(--color-canvas-2)] text-[var(--color-ink)] border-[var(--color-line)]',
   green:
-    'bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)] border-[var(--color-mint)]',
-  blue: 'bg-[var(--color-sky-soft)] text-[var(--color-sky-ink)] border-[var(--color-sky)]',
+    'bg-[var(--color-accent-soft)] text-[var(--color-accent-ink)] border-[var(--color-accent)]/25',
+  blue:
+    'bg-[var(--color-info-soft)] text-[var(--color-info-ink)] border-[var(--color-info)]/25',
   amber:
-    'bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)] border-[var(--color-sun)]',
-  red: 'bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)] border-[var(--color-coral)]',
+    'bg-[var(--color-warn-soft)] text-[var(--color-warn-ink)] border-[var(--color-warn)]/25',
+  red:
+    'bg-[var(--color-danger-soft)] text-[var(--color-danger-ink)] border-[var(--color-danger)]/25',
   purple:
-    'bg-[var(--color-berry-soft)] text-[var(--color-berry-ink)] border-[var(--color-berry)]',
+    'bg-[var(--color-purple-soft)] text-[var(--color-purple-ink)] border-[var(--color-purple)]/25',
   indigo:
-    'bg-[var(--color-berry-soft)] text-[var(--color-berry-ink)] border-[var(--color-berry)]',
-  teal: 'bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)] border-[var(--color-mint)]',
+    'bg-[var(--color-purple-soft)] text-[var(--color-purple-ink)] border-[var(--color-purple)]/25',
+  teal:
+    'bg-[var(--color-accent-soft)] text-[var(--color-accent-ink)] border-[var(--color-accent)]/25',
 }
 
 type Props = {
@@ -47,8 +57,8 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border-[1.5px] font-semibold',
-        size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs',
+        'inline-flex items-center gap-1 rounded-full border font-medium',
+        size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-0.5 text-xs',
         TONES[tone],
         className,
       )}

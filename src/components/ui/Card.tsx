@@ -9,7 +9,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'rounded-3xl border-[1.5px] border-[var(--color-line)] bg-white',
+        'rounded-2xl border border-[var(--color-line)] bg-[var(--color-canvas)]',
         className,
       )}
       {...props}
@@ -29,7 +29,7 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        'flex flex-col gap-1 border-b-[1.5px] border-dashed border-[var(--color-line)] px-5 py-4 sm:px-6 sm:py-5',
+        'flex flex-col gap-1 border-b border-[var(--color-line)] px-5 py-4 sm:px-6',
         className,
       )}
     >
@@ -48,7 +48,7 @@ export function CardTitle({
   return (
     <h2
       className={cn(
-        'font-display text-base font-bold tracking-tight text-[var(--color-ink)]',
+        'text-base font-semibold tracking-tight text-[var(--color-ink)]',
         className,
       )}
     >
@@ -93,7 +93,7 @@ export function CardFooter({
   return (
     <div
       className={cn(
-        'flex flex-wrap items-center justify-end gap-2 border-t-[1.5px] border-dashed border-[var(--color-line)] bg-[var(--color-cream)] px-5 py-4 sm:px-6',
+        'flex flex-wrap items-center justify-end gap-2 border-t border-[var(--color-line)] bg-[var(--color-canvas-2)] px-5 py-3 sm:px-6',
         className,
       )}
     >

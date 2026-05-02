@@ -8,6 +8,7 @@ import {
   ShoppingBag,
   Utensils,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
 import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
@@ -63,7 +64,6 @@ function AnimalDashboard() {
       organization={organization}
     >
       <DashboardWelcomeBanner
-        tone="emerald"
         eyebrow="Animal rescue workspace"
         title={`${greeting()}, ${orgName}`}
         description="Pick up animal-safe surplus near you and reduce feed costs while diverting waste from landfill."
@@ -91,19 +91,17 @@ function AnimalDashboard() {
         }
       />
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+      <div className="mt-7 grid gap-4 sm:grid-cols-3">
         <DashboardStatsCard
           label="Nearby available"
           value={canClaim ? nearby.length : '—'}
           icon={PawPrint}
-          tone="green"
           hint="Animal-safe surplus"
         />
         <DashboardStatsCard
           label="Active claims"
           value={canClaim ? activeClaims.length : '—'}
           icon={ShoppingBag}
-          tone="blue"
           hint="Pending or in progress"
           to={canClaim ? '/animal/my-claims' : undefined}
         />
@@ -111,7 +109,6 @@ function AnimalDashboard() {
           label="Total claims"
           value={canClaim ? myClaims.length : '—'}
           icon={ListChecks}
-          tone="orange"
           hint="Lifetime"
           to={canClaim ? '/animal/my-claims' : undefined}
         />
@@ -125,7 +122,7 @@ function AnimalDashboard() {
               ? 'Animal-rescue organization required'
               : 'Claiming is locked'
           }
-          className="mt-5"
+          className="mt-6"
         >
           {!organization || organization.type !== 'ANIMAL_RESCUE'
             ? 'You need to own an animal-rescue organization to claim animal-safe food.'
@@ -134,27 +131,15 @@ function AnimalDashboard() {
       ) : null}
 
       {canClaim ? (
-        <div className="mt-6 grid gap-5 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--color-ink)]">
-                  Nearby right now
-                </h2>
-                <p className="mt-1 text-sm text-[var(--color-ink-2)]">
-                  Animal-safe listings sorted by distance
-                </p>
-              </div>
-              <Link
-                to="/animal/nearby-food"
-                className="inline-flex items-center gap-1 text-sm font-bold text-[var(--color-ink)] hover:text-[var(--color-coral)]"
-              >
-                View all
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+            <SectionHead
+              title="Nearby right now"
+              subtitle="Animal-safe listings sorted by distance"
+              link={{ to: '/animal/nearby-food', label: 'View all' }}
+            />
             {recentNearby.length === 0 ? (
-              <div className="dotgrid mt-4 rounded-[28px] border-[1.5px] border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)]">
+              <div className="mt-4 rounded-xl border border-dashed border-[var(--color-line)] bg-[var(--color-canvas-2)]">
                 <EmptyState
                   bare
                   icon={Utensils}
@@ -184,54 +169,48 @@ function AnimalDashboard() {
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white p-6">
+            <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
               <div className="tiny-cap text-[var(--color-ink-3)]">
                 Quick actions
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-2.5">
-                <ActionTile
+              <div className="mt-3 space-y-1">
+                <ActionRow
                   to="/animal/nearby-food"
                   icon={MapPin}
                   label="Nearby food"
-                  bg="bg-[var(--color-coral-soft)]"
-                  fg="text-[var(--color-coral-ink)]"
-                  border="border-[var(--color-coral)]"
                 />
-                <ActionTile
+                <ActionRow
                   to="/animal/my-claims"
                   icon={ShoppingBag}
                   label="My claims"
-                  bg="bg-[var(--color-sky-soft)]"
-                  fg="text-[var(--color-sky-ink)]"
-                  border="border-[var(--color-sky)]"
                 />
               </div>
             </div>
 
             {activeClaims.length > 0 ? (
-              <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white">
-                <div className="flex items-center justify-between gap-2 border-b-[1.5px] border-[var(--color-line)] px-6 py-4">
-                  <h3 className="font-display text-base font-bold text-[var(--color-ink)]">
+              <div className="overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)]">
+                <div className="flex items-center justify-between gap-2 border-b border-[var(--color-line)] px-5 py-3">
+                  <h3 className="text-[13px] font-semibold tracking-tight text-[var(--color-ink)]">
                     Active claims
                   </h3>
                   <Link
                     to="/animal/my-claims"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-ink)] hover:text-[var(--color-coral)]"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)]"
                   >
                     All
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
-                <ul className="divide-y-[1.5px] divide-[var(--color-line)]">
+                <ul className="divide-y divide-[var(--color-line)]">
                   {activeClaims.slice(0, 4).map((claim) => {
                     const status = claim.status as ClaimStatus
                     return (
                       <li
                         key={claim.id}
-                        className="flex items-center gap-2 px-6 py-3"
+                        className="flex items-center gap-2 px-5 py-2.5"
                       >
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-xs font-semibold text-[var(--color-ink)]">
+                          <div className="truncate text-xs font-medium text-[var(--color-ink)]">
                             {claim.listing.title}
                           </div>
                         </div>
@@ -249,32 +228,53 @@ function AnimalDashboard() {
   )
 }
 
-function ActionTile({
+function SectionHead({
+  title,
+  subtitle,
+  link,
+}: {
+  title: string
+  subtitle: string
+  link?: { to: string; label: string }
+}) {
+  return (
+    <div className="flex items-end justify-between gap-3">
+      <div>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-[var(--color-ink)]">
+          {title}
+        </h2>
+        <p className="mt-1 text-sm text-[var(--color-ink-2)]">{subtitle}</p>
+      </div>
+      {link ? (
+        <Link
+          to={link.to}
+          className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-ink-2)] transition-colors hover:text-[var(--color-ink)]"
+        >
+          {link.label}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      ) : null}
+    </div>
+  )
+}
+
+function ActionRow({
   to,
   icon: Icon,
   label,
-  bg,
-  fg,
-  border,
 }: {
   to: string
-  icon: typeof MapPin
+  icon: LucideIcon
   label: string
-  bg: string
-  fg: string
-  border: string
 }) {
   return (
     <Link
       to={to}
-      className="group flex flex-col items-start gap-2 rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white p-3 transition-transform hover:-translate-y-0.5 hover:border-[var(--color-line-strong)]"
+      className="group flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)]"
     >
-      <div
-        className={`flex h-9 w-9 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] ${border} ${bg} ${fg}`}
-      >
-        <Icon className="h-4 w-4" />
-      </div>
-      <span className="text-xs font-bold text-[var(--color-ink)]">{label}</span>
+      <Icon className="h-4 w-4 flex-shrink-0 text-[var(--color-ink-3)] group-hover:text-[var(--color-ink)]" />
+      <span className="flex-1 truncate">{label}</span>
+      <ArrowRight className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-ink-4)] transition-colors group-hover:text-[var(--color-ink-2)]" />
     </Link>
   )
 }

@@ -71,7 +71,7 @@ function MyReportsPage() {
 
       <div className="mb-6">
         <div className="tiny-cap text-[var(--color-coral)]">Reports</div>
-        <h1 className="font-display mt-2 text-3xl font-bold tracking-tight text-[var(--color-ink)]">
+        <h1 className="font-display mt-2 text-2xl font-semibold tracking-tight text-[var(--color-ink)]">
           What admins are looking into
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-[var(--color-ink-2)]">
@@ -81,7 +81,7 @@ function MyReportsPage() {
       </div>
 
       {reports.length === 0 ? (
-        <div className="dotgrid rounded-[28px] border-[1.5px] border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)]">
+        <div className="rounded-2xl border border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)]">
           <EmptyState
             bare
             icon={Flag}
@@ -94,7 +94,7 @@ function MyReportsPage() {
           {reports.map((r) => (
             <li
               key={r.id}
-              className="rounded-[24px] border-[1.5px] border-[var(--color-line)] bg-white p-5"
+              className="rounded-[24px] border border-[var(--color-line)] bg-white p-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
@@ -103,7 +103,7 @@ function MyReportsPage() {
                       {REPORT_REASON_LABELS[r.reason] ?? r.reason}
                     </span>
                     <span
-                      className={`inline-flex items-center rounded-full border-[1.5px] px-2 py-0.5 text-[10px] font-bold ${VISIBILITY_BADGE[r.visibility]}`}
+                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold ${VISIBILITY_BADGE[r.visibility]}`}
                     >
                       {VISIBILITY_LABEL[r.visibility]}
                     </span>
@@ -122,7 +122,7 @@ function MyReportsPage() {
                   </div>
                 </div>
                 <span
-                  className={`inline-flex items-center rounded-full border-[1.5px] px-2.5 py-1 text-xs font-bold ${REPORT_STATUS_BADGE_CLASSES[r.status]}`}
+                  className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-bold ${REPORT_STATUS_BADGE_CLASSES[r.status]}`}
                 >
                   {REPORT_STATUS_LABELS[r.status]}
                 </span>

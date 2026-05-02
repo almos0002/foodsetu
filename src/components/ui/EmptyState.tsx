@@ -8,7 +8,7 @@ type Props = {
   description?: ReactNode
   action?: ReactNode
   className?: string
-  /** When true, drops the dashed border for cases where the parent already has a card. */
+  /** When true, drops the surrounding border for cases where the parent already has a card. */
   bare?: boolean
 }
 
@@ -23,19 +23,19 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center gap-4 px-6 py-14 text-center',
+        'flex flex-col items-center justify-center gap-3 px-6 py-12 text-center',
         !bare &&
-          'rounded-3xl border-[1.5px] border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)]',
+          'rounded-2xl border border-dashed border-[var(--color-line-strong)] bg-[var(--color-canvas-2)]',
         className,
       )}
     >
       {Icon ? (
-        <div className="flex h-14 w-14 -rotate-3 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-white text-[var(--color-coral)]">
-          <Icon className="h-6 w-6" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-canvas)] text-[var(--color-ink-2)]">
+          <Icon className="h-4 w-4" />
         </div>
       ) : null}
-      <div className="space-y-1.5">
-        <h3 className="font-display text-xl font-bold tracking-tight text-[var(--color-ink)]">
+      <div className="space-y-1">
+        <h3 className="text-base font-semibold tracking-tight text-[var(--color-ink)]">
           {title}
         </h3>
         {description ? (

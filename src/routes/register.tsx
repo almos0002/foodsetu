@@ -15,51 +15,21 @@ import { BowlMascot } from './index'
 
 const ROLE_META: Record<
   SignupRole,
-  { icon: LucideIcon; tone: 'coral' | 'mint' | 'sun'; description: string }
+  { icon: LucideIcon; description: string }
 > = {
   RESTAURANT: {
     icon: Salad,
-    tone: 'coral',
     description: 'Post surplus meals from your kitchen.',
   },
   NGO: {
     icon: ShieldCheck,
-    tone: 'mint',
     description: 'Claim human-safe meals for the people you serve.',
   },
   ANIMAL_RESCUE: {
     icon: PawPrint,
-    tone: 'sun',
     description: 'Pick up animal-safe scraps near you.',
   },
 }
-
-const TONE_CLASS = {
-  coral: {
-    activeBg: 'bg-[var(--color-coral-soft)] border-[var(--color-coral)]',
-    iconBg:
-      'bg-[var(--color-coral)] text-white border-[var(--color-coral)]',
-    activeIconBg:
-      'bg-[var(--color-coral)] text-white border-[var(--color-line-strong)]',
-    dot: 'bg-[var(--color-coral)] border-[var(--color-coral)]',
-  },
-  mint: {
-    activeBg: 'bg-[var(--color-mint-soft)] border-[var(--color-mint)]',
-    iconBg:
-      'bg-[var(--color-mint)] text-white border-[var(--color-mint)]',
-    activeIconBg:
-      'bg-[var(--color-mint)] text-white border-[var(--color-line-strong)]',
-    dot: 'bg-[var(--color-mint)] border-[var(--color-mint)]',
-  },
-  sun: {
-    activeBg: 'bg-[var(--color-sun-soft)] border-[var(--color-sun)]',
-    iconBg:
-      'bg-[var(--color-sun)] text-[var(--color-sun-ink)] border-[var(--color-sun)]',
-    activeIconBg:
-      'bg-[var(--color-sun)] text-[var(--color-sun-ink)] border-[var(--color-line-strong)]',
-    dot: 'bg-[var(--color-sun)] border-[var(--color-sun)]',
-  },
-} as const
 
 export const Route = createFileRoute('/register')({
   beforeLoad: async () => {
@@ -110,33 +80,33 @@ function RegisterPage() {
   }
 
   return (
-    <div className="dotgrid relative min-h-screen bg-[var(--color-cream)] px-5 py-8 sm:px-8 sm:py-12">
-      <div className="pointer-events-none absolute right-4 top-4 hidden sm:block">
-        <BowlMascot className="h-16 w-16" smiling steamCount={4} />
-      </div>
+    <div className="relative min-h-screen bg-[var(--color-canvas)] text-[var(--color-ink)]">
+      <div
+        className="grid-bg pointer-events-none absolute inset-0 opacity-40"
+        aria-hidden="true"
+      />
 
-      <Link
-        to="/"
-        className="relative inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-ink-2)] hover:text-[var(--color-coral)]"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to home
-      </Link>
+      <div className="relative mx-auto max-w-xl px-5 py-8 sm:px-8 sm:py-12">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-ink-2)] transition-colors hover:text-[var(--color-ink)]"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to home
+        </Link>
 
-      <div className="relative mx-auto mt-8 max-w-xl">
-        <div className="rounded-[32px] border-[1.5px] border-[var(--color-line-strong)] bg-white p-7 sm:p-10">
+        <div className="mt-8 rounded-2xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-7 sm:p-9">
           <Link to="/" className="flex items-center gap-2.5">
-            <BowlMascot className="h-10 w-10" smiling />
-            <span className="font-display text-2xl font-bold tracking-tight">
+            <BowlMascot className="h-7 w-7" />
+            <span className="text-[15px] font-semibold tracking-tight">
               FoodSetu
             </span>
           </Link>
 
-          <h1 className="font-display mt-8 text-4xl font-bold tracking-tight">
-            Make an account
-            <span className="text-[var(--color-coral)]">.</span>
+          <h1 className="font-display mt-7 text-3xl font-semibold tracking-tight">
+            Create your account
           </h1>
-          <p className="mt-2 text-sm text-[var(--color-ink-2)]">
+          <p className="mt-1.5 text-sm text-[var(--color-ink-2)]">
             Two minutes, no card. You can add organisation details right after.
           </p>
 
@@ -178,22 +148,21 @@ function RegisterPage() {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-[var(--color-ink)]">
+              <label className="mb-2 block text-[13px] font-medium text-[var(--color-ink)]">
                 I&rsquo;m signing up as
               </label>
-              <div className="grid gap-2.5">
+              <div className="grid gap-2">
                 {SIGNUP_ROLES.map((r) => {
                   const meta = ROLE_META[r]
-                  const t = TONE_CLASS[meta.tone]
                   const Icon = meta.icon
                   const active = role === r
                   return (
                     <label
                       key={r}
-                      className={`flex cursor-pointer items-start gap-3 rounded-2xl border-[1.5px] p-4 text-sm transition-all focus-within:ring-2 focus-within:ring-[var(--color-ink)] focus-within:ring-offset-2 ${
+                      className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 text-sm transition-colors focus-within:ring-2 focus-within:ring-[var(--color-ink)] focus-within:ring-offset-2 ${
                         active
-                          ? `${t.activeBg} -translate-y-0.5`
-                          : 'border-[var(--color-line)] bg-white hover:border-[var(--color-line-strong)]'
+                          ? 'border-[var(--color-ink)] bg-[var(--color-canvas-2)]'
+                          : 'border-[var(--color-line)] bg-[var(--color-canvas)] hover:border-[var(--color-line-strong)]'
                       }`}
                     >
                       <input
@@ -205,12 +174,16 @@ function RegisterPage() {
                         className="sr-only"
                       />
                       <span
-                        className={`mt-0.5 inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border-[1.5px] ${active ? t.activeIconBg : t.iconBg} ${active ? '-rotate-3' : 'rotate-0'} transition-transform`}
+                        className={`mt-0.5 inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md border ${
+                          active
+                            ? 'border-[var(--color-ink)] bg-[var(--color-ink)] text-white'
+                            : 'border-[var(--color-line)] bg-[var(--color-canvas-2)] text-[var(--color-ink-2)]'
+                        }`}
                       >
-                        <Icon className="h-5 w-5" />
+                        <Icon className="h-4 w-4" />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-bold text-[var(--color-ink)]">
+                        <span className="block text-[14px] font-semibold text-[var(--color-ink)]">
                           {ROLE_LABELS[r]}
                         </span>
                         <span className="mt-0.5 block text-xs text-[var(--color-ink-2)]">
@@ -218,14 +191,14 @@ function RegisterPage() {
                         </span>
                       </span>
                       <span
-                        className={`mt-1.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-[1.5px] ${
+                        className={`mt-1 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border ${
                           active
-                            ? t.dot
-                            : 'border-[var(--color-line-strong)] bg-white'
+                            ? 'border-[var(--color-ink)] bg-[var(--color-ink)]'
+                            : 'border-[var(--color-line-strong)] bg-[var(--color-canvas)]'
                         }`}
                       >
                         {active ? (
-                          <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-canvas)]" />
                         ) : null}
                       </span>
                     </label>
@@ -235,7 +208,7 @@ function RegisterPage() {
             </div>
 
             {error ? (
-              <div className="rounded-2xl border-[1.5px] border-[var(--color-coral)] bg-[var(--color-coral-soft)] px-3.5 py-2.5 text-sm font-medium text-[var(--color-coral-ink)]">
+              <div className="rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger-soft)] px-3.5 py-2.5 text-sm font-medium text-[var(--color-danger-ink)]">
                 {error}
               </div>
             ) : null}
@@ -243,13 +216,13 @@ function RegisterPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--color-coral)] text-sm font-semibold text-white transition-all hover:bg-[var(--color-coral-2)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-ink)] text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-ink-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[var(--color-line-strong)]"
             >
               <UserPlus className="h-4 w-4" />
               {submitting ? 'Creating account…' : 'Create my account'}
             </button>
 
-            <p className="text-center text-xs text-[var(--color-ink-2)]">
+            <p className="text-center text-xs text-[var(--color-ink-3)]">
               By creating an account you agree to redistribute food responsibly
               and follow your local food-safety guidelines.
             </p>
@@ -259,7 +232,7 @@ function RegisterPage() {
             Already have an account?{' '}
             <Link
               to="/login"
-              className="font-bold text-[var(--color-coral)] hover:underline"
+              className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-line-strong)] underline-offset-2 transition-colors hover:decoration-[var(--color-ink)]"
             >
               Sign in
             </Link>
@@ -295,7 +268,7 @@ function Field({
     <div>
       <label
         htmlFor={id}
-        className="mb-1.5 block text-sm font-semibold text-[var(--color-ink)]"
+        className="mb-1.5 block text-[13px] font-medium text-[var(--color-ink)]"
       >
         {label}
       </label>
@@ -306,7 +279,7 @@ function Field({
         minLength={minLength}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white px-4 py-3 text-sm placeholder-[var(--color-ink-3)] transition-colors focus:border-[var(--color-ink)] focus:outline-none"
+        className="w-full rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] px-3.5 py-2.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] transition-colors focus:border-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-canvas-3)]"
         placeholder={placeholder}
         autoComplete={autoComplete}
       />

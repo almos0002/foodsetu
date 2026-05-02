@@ -1,10 +1,4 @@
-import {
-  CalendarClock,
-  Clock,
-  MapPin,
-  ShoppingBag,
-  Utensils,
-} from 'lucide-react'
+import { MapPin, ShoppingBag, Utensils } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Button } from './Button'
 import { cn } from './cn'
@@ -35,11 +29,8 @@ export type FoodListingCardData = {
 
 type Props = {
   listing: FoodListingCardData
-  /** Renders a compact image preview at the top. Defaults to true. */
   showImage?: boolean
-  /** Display the listing status badge in the header. */
   showStatus?: boolean
-  /** Renders a primary action button (e.g. "Claim"). */
   action?: {
     label: string
     onClick: () => void
@@ -48,7 +39,6 @@ type Props = {
     disabled?: boolean
     icon?: ReactNode
   }
-  /** Optional secondary slot at footer (e.g. "Open" link). */
   footerSlot?: ReactNode
   className?: string
 }
@@ -65,33 +55,26 @@ export function FoodListingCard({
   return (
     <article
       className={cn(
-        'flex flex-col overflow-hidden rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white transition-all hover:border-[var(--color-line-strong)]',
+        'flex flex-col overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] transition-colors hover:border-[var(--color-line-strong)]',
         className,
       )}
     >
       {showImage ? (
         listing.imageUrl ? (
-          <div className="relative aspect-[16/10] w-full overflow-hidden bg-[var(--color-cream-2)]">
+          <div className="relative aspect-[16/10] w-full overflow-hidden bg-[var(--color-canvas-3)]">
             <img
               src={listing.imageUrl}
               alt={listing.title}
               className="h-full w-full object-cover"
             />
             {listing.foodCategory ? (
-              <span
-                className={cn(
-                  'sticker absolute left-3 top-3 rotate-[-3deg]',
-                  isAnimal
-                    ? 'bg-[var(--color-sun-soft)]'
-                    : 'bg-[var(--color-mint-soft)]',
-                )}
-              >
+              <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] bg-[var(--color-canvas)] px-2 py-1 text-[11px] font-medium text-[var(--color-ink)]">
                 <span
                   className={cn(
-                    'h-2 w-2 rounded-full',
+                    'h-1.5 w-1.5 rounded-full',
                     isAnimal
-                      ? 'bg-[var(--color-sun-ink)]'
-                      : 'bg-[var(--color-mint)]',
+                      ? 'bg-[var(--color-warn)]'
+                      : 'bg-[var(--color-accent)]',
                   )}
                 />
                 {isAnimal ? 'Animal-safe' : 'Human-safe'}
@@ -99,8 +82,8 @@ export function FoodListingCard({
             ) : null}
           </div>
         ) : (
-          <div className="flex h-36 w-full items-center justify-center bg-[var(--color-coral-soft)] text-[var(--color-coral)]">
-            <Utensils className="h-9 w-9" />
+          <div className="flex h-32 w-full items-center justify-center bg-[var(--color-canvas-2)] text-[var(--color-ink-3)]">
+            <Utensils className="h-7 w-7" />
           </div>
         )
       ) : null}
@@ -108,7 +91,7 @@ export function FoodListingCard({
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="font-display truncate text-lg font-bold tracking-tight text-[var(--color-ink)]">
+            <h3 className="truncate text-[15px] font-semibold tracking-tight text-[var(--color-ink)]">
               {listing.title}
             </h3>
             {listing.restaurantName || listing.cityName ? (
@@ -124,40 +107,32 @@ export function FoodListingCard({
           ) : null}
         </div>
 
-        <dl className="grid grid-cols-2 gap-2 text-xs">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
           <Field
-            icon={<Utensils className="h-3 w-3" />}
             label="Quantity"
             value={`${listing.quantity} ${listing.quantityUnit}`}
           />
           <Field
-            icon={<Utensils className="h-3 w-3" />}
             label="Type"
             value={
               FOOD_TYPE_LABELS[listing.foodType as FoodType] ?? listing.foodType
             }
           />
           <Field
-            icon={<CalendarClock className="h-3 w-3" />}
             label="Pickup"
             value={
               <>
                 <span className="block">
                   {formatTime(listing.pickupStartTime)}
                 </span>
-                <span className="block text-[var(--color-ink-2)]">
+                <span className="block text-[var(--color-ink-3)]">
                   → {formatTime(listing.pickupEndTime)}
                 </span>
               </>
             }
           />
+          <Field label="Expires" value={formatTime(listing.expiryTime)} />
           <Field
-            icon={<Clock className="h-3 w-3" />}
-            label="Expires"
-            value={formatTime(listing.expiryTime)}
-          />
-          <Field
-            icon={<MapPin className="h-3 w-3" />}
             label="Distance"
             value={
               listing.distanceKm != null
@@ -166,7 +141,6 @@ export function FoodListingCard({
             }
           />
           <Field
-            icon={<MapPin className="h-3 w-3" />}
             label="Area"
             value={
               listing.restaurantAddress?.trim() ||
@@ -175,11 +149,12 @@ export function FoodListingCard({
                 ? `${listing.latitude.toFixed(3)}, ${listing.longitude.toFixed(3)}`
                 : '—')
             }
+            icon={<MapPin className="h-3 w-3 text-[var(--color-ink-3)]" />}
           />
         </dl>
 
         {listing.foodCategory && !listing.imageUrl ? (
-          <div className="text-[11px] font-semibold text-[var(--color-ink-2)]">
+          <div className="text-[11px] font-medium text-[var(--color-ink-2)]">
             {FOOD_CATEGORY_LABELS[listing.foodCategory as FoodCategory] ??
               listing.foodCategory}
           </div>
@@ -187,6 +162,7 @@ export function FoodListingCard({
 
         {action ? (
           <Button
+            variant="accent"
             onClick={action.onClick}
             disabled={action.disabled || action.busy}
             leftIcon={action.icon ?? <ShoppingBag className="h-4 w-4" />}
@@ -205,23 +181,21 @@ export function FoodListingCard({
 }
 
 function Field({
-  icon,
   label,
   value,
+  icon,
 }: {
-  icon: ReactNode
   label: string
   value: ReactNode
+  icon?: ReactNode
 }) {
   return (
-    <div className="rounded-2xl border-[1.5px] border-[var(--color-line)] bg-[var(--color-cream)] px-2.5 py-2">
-      <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-2)]">
+    <div>
+      <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
         {icon}
         {label}
       </div>
-      <div className="mt-0.5 text-xs font-semibold text-[var(--color-ink)]">
-        {value}
-      </div>
+      <div className="mt-0.5 text-[13px] text-[var(--color-ink)]">{value}</div>
     </div>
   )
 }

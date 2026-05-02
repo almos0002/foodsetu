@@ -31,7 +31,7 @@ export function PageHeader({
       {back ? (
         <Link
           to={back.to}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-ink-2)] hover:text-[var(--color-coral)]"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)]"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           {back.label}
@@ -40,13 +40,13 @@ export function PageHeader({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           {eyebrow ? (
-            <div className="tiny-cap text-[var(--color-coral)]">{eyebrow}</div>
+            <div className="tiny-cap text-[var(--color-ink-3)]">{eyebrow}</div>
           ) : null}
-          <h1 className="font-display mt-1 text-3xl font-bold tracking-tight text-[var(--color-ink)] sm:text-[34px]">
+          <h1 className="font-display mt-1 text-[26px] font-semibold tracking-tight text-[var(--color-ink)] sm:text-[28px]">
             {title}
           </h1>
           {description ? (
-            <div className="mt-2 text-sm text-[var(--color-ink-2)]">
+            <div className="mt-1.5 text-sm text-[var(--color-ink-2)]">
               {description}
             </div>
           ) : null}

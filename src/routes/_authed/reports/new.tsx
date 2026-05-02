@@ -137,16 +137,16 @@ function NewReportPage() {
           Back
         </button>
 
-        <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white p-6 sm:p-8">
+        <div className="rounded-2xl border border-[var(--color-line)] bg-white p-6 sm:p-8">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 -rotate-3 flex-shrink-0 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)] bg-[var(--color-coral)] text-white">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border border-[var(--color-line-strong)] bg-[var(--color-coral)] text-white">
               <Flag className="h-4 w-4" />
             </div>
             <div>
               <div className="tiny-cap text-[var(--color-coral)]">
                 File a report
               </div>
-              <h2 className="font-display mt-1.5 text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+              <h2 className="font-display mt-1.5 text-2xl font-semibold tracking-tight text-[var(--color-ink)]">
                 Tell us what went wrong
               </h2>
               <p className="mt-2 text-sm text-[var(--color-ink-2)]">
@@ -157,7 +157,7 @@ function NewReportPage() {
           </div>
 
           {search.listingId || search.claimId ? (
-            <div className="mt-5 rounded-2xl border-[1.5px] border-[var(--color-line)] bg-[var(--color-cream)] px-4 py-3 text-xs text-[var(--color-ink-2)]">
+            <div className="mt-5 rounded-2xl border border-[var(--color-line)] bg-[var(--color-cream)] px-4 py-3 text-xs text-[var(--color-ink-2)]">
               <div className="tiny-cap text-[var(--color-ink-3)]">
                 Linked context
               </div>
@@ -179,7 +179,7 @@ function NewReportPage() {
                 {REPORT_REASONS.map((r) => (
                   <label
                     key={r}
-                    className={`flex cursor-pointer items-start gap-3 rounded-2xl border-[1.5px] px-4 py-3 transition-colors ${
+                    className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 transition-colors ${
                       reason === r
                         ? 'border-[var(--color-coral)] bg-[var(--color-coral-soft)]'
                         : 'border-[var(--color-line)] bg-white hover:border-[var(--color-line-strong)]'
@@ -224,7 +224,7 @@ function NewReportPage() {
                 placeholder="Add any details that will help an admin investigate."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="mt-1.5 w-full rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none"
+                className="mt-1.5 w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none"
               />
               <div className="mt-1.5 flex items-center justify-between text-[11px] text-[var(--color-ink-3)]">
                 <span>{description.length} / 2000</span>

@@ -29,6 +29,7 @@
   --color-ink-2: #525252;        /* secondary text */
   --color-ink-3: #6b6b68;        /* tertiary text / placeholders */
   --color-ink-4: #b8b8b3;        /* faint marks */
+  --color-ink-hover: #1f1f1f;    /* hover for ink solids */
 
   /* Accent — a single deep, slightly muted emerald.
      Reads as "fresh food + trust" without screaming. */
@@ -37,41 +38,57 @@
   --color-accent-soft: #e3f1e8;  /* tints */
   --color-accent-ink: #053c1f;
 
-  /* Status (kept for dashboards) */
+  /* Status — restrained, only used where color carries meaning */
   --color-success: #0a7a3f;
-  --color-warn: #b07a1f;
-  --color-danger: #c5392f;
+  --color-success-soft: #e3f1e8;
+  --color-success-ink: #053c1f;
 
-  /* Compatibility aliases for pages still using the old token names.
-     Mapped to the minimal palette so nothing else breaks. */
+  --color-warn: #a06b1d;
+  --color-warn-soft: #f5ecd9;
+  --color-warn-ink: #5b3d10;
+
+  --color-info: #3d5b6e;
+  --color-info-soft: #dde4ea;
+  --color-info-ink: #1c2f3d;
+
+  --color-danger: #b54836;
+  --color-danger-soft: #f4ddd7;
+  --color-danger-ink: #6e2418;
+
+  --color-purple: #5b4575;
+  --color-purple-soft: #e6dfee;
+  --color-purple-ink: #2f2240;
+
+  /* Compatibility aliases — old token names mapped to the minimal palette so
+     unconverted code keeps rendering. Do not introduce new uses. */
   --color-cream: #fafaf9;
   --color-cream-2: #f4f4f2;
-  --color-coral: #0a7a3f;
-  --color-coral-2: #075c30;
-  --color-coral-soft: #e3f1e8;
-  --color-coral-ink: #053c1f;
+  /* coral was the playful "primary action" — now mapped to ink so all primary
+     buttons / active nav / accent typography read as a clean black. */
+  --color-coral: #0a0a0a;
+  --color-coral-2: #1f1f1f;
+  --color-coral-soft: #f4f4f2;
+  --color-coral-ink: #0a0a0a;
+  /* mint was "success / verified" — keep mapped to accent emerald. */
   --color-mint: #0a7a3f;
   --color-mint-2: #075c30;
   --color-mint-soft: #e3f1e8;
   --color-mint-ink: #053c1f;
-  --color-sun: #b07a1f;
-  --color-sun-soft: #f3e9d0;
-  --color-sun-ink: #6b4810;
-  --color-berry: #8e3a52;
-  --color-berry-soft: #ecd6dd;
-  --color-berry-ink: #5a2333;
-  --color-sky: #355a6b;
-  --color-sky-soft: #d8e4ea;
-  --color-sky-ink: #1c3744;
+  /* sun → warn (muted amber) */
+  --color-sun: #a06b1d;
+  --color-sun-soft: #f5ecd9;
+  --color-sun-ink: #5b3d10;
+  /* berry → admin / purple */
+  --color-berry: #5b4575;
+  --color-berry-soft: #e6dfee;
+  --color-berry-ink: #2f2240;
+  /* sky → info / accepted */
+  --color-sky: #3d5b6e;
+  --color-sky-soft: #dde4ea;
+  --color-sky-ink: #1c2f3d;
 
-  --animate-bob: bob 6s ease-in-out infinite;
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
-}
-
-@keyframes bob {
-  0%, 100% { transform: translateY(0) rotate(var(--bob-rot, 0deg)); }
-  50%      { transform: translateY(-3px) rotate(var(--bob-rot, 0deg)); }
 }
 
 @keyframes fade-up {
@@ -116,7 +133,7 @@ body {
 @utility font-display {
   font-family: var(--font-display);
   font-weight: 600;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.025em;
   font-feature-settings: 'ss01', 'cv11', 'kern';
 }
 
@@ -124,7 +141,7 @@ body {
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 500;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
 }
 
 /* ── Eyebrow — small caps label above sections ────────────────────────── */
@@ -167,14 +184,14 @@ body {
   white-space: nowrap;
 }
 
-/* Compatibility aliases — old utility names mapped to minimal equivalents
-   so existing pages keep rendering until they get touched individually. */
+/* Compatibility utilities — old, decorative names mapped to flat,
+   minimal styles so unconverted pages still render cleanly. */
 @utility sticker {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
   border: 1px solid var(--color-line);
   font-size: 0.7rem;
   font-weight: 500;
@@ -187,26 +204,31 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 500;
+  border: 1px solid var(--color-line);
+  background: var(--color-paper);
+  color: var(--color-ink-2);
 }
 
 @utility pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 1rem;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
   border-radius: 999px;
-  border: 1px solid transparent;
-  font-size: 0.875rem;
+  border: 1px solid var(--color-line);
+  font-size: 0.8125rem;
   font-weight: 500;
+  background: var(--color-paper);
+  color: var(--color-ink);
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 @utility bouncy-card {
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid var(--color-line);
   background: var(--color-paper);
   transition: border-color 0.18s ease;
@@ -217,7 +239,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.4rem 0.8rem;
+  padding: 0.35rem 0.75rem;
   border-radius: 999px;
   border: 1px solid var(--color-line);
   background: var(--color-paper);
@@ -236,7 +258,7 @@ body {
     transparent 1px
   );
   background-size: 24px 24px;
-  opacity: 0.55;
+  opacity: 0.4;
 }
 
 @utility wavey-link {
@@ -309,4 +331,22 @@ body {
 @utility mask-fade-x {
   mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* ── Field — minimal text input (used by forms) ──────────────────────── */
+@utility field {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--color-line);
+  background: var(--color-canvas);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 3px var(--color-canvas-3);
+  }
 }

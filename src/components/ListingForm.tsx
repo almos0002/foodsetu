@@ -29,7 +29,6 @@ export type ListingFormInitial = Partial<{
 
 type Props = {
   initial?: ListingFormInitial
-  /** Pre-fill lat/lng from the org when the listing has none yet. */
   defaultLatitude?: number | null
   defaultLongitude?: number | null
   submitLabel: string
@@ -38,10 +37,8 @@ type Props = {
 }
 
 const inputCls =
-  'w-full rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none'
+  'w-full rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] px-3.5 py-2.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] transition-colors focus:border-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-canvas-3)]'
 
-// Convert an ISO string into the value format <input type="datetime-local">
-// expects (YYYY-MM-DDTHH:mm in *local* time, no timezone).
 function isoToLocalInput(iso?: string | null): string {
   if (!iso) return ''
   const d = new Date(iso)
@@ -52,8 +49,6 @@ function isoToLocalInput(iso?: string | null): string {
   )}:${pad(d.getMinutes())}`
 }
 
-// The browser's datetime-local value has no zone; treat it as local and
-// convert to ISO for transport.
 function localInputToIso(local: string): string {
   if (!local) return ''
   const d = new Date(local)
@@ -171,7 +166,7 @@ export function ListingForm({
         />
       </Field>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3">
         <Field label="Quantity" required>
           <input
             required
@@ -226,7 +221,7 @@ export function ListingForm({
         </select>
       </Field>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3">
         <Field label="Pickup start" required>
           <input
             required
@@ -256,7 +251,7 @@ export function ListingForm({
         </Field>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Latitude" required>
           <input
             required
@@ -323,10 +318,10 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-semibold text-[var(--color-ink)]">
+      <span className="mb-1.5 block text-[13px] font-medium text-[var(--color-ink)]">
         {label}
         {required ? (
-          <span className="ml-0.5 text-[var(--color-coral)]">*</span>
+          <span className="ml-0.5 text-[var(--color-danger)]">*</span>
         ) : null}
       </span>
       {children}

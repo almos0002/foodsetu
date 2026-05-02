@@ -48,30 +48,30 @@ export function ConfirmDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--color-ink)]/55 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--color-ink)]/40 p-0 sm:items-center sm:p-4"
       onClick={() => {
         if (!busy) onCancel()
       }}
     >
       <div
-        className="w-full max-w-md rounded-t-3xl border-[1.5px] border-[var(--color-line-strong)] bg-white sm:rounded-3xl"
+        className="w-full max-w-md rounded-t-2xl border border-[var(--color-line-strong)] bg-[var(--color-canvas)] sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start gap-3 border-b-[1.5px] border-dashed border-[var(--color-line)] p-5">
+        <div className="flex items-start gap-3 border-b border-[var(--color-line)] p-5">
           <div
             className={cn(
-              'flex h-11 w-11 -rotate-3 flex-shrink-0 items-center justify-center rounded-2xl border-[1.5px] border-[var(--color-line-strong)]',
+              'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border',
               destructive
-                ? 'bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]'
-                : 'bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]',
+                ? 'border-[var(--color-danger)]/25 bg-[var(--color-danger-soft)] text-[var(--color-danger)]'
+                : 'border-[var(--color-warn)]/25 bg-[var(--color-warn-soft)] text-[var(--color-warn)]',
             )}
           >
-            <AlertTriangle className="h-5 w-5" />
+            <AlertTriangle className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
             <h2
               id="confirm-dialog-title"
-              className="font-display text-lg font-bold tracking-tight text-[var(--color-ink)]"
+              className="text-base font-semibold tracking-tight text-[var(--color-ink)]"
             >
               {title}
             </h2>
@@ -88,7 +88,7 @@ export function ConfirmDialog({
             }}
             disabled={busy}
             aria-label="Close"
-            className="rounded-full p-1.5 text-[var(--color-ink-3)] hover:bg-[var(--color-cream)] hover:text-[var(--color-ink)] disabled:opacity-40"
+            className="rounded-md p-1.5 text-[var(--color-ink-3)] hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)] disabled:opacity-40"
           >
             <X className="h-4 w-4" />
           </button>

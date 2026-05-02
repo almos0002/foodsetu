@@ -1,55 +1,26 @@
 import type { ReactNode } from 'react'
 import { cn } from './cn'
 
+/**
+ * Flat page-header in the Linear / Vercel mold:
+ *   eyebrow · title · subtitle · meta-chips · actions
+ *
+ * No card surface, no decorative image, no tone color floods. The legacy
+ * `tone` and `image` props are accepted-and-ignored for backwards
+ * compatibility with existing dashboard callsites.
+ */
 type Tone = 'orange' | 'rose' | 'emerald' | 'gray'
-
-const TONES: Record<
-  Tone,
-  { bg: string; eyebrow: string; chip: string; titleColor: string; bodyColor: string; rotate: string }
-> = {
-  orange: {
-    bg: 'bg-[var(--color-coral-soft)]',
-    eyebrow: 'text-[var(--color-coral)]',
-    chip: 'bg-white text-[var(--color-coral-ink)] border-[var(--color-coral)]',
-    titleColor: 'text-[var(--color-ink)]',
-    bodyColor: 'text-[var(--color-ink-2)]',
-    rotate: '-rotate-1',
-  },
-  rose: {
-    bg: 'bg-[var(--color-berry-soft)]',
-    eyebrow: 'text-[var(--color-berry)]',
-    chip: 'bg-white text-[var(--color-berry-ink)] border-[var(--color-berry)]',
-    titleColor: 'text-[var(--color-ink)]',
-    bodyColor: 'text-[var(--color-ink-2)]',
-    rotate: 'rotate-1',
-  },
-  emerald: {
-    bg: 'bg-[var(--color-mint-soft)]',
-    eyebrow: 'text-[var(--color-mint-ink)]',
-    chip: 'bg-white text-[var(--color-mint-ink)] border-[var(--color-mint)]',
-    titleColor: 'text-[var(--color-ink)]',
-    bodyColor: 'text-[var(--color-ink-2)]',
-    rotate: '-rotate-1',
-  },
-  gray: {
-    bg: 'bg-[var(--color-ink)]',
-    eyebrow: 'text-[var(--color-sun)]',
-    chip: 'bg-white/10 text-white border-white/20',
-    titleColor: 'text-white',
-    bodyColor: 'text-white/85',
-    rotate: 'rotate-1',
-  },
-}
 
 type Props = {
   eyebrow: string
   title: string
   description?: ReactNode
   actions?: ReactNode
-  /** Decorative photo URL shown on the right (hidden on mobile). */
+  /** Accepted for backwards-compat; ignored visually. */
   image?: string
-  /** Decorative meta chips shown above actions, e.g. date, city, role. */
+  /** Small meta chips rendered between title and actions. */
   chips?: Array<{ label: string; icon?: ReactNode }>
+  /** Accepted for backwards-compat; ignored visually. */
   tone?: Tone
   className?: string
 }
@@ -59,68 +30,43 @@ export function DashboardWelcomeBanner({
   title,
   description,
   actions,
-  image,
   chips,
-  tone = 'orange',
   className,
 }: Props) {
-  const t = TONES[tone]
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-[32px] border-[1.5px] border-[var(--color-line-strong)]',
-        t.bg,
+        'flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between',
         className,
       )}
     >
-      <div className="grid gap-0 lg:grid-cols-[1fr_320px]">
-        <div className="p-7 sm:p-9">
-          <div className={cn('tiny-cap', t.eyebrow)}>{eyebrow}</div>
-          <h1
-            className={cn(
-              'font-display mt-3 text-3xl font-bold tracking-tight sm:text-[36px]',
-              t.titleColor,
-            )}
-          >
-            {title}
-          </h1>
-          {description ? (
-            <p className={cn('mt-3 max-w-xl text-sm sm:text-base', t.bodyColor)}>
-              {description}
-            </p>
-          ) : null}
-          {chips && chips.length > 0 ? (
-            <div className="mt-5 flex flex-wrap gap-2">
-              {chips.map((chip) => (
-                <span
-                  key={chip.label}
-                  className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border-[1.5px] px-3 py-1 text-xs font-semibold',
-                    t.chip,
-                  )}
-                >
-                  {chip.icon}
-                  {chip.label}
-                </span>
-              ))}
-            </div>
-          ) : null}
-          {actions ? (
-            <div className="mt-6 flex flex-wrap items-center gap-2">
-              {actions}
-            </div>
-          ) : null}
-        </div>
-        {image ? (
-          <div className="relative hidden lg:block">
-            <img
-              src={image}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+      <div className="min-w-0">
+        <div className="tiny-cap text-[var(--color-ink-3)]">{eyebrow}</div>
+        <h1 className="font-display mt-1.5 break-words text-[24px] font-semibold leading-tight tracking-tight text-[var(--color-ink)] sm:text-[28px]">
+          {title}
+        </h1>
+        {description ? (
+          <p className="mt-1.5 max-w-2xl text-sm text-[var(--color-ink-2)]">
+            {description}
+          </p>
+        ) : null}
+        {chips && chips.length > 0 ? (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            {chips.map((chip) => (
+              <span
+                key={chip.label}
+                className="inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] bg-[var(--color-canvas-2)] px-2 py-1 text-[11px] font-medium text-[var(--color-ink-2)]"
+              >
+                {chip.icon}
+                {chip.label}
+              </span>
+            ))}
           </div>
         ) : null}
       </div>
+      {actions ? (
+        <div className="flex flex-wrap items-center gap-2">{actions}</div>
+      ) : null}
     </div>
   )
 }

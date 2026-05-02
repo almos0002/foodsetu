@@ -47,13 +47,13 @@ export function RestaurantClaimCard({
   const l = claim.listing
 
   return (
-    <article className="overflow-hidden rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b-[1.5px] border-dashed border-[var(--color-line)] px-5 py-4">
+    <article className="overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)]">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--color-line)] px-5 py-4">
         <div className="min-w-0 flex-1">
-          <h3 className="font-display truncate text-lg font-bold tracking-tight text-[var(--color-ink)]">
+          <h3 className="truncate text-[15px] font-semibold tracking-tight text-[var(--color-ink)]">
             {l.title}
           </h3>
-          <div className="text-xs text-[var(--color-ink-2)]">
+          <div className="mt-0.5 text-xs text-[var(--color-ink-2)]">
             Requested {formatTime(claim.createdAt)}
             {l.cityName ? ` · ${l.cityName}` : ''}
           </div>
@@ -61,16 +61,16 @@ export function RestaurantClaimCard({
         <ClaimStatusBadge status={status} size="sm" />
       </div>
 
-      <div className="grid gap-2 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-x-6 gap-y-3 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3">
         <Field
           icon={<Building2 className="h-3 w-3" />}
           label="Claimant"
           value={
             <>
-              <div className="font-bold text-[var(--color-ink)]">
+              <div className="font-medium text-[var(--color-ink)]">
                 {c.orgName ?? '—'}
               </div>
-              <div className="text-[11px] text-[var(--color-ink-2)]">
+              <div className="text-[11px] text-[var(--color-ink-3)]">
                 {(c.orgType && CLAIMANT_ORG_TYPE_LABELS[c.orgType]) ??
                   c.orgType ??
                   ''}
@@ -86,7 +86,7 @@ export function RestaurantClaimCard({
             value={
               <a
                 href={`tel:${c.orgPhone}`}
-                className="font-bold text-[var(--color-coral)] hover:underline"
+                className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-line-strong)] underline-offset-2 hover:decoration-[var(--color-ink)]"
               >
                 {c.orgPhone}
               </a>
@@ -117,7 +117,7 @@ export function RestaurantClaimCard({
             <>
               {formatTime(l.pickupStartTime)}
               <br />
-              <span className="text-[var(--color-ink-2)]">
+              <span className="text-[var(--color-ink-3)]">
                 → {formatTime(l.pickupEndTime)}
               </span>
             </>
@@ -126,29 +126,29 @@ export function RestaurantClaimCard({
       </div>
 
       {claim.otpIssued && status === 'ACCEPTED' ? (
-        <div className="border-t-[1.5px] border-dashed border-[var(--color-line)] bg-[var(--color-sky-soft)] px-5 py-3 text-xs font-medium text-[var(--color-sky-ink)]">
+        <div className="border-t border-[var(--color-line)] bg-[var(--color-info-soft)] px-5 py-2.5 text-xs font-medium text-[var(--color-info-ink)]">
           <KeyRound className="mr-1 inline h-3 w-3" />
           OTP issued — open this claim to enter the 6-digit code at pickup.
         </div>
       ) : null}
       {status === 'PICKED_UP' ? (
-        <div className="border-t-[1.5px] border-dashed border-[var(--color-line)] bg-[var(--color-mint-soft)] px-5 py-3 text-xs font-medium text-[var(--color-mint-ink)]">
+        <div className="border-t border-[var(--color-line)] bg-[var(--color-accent-soft)] px-5 py-2.5 text-xs font-medium text-[var(--color-accent-ink)]">
           Pickup confirmed.
         </div>
       ) : null}
       {status === 'COMPLETED' ? (
-        <div className="border-t-[1.5px] border-dashed border-[var(--color-line)] bg-[var(--color-mint-soft)] px-5 py-3 text-xs font-bold text-[var(--color-mint-ink)]">
+        <div className="border-t border-[var(--color-line)] bg-[var(--color-accent-soft)] px-5 py-2.5 text-xs font-semibold text-[var(--color-accent-ink)]">
           <CheckCircle2 className="mr-1 inline h-3 w-3" />
           Pickup verified — handoff complete.
         </div>
       ) : null}
 
       {showActions ? (
-        <div className="flex flex-wrap items-center justify-end gap-2 border-t-[1.5px] border-dashed border-[var(--color-line)] bg-[var(--color-cream)] px-5 py-3">
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[var(--color-line)] bg-[var(--color-canvas-2)] px-5 py-3">
           <Link
             to="/restaurant/claims/$id"
             params={{ id: claim.id }}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-ink-2)] hover:text-[var(--color-coral)]"
+            className="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)]"
           >
             View details
             <ChevronRight className="h-3.5 w-3.5" />
@@ -157,6 +157,7 @@ export function RestaurantClaimCard({
             <Link to="/restaurant/claims/$id" params={{ id: claim.id }}>
               <Button
                 size="sm"
+                variant="accent"
                 leftIcon={<ShieldCheck className="h-3.5 w-3.5" />}
               >
                 Verify pickup
@@ -177,6 +178,7 @@ export function RestaurantClaimCard({
           {isPending && onAccept ? (
             <Button
               size="sm"
+              variant="accent"
               onClick={onAccept}
               disabled={disabled || busy != null}
               leftIcon={<Check className="h-3.5 w-3.5" />}
@@ -200,14 +202,12 @@ function Field({
   value: ReactNode
 }) {
   return (
-    <div className="rounded-2xl border-[1.5px] border-[var(--color-line)] bg-[var(--color-cream)] px-3 py-2">
-      <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-2)]">
+    <div>
+      <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
         {icon}
         {label}
       </div>
-      <div className="mt-0.5 text-xs font-semibold text-[var(--color-ink)]">
-        {value}
-      </div>
+      <div className="mt-0.5 text-[13px] text-[var(--color-ink)]">{value}</div>
     </div>
   )
 }

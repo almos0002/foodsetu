@@ -77,7 +77,7 @@ export function AdminTable<T, TFilter extends string>({
       {(showSearch || filters) && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {filters ? (
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas-2)] p-1">
               {filters.map((f) => {
                 const active = filterValue === f.value
                 return (
@@ -85,17 +85,19 @@ export function AdminTable<T, TFilter extends string>({
                     key={f.value}
                     type="button"
                     onClick={() => onFilterChange?.(f.value)}
-                    className={`rounded-full border-[1.5px] px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                       active
-                        ? 'border-[var(--color-coral)] bg-[var(--color-coral)] text-white'
-                        : 'border-[var(--color-line)] bg-white text-[var(--color-ink-2)] hover:border-[var(--color-line-strong)] hover:text-[var(--color-ink)]'
+                        ? 'bg-[var(--color-canvas)] text-[var(--color-ink)] shadow-sm'
+                        : 'text-[var(--color-ink-2)] hover:text-[var(--color-ink)]'
                     }`}
                   >
                     {f.label}
                     {typeof f.count === 'number' ? (
                       <span
-                        className={`ml-1.5 text-[10px] tabular-nums ${
-                          active ? 'opacity-90' : 'text-[var(--color-ink-3)]'
+                        className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-medium tabular-nums ${
+                          active
+                            ? 'bg-[var(--color-canvas-3)] text-[var(--color-ink)]'
+                            : 'bg-[var(--color-canvas)] text-[var(--color-ink-3)] border border-[var(--color-line)]'
                         }`}
                       >
                         {f.count}
@@ -116,29 +118,29 @@ export function AdminTable<T, TFilter extends string>({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full rounded-full border-[1.5px] border-[var(--color-line)] bg-white py-2 pl-9 pr-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none"
+                className="w-full rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] py-2 pl-9 pr-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-canvas-3)]"
               />
             </div>
           ) : null}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-[24px] border-[1.5px] border-[var(--color-line)] bg-white">
+      <div className="overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)]">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-[var(--color-cream)] text-xs font-bold uppercase tracking-wider text-[var(--color-ink-2)]">
+            <thead className="border-b border-[var(--color-line)] bg-[var(--color-canvas-2)] text-[11px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
               <tr>
                 {columns.map((c) => (
                   <th
                     key={c.key}
-                    className={`px-4 py-3 ${alignClass(c.align)} ${c.className ?? ''}`}
+                    className={`px-4 py-2.5 ${alignClass(c.align)} ${c.className ?? ''}`}
                   >
                     {c.header}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y-[1.5px] divide-dashed divide-[var(--color-line)]">
+            <tbody className="divide-y divide-[var(--color-line)]">
               {visible.length === 0 ? (
                 <tr>
                   <td
@@ -154,7 +156,7 @@ export function AdminTable<T, TFilter extends string>({
                 visible.map((row) => (
                   <tr
                     key={rowKey(row)}
-                    className="transition-colors hover:bg-[var(--color-cream)]"
+                    className="transition-colors hover:bg-[var(--color-canvas-2)]"
                   >
                     {columns.map((c) => (
                       <td
@@ -172,7 +174,7 @@ export function AdminTable<T, TFilter extends string>({
         </div>
       </div>
 
-      <div className="text-right text-xs font-medium text-[var(--color-ink-2)]">
+      <div className="text-right text-xs text-[var(--color-ink-3)]">
         {visible.length} of {rows.length}
       </div>
     </div>

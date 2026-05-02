@@ -64,7 +64,7 @@ export const Route = createFileRoute('/_authed/restaurant/listings/$id/')({
   component: ListingDetail,
   notFoundComponent: () => (
     <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-      <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--color-ink)]">
+      <h2 className="font-display text-2xl font-semibold tracking-tight text-[var(--color-ink)]">
         Listing not found
       </h2>
       <p className="mt-2 text-sm text-[var(--color-ink-2)]">
@@ -135,7 +135,7 @@ function ListingDetail() {
             <img
               src={listing.imageUrl}
               alt={listing.title}
-              className="h-72 w-full rounded-[28px] border-[1.5px] border-[var(--color-line)] object-cover"
+              className="h-72 w-full rounded-2xl border border-[var(--color-line)] object-cover"
             />
           ) : null}
 
@@ -269,7 +269,7 @@ function DetailCard({
   value: React.ReactNode
 }) {
   return (
-    <div className="rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white p-4">
+    <div className="rounded-2xl border border-[var(--color-line)] bg-white p-4">
       <div className="tiny-cap flex items-center gap-1.5 text-[var(--color-ink-3)]">
         {icon}
         {label}
@@ -283,7 +283,7 @@ function DetailCard({
 
 function ListingMeta({ listing }: { listing: ListingRow }) {
   return (
-    <div className="rounded-2xl border-[1.5px] border-[var(--color-line)] bg-[var(--color-cream)] p-4 text-xs text-[var(--color-ink-3)]">
+    <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-cream)] p-4 text-xs text-[var(--color-ink-3)]">
       <div className="font-mono break-all">{listing.id}</div>
       <div className="mt-1">Updated {fullDateTime(listing.updatedAt)}</div>
     </div>

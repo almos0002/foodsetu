@@ -10,15 +10,10 @@ type Props = {
   to: string
   imageUrl?: string | null
   title: string
-  /** Top-left badge over the photo (e.g. status badge). */
   badge?: ReactNode
-  /** Secondary label rendered to the left of the meta line (e.g. quantity). */
   primaryMeta: string
-  /** Right-side meta (e.g. relative time / pickup). */
   pickupAt?: Date | string | null
-  /** Optional location/distance suffix shown beneath title. */
   location?: string | null
-  /** Optional click target indicator. */
   trailing?: ReactNode
   className?: string
 }
@@ -50,39 +45,39 @@ export function DashboardListingCard({
     <Link
       to={to}
       className={cn(
-        'group block overflow-hidden rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white transition-all hover:-translate-y-1 hover:border-[var(--color-line-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2',
+        'group block overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] transition-colors hover:border-[var(--color-line-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2',
         className,
       )}
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-[var(--color-cream-2)]">
+      <div className="relative aspect-[16/10] overflow-hidden bg-[var(--color-canvas-3)]">
         <img
           src={imageUrl || FALLBACK_IMG}
           alt={title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
         />
         {badge ? <div className="absolute left-3 top-3">{badge}</div> : null}
       </div>
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-display min-w-0 flex-1 truncate text-base font-bold tracking-tight text-[var(--color-ink)]">
+          <h3 className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-tight text-[var(--color-ink)]">
             {title}
           </h3>
           {trailing}
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-ink-2)]">
           <span className="inline-flex items-center gap-1">
-            <Utensils className="h-3 w-3" />
-            <span className="tabular-nums font-semibold">{primaryMeta}</span>
+            <Utensils className="h-3 w-3 text-[var(--color-ink-3)]" />
+            <span className="tabular-nums font-medium">{primaryMeta}</span>
           </span>
           {pickupDate ? (
             <span className="inline-flex items-center gap-1">
-              <Clock className="h-3 w-3" />
+              <Clock className="h-3 w-3 text-[var(--color-ink-3)]" />
               <span className="tabular-nums">{formatPickup(pickupDate)}</span>
             </span>
           ) : null}
           {location ? (
             <span className="inline-flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
+              <MapPin className="h-3 w-3 text-[var(--color-ink-3)]" />
               <span className="truncate">{location}</span>
             </span>
           ) : null}

@@ -5,7 +5,7 @@ import {
   useRouter,
 } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ArrowLeft, ChevronDown, LogIn, Sparkles } from 'lucide-react'
+import { ArrowLeft, ChevronDown, LogIn } from 'lucide-react'
 import { signIn } from '../lib/auth-client'
 import { getServerSession } from '../lib/auth-server'
 import { roleToDashboard, safeRedirectPath } from '../lib/permissions'
@@ -13,15 +13,11 @@ import { BowlMascot } from './index'
 
 type LoginSearch = { redirect?: string }
 
-const DEMO_ACCOUNTS: Array<{ label: string; email: string; tone: string }> = [
-  { label: 'Admin', email: 'admin@foodsetu.dev', tone: 'berry' },
-  {
-    label: 'Restaurant',
-    email: 'verified-restaurant@foodsetu.dev',
-    tone: 'coral',
-  },
-  { label: 'NGO', email: 'verified-ngo@foodsetu.dev', tone: 'mint' },
-  { label: 'Animal rescue', email: 'verified-animal@foodsetu.dev', tone: 'sun' },
+const DEMO_ACCOUNTS: Array<{ label: string; email: string }> = [
+  { label: 'Admin', email: 'admin@foodsetu.dev' },
+  { label: 'Restaurant', email: 'verified-restaurant@foodsetu.dev' },
+  { label: 'NGO', email: 'verified-ngo@foodsetu.dev' },
+  { label: 'Animal rescue', email: 'verified-animal@foodsetu.dev' },
 ]
 
 export const Route = createFileRoute('/login')({
@@ -39,16 +35,6 @@ export const Route = createFileRoute('/login')({
   },
   component: LoginPage,
 })
-
-function toneFor(tone: string) {
-  if (tone === 'coral')
-    return 'bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]'
-  if (tone === 'mint')
-    return 'bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]'
-  if (tone === 'sun')
-    return 'bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]'
-  return 'bg-[var(--color-berry-soft)] text-[var(--color-berry-ink)]'
-}
 
 function LoginPage() {
   const router = useRouter()
@@ -86,34 +72,34 @@ function LoginPage() {
   }
 
   return (
-    <div className="dotgrid relative min-h-screen bg-[var(--color-cream)] px-5 py-8 sm:px-8 sm:py-12">
-      {/* corner mascot — playful peek */}
-      <div className="pointer-events-none absolute right-4 top-4 hidden sm:block">
-        <BowlMascot className="h-16 w-16" smiling />
-      </div>
+    <div className="relative min-h-screen bg-[var(--color-canvas)] text-[var(--color-ink)]">
+      {/* Faint grid backdrop */}
+      <div
+        className="grid-bg pointer-events-none absolute inset-0 opacity-40"
+        aria-hidden="true"
+      />
 
-      <Link
-        to="/"
-        className="relative inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-ink-2)] hover:text-[var(--color-coral)]"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to home
-      </Link>
+      <div className="relative mx-auto max-w-md px-5 py-8 sm:px-8 sm:py-12">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-ink-2)] transition-colors hover:text-[var(--color-ink)]"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to home
+        </Link>
 
-      <div className="relative mx-auto mt-8 max-w-md">
-        <div className="rounded-[32px] border-[1.5px] border-[var(--color-line-strong)] bg-white p-7 sm:p-10">
+        <div className="mt-8 rounded-2xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-7 sm:p-9">
           <Link to="/" className="flex items-center gap-2.5">
-            <BowlMascot className="h-10 w-10" smiling />
-            <span className="font-display text-2xl font-bold tracking-tight">
+            <BowlMascot className="h-7 w-7" />
+            <span className="text-[15px] font-semibold tracking-tight">
               FoodSetu
             </span>
           </Link>
 
-          <h1 className="font-display mt-8 text-4xl font-bold tracking-tight">
+          <h1 className="font-display mt-7 text-3xl font-semibold tracking-tight">
             Welcome back
-            <span className="text-[var(--color-coral)]">.</span>
           </h1>
-          <p className="mt-2 text-sm text-[var(--color-ink-2)]">
+          <p className="mt-1.5 text-sm text-[var(--color-ink-2)]">
             Sign in to keep food out of the bin.
           </p>
 
@@ -141,7 +127,7 @@ function LoginPage() {
             />
 
             {error ? (
-              <div className="rounded-2xl border-[1.5px] border-[var(--color-coral)] bg-[var(--color-coral-soft)] px-3.5 py-2.5 text-sm font-medium text-[var(--color-coral-ink)]">
+              <div className="rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger-soft)] px-3.5 py-2.5 text-sm font-medium text-[var(--color-danger-ink)]">
                 {error}
               </div>
             ) : null}
@@ -149,50 +135,45 @@ function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--color-coral)] text-sm font-semibold text-white transition-all hover:bg-[var(--color-coral-2)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-ink)] text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-ink-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[var(--color-line-strong)]"
             >
               <LogIn className="h-4 w-4" />
               {submitting ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
 
-          <div className="mt-5 rounded-2xl border-[1.5px] border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)]">
+          <div className="mt-5 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas-2)]">
             <button
               type="button"
               onClick={() => setDemoOpen((v) => !v)}
-              className="flex w-full items-center justify-between gap-2 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-cream-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-coral)] focus-visible:ring-offset-2"
+              className="flex w-full items-center justify-between gap-2 rounded-lg px-4 py-3 text-left text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-canvas-3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2"
               aria-expanded={demoOpen}
             >
-              <span className="inline-flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[var(--color-coral)]" />
-                Try a demo account
-              </span>
+              <span>Try a demo account</span>
               <ChevronDown
-                className={`h-4 w-4 transition-transform ${demoOpen ? 'rotate-180' : ''}`}
+                className={`h-4 w-4 text-[var(--color-ink-3)] transition-transform ${demoOpen ? 'rotate-180' : ''}`}
               />
             </button>
             {demoOpen ? (
-              <div className="border-t-[1.5px] border-dashed border-[var(--color-line-strong)] p-3">
+              <div className="border-t border-[var(--color-line)] p-3">
                 <p className="px-1 pb-2 text-xs text-[var(--color-ink-2)]">
                   Tap to fill. Password:{' '}
-                  <code className="rounded bg-white px-1.5 py-0.5 text-[11px] font-bold tracking-wider">
+                  <code className="font-mono rounded bg-[var(--color-canvas)] px-1.5 py-0.5 text-[11px] tracking-wider">
                     password123
                   </code>
                 </p>
-                <div className="grid gap-1.5">
+                <div className="grid gap-1">
                   {DEMO_ACCOUNTS.map((acc) => (
                     <button
                       key={acc.email}
                       type="button"
                       onClick={() => fillDemo(acc.email)}
-                      className="flex items-center justify-between gap-3 rounded-xl border-[1.5px] border-transparent bg-white px-3 py-2 text-left text-xs hover:border-[var(--color-line-strong)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-coral)]"
+                      className="flex items-center justify-between gap-3 rounded-md border border-transparent bg-[var(--color-canvas)] px-3 py-2 text-left text-xs transition-colors hover:border-[var(--color-line-strong)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)]"
                     >
-                      <span
-                        className={`chip ${toneFor(acc.tone)}`}
-                      >
+                      <span className="font-medium text-[var(--color-ink)]">
                         {acc.label}
                       </span>
-                      <span className="truncate text-[var(--color-ink-2)]">
+                      <span className="truncate text-[var(--color-ink-3)]">
                         {acc.email}
                       </span>
                     </button>
@@ -206,7 +187,7 @@ function LoginPage() {
             New here?{' '}
             <Link
               to="/register"
-              className="font-bold text-[var(--color-coral)] hover:underline"
+              className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-line-strong)] underline-offset-2 transition-colors hover:decoration-[var(--color-ink)]"
             >
               Sign up — it&rsquo;s free
             </Link>
@@ -242,7 +223,7 @@ function Field({
     <div>
       <label
         htmlFor={id}
-        className="mb-1.5 block text-sm font-semibold text-[var(--color-ink)]"
+        className="mb-1.5 block text-[13px] font-medium text-[var(--color-ink)]"
       >
         {label}
       </label>
@@ -253,7 +234,7 @@ function Field({
         minLength={minLength}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-2xl border-[1.5px] border-[var(--color-line)] bg-white px-4 py-3 text-sm placeholder-[var(--color-ink-3)] transition-colors focus:border-[var(--color-ink)] focus:outline-none"
+        className="w-full rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] px-3.5 py-2.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] transition-colors focus:border-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-canvas-3)]"
         placeholder={placeholder}
         autoComplete={autoComplete}
       />
