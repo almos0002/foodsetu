@@ -323,6 +323,59 @@ with a wider allowed status set (a restaurant can only cancel `DRAFT` /
 `CLAIMED` / `REPORTED` for unsafe-food situations and frees any active
 claim row in the same transaction so the claimant doesn't get stuck).
 
+### Listing expiry sweep (`src/lib/expiry-server.ts`)
+
+Listings carry an `expiry_time`. There is no cron yet, so the sweep is
+piggy-backed onto hot-path data fetches and runs as a single atomic SQL
+statement:
+
+```sql
+WITH expired AS (
+  UPDATE food_listings
+     SET status = 'EXPIRED', updated_at = NOW()
+   WHERE status IN ('AVAILABLE', 'CLAIM_REQUESTED')
+     AND expiry_time <= NOW()
+   RETURNING id
+),
+cancelled AS (
+  UPDATE claims
+     SET status = 'CANCELLED', updated_at = NOW()
+   WHERE food_listing_id IN (SELECT id FROM expired)
+     AND status = 'PENDING'
+   RETURNING id
+)
+SELECT (SELECT COUNT(*) FROM expired)   AS expired_listings,
+       (SELECT COUNT(*) FROM cancelled) AS cancelled_claims;
+```
+
+Transition rules:
+
+| From | Condition | Becomes | Side effect |
+|------|-----------|---------|-------------|
+| `AVAILABLE` | `expiry_time <= NOW()` | `EXPIRED` | — |
+| `CLAIM_REQUESTED` | `expiry_time <= NOW()` (only `PENDING` claim attached) | `EXPIRED` | The `PENDING` claim moves to `CANCELLED`, freeing `claims_listing_active_uq` |
+| `CLAIMED` | _any_ | unchanged | A donor has already accepted; the OTP/handoff flow continues |
+| `DRAFT` / terminal (`PICKED_UP`, `EXPIRED`, `CANCELLED`, `REPORTED`) | _any_ | unchanged | — |
+
+Two exports:
+
+| Function | Purpose |
+|----------|---------|
+| `expireOldListings()` | Returns `{ expiredListings, cancelledClaims }`. Throws on DB errors. Suitable for a future cron entry where you want failures surfaced. |
+| `safeExpireOldListings()` | Throttled (≤ 1 sweep / 30 s per server instance), coalesces concurrent calls onto a single in-flight promise, and swallows errors with a `console.error` log. Suitable for fire-and-forget invocation from page-load server fns. |
+
+Wired into the server fns that back the public-facing lists, so the UI
+reflects expiry without needing a cron:
+
+| Caller | Why |
+|--------|-----|
+| `listNearbyHumanFoodFn` / `listNearbyAnimalFoodFn` (in `claim-server.ts`) | NGO + animal "Nearby food" feeds — claimants never see a stale row, and the temporal guard inside `createClaimForKind` is a second line of defence. |
+| `listMyListingsFn` (in `listing-server.ts`) | `/restaurant/listings` — restaurants see expired items move into the history tab as soon as they navigate. |
+| `listListingsForAdminFn` (in `admin-server.ts`) | `/admin/listings` — the admin's `EXPIRED` filter chip stays accurate. |
+
+A future scheduled job can call `expireOldListings()` directly to run the
+same logic on a timer; nothing else needs to change.
+
 ### Org server functions (`src/lib/org-server.ts`)
 
 | Function | Auth | Purpose |

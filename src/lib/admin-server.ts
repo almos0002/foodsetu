@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { auth, pool } from './auth'
+import { safeExpireOldListings } from './expiry-server'
 
 // ---------------------------------------------------------------------------
 // Auth gate
@@ -170,6 +171,9 @@ export type AdminListingRow = {
 export const listListingsForAdminFn = createServerFn({ method: 'GET' }).handler(
   async (): Promise<AdminListingRow[]> => {
     await requireAdmin()
+    // Sweep stale rows so the admin's expired filter reflects current truth
+    // without waiting for a cron. Throttled + error-swallowing.
+    await safeExpireOldListings()
     const { rows } = await pool.query(
       `SELECT l.id, l.title, l.status, l.food_category AS "foodCategory",
               l.food_type AS "foodType", l.quantity, l.quantity_unit AS "quantityUnit",

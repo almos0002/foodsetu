@@ -4,6 +4,7 @@ import { and, desc, eq, inArray } from 'drizzle-orm'
 import { auth, pool } from './auth'
 import { db } from '../db'
 import { foodListings, type FoodListing } from '../db/schema'
+import { safeExpireOldListings } from './expiry-server'
 import {
   ACTIVE_LISTING_STATUSES,
   CANCELABLE_LISTING_STATUSES,
@@ -301,6 +302,11 @@ export const listMyListingsFn = createServerFn({ method: 'GET' })
     const user = await requireSessionUser()
     const org = await fetchOwnerOrgForUser(user.id)
     if (!org || org.type !== 'RESTAURANT') return [] as ListingRow[]
+
+    // Sweep stale rows so the restaurant sees expired items move to history
+    // immediately. Throttled + error-swallowing so a sweep failure never
+    // breaks the listings page.
+    await safeExpireOldListings()
 
     const statuses =
       data.scope === 'active'

@@ -5,6 +5,7 @@ import { and, eq, inArray, sql } from 'drizzle-orm'
 import { auth, pool } from './auth'
 import { db } from '../db'
 import { claims, foodListings, type Claim } from '../db/schema'
+import { safeExpireOldListings } from './expiry-server'
 import {
   ACTIVE_CLAIM_STATUSES,
   HISTORY_CLAIM_STATUSES,
@@ -292,6 +293,13 @@ async function listNearbyFoodForKind(
   if (user.role !== 'ADMIN' && org.verificationStatus !== 'VERIFIED') {
     return []
   }
+
+  // Sweep stale rows BEFORE the SELECT so claimants never see (and never
+  // attempt to claim) listings whose expiry has just passed. The temporal
+  // guard in `createClaimForKind` is a second line of defence; this keeps
+  // the UI honest. Throttled + error-swallowing — a sweep failure must not
+  // block the feed.
+  await safeExpireOldListings()
 
   // NOTE: `o.phone` is intentionally NOT selected — restaurant contact is
   // gated behind an accepted claim (see `listMyClaimsForKind`).
