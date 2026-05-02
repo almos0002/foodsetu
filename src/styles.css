@@ -5,6 +5,31 @@
     'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --font-poppins: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    'Fraunces', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+
+  /* Editorial almanac palette — warm cream paper + warm ink. */
+  --color-paper: oklch(0.974 0.012 90);
+  --color-paper-200: oklch(0.945 0.018 88);
+  --color-paper-300: oklch(0.905 0.022 85);
+  --color-rule: oklch(0.78 0.018 80);
+  --color-ink: oklch(0.2 0.012 75);
+  --color-ink-700: oklch(0.36 0.012 75);
+  --color-ink-500: oklch(0.55 0.012 75);
+  --color-ink-300: oklch(0.74 0.012 75);
+  --color-ember: oklch(0.66 0.21 38);
+
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-marquee-slow: marquee 70s linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
 
 * {
@@ -20,6 +45,10 @@ body,
 body {
   margin: 0;
   font-family: var(--font-sans);
+  font-feature-settings: 'ss01', 'cv11';
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @utility scrollbar-hide {
@@ -28,4 +57,84 @@ body {
   }
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Editorial display type — Fraunces with optical-size & soft variant. */
+@utility font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  letter-spacing: -0.02em;
+}
+
+@utility font-display-italic {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-optical-sizing: auto;
+  font-variation-settings: 'opsz' 144, 'SOFT' 50;
+  letter-spacing: -0.01em;
+}
+
+/* Tiny eyebrow / kicker style used across editorial sections. */
+@utility eyebrow {
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Hairline horizontal rule, the structural backbone of the layout. */
+@utility hairline {
+  border: 0;
+  border-top: 1px solid var(--color-rule);
+  height: 0;
+  margin: 0;
+}
+
+/* Subtle paper grain — pure CSS, no shadows. */
+@utility paper-grain {
+  background-color: var(--color-paper);
+  background-image:
+    radial-gradient(
+      circle at 20% 10%,
+      oklch(0.92 0.022 85 / 0.55) 0,
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      oklch(0.92 0.022 85 / 0.4) 0,
+      transparent 40%
+    ),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.045 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size:
+    auto,
+    auto,
+    180px 180px;
+}
+
+/* Slightly stronger grain for the inverted CTA panel. */
+@utility ink-grain {
+  background-color: var(--color-ink);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 180px 180px;
+}
+
+/* Ledger column rules — vertical hairlines between grid items. */
+@utility col-rules {
+  & > * + * {
+    border-left: 1px solid var(--color-rule);
+  }
+}
+
+/* Dotted-underline hover for editorial nav links. */
+@utility editorial-link {
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 0.35em;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.15s ease;
+  &:hover {
+    text-decoration-color: currentColor;
+  }
 }

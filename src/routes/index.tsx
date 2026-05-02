@@ -1,32 +1,35 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import {
   ArrowRight,
-  Building2,
-  ChefHat,
-  Cookie,
+  ArrowUpRight,
   Heart,
-  Leaf,
   LogIn,
-  PawPrint,
-  Recycle,
-  Search,
   Sparkles,
   UserPlus,
   Utensils,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useSession } from '../lib/auth-client'
-import { Button } from '../components/ui/Button'
 import { roleToDashboard } from '../lib/permissions'
 import { listPublicAvailableListingsFn } from '../lib/public-listings-server'
 import type { PublicListingRow } from '../lib/public-listings-server'
+
+// Computed in the loader (server-side) and passed via useLoaderData so SSR
+// and client always agree, even if a week boundary ticks over mid-render.
+function computeIssueNumber(): string {
+  const start = new Date('2024-01-01T00:00:00Z')
+  const weeks = Math.floor(
+    (Date.now() - start.getTime()) / (1000 * 60 * 60 * 24 * 7),
+  )
+  return String(weeks + 1).padStart(3, '0')
+}
 
 export const Route = createFileRoute('/')({
   loader: async () => {
     const listings = await listPublicAvailableListingsFn({
       data: { category: 'ALL', limit: 8 },
     }).catch(() => [] as PublicListingRow[])
-    return { listings }
+    return { listings, issueNumber: computeIssueNumber() }
   },
   component: Home,
 })
@@ -37,525 +40,881 @@ const HERO_IMG =
 const FALLBACK_LISTING_IMG =
   'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80'
 
-const CATEGORIES: Array<{ icon: LucideIcon; label: string }> = [
-  { icon: Utensils, label: 'Hot meals' },
-  { icon: Cookie, label: 'Bakery' },
-  { icon: Leaf, label: 'Vegetarian' },
-  { icon: ChefHat, label: 'Restaurants' },
-  { icon: Sparkles, label: 'Catering' },
-  { icon: PawPrint, label: 'Animal-safe' },
-  { icon: Recycle, label: 'Compost' },
-  { icon: Building2, label: 'Hotels' },
-]
-
 function Home() {
   const { data: session, isPending } = useSession()
-  const { listings } = Route.useLoaderData()
+  const { listings, issueNumber } = Route.useLoaderData()
   const user = session?.user as
     | { name?: string | null; email?: string | null; role?: string | null }
     | undefined
 
+  const liveCount = listings.length
+  const cityCount = new Set(
+    listings.map((l) => l.cityName).filter(Boolean) as Array<string>,
+  ).size
+  const animalCount = listings.filter(
+    (l) => l.foodCategory === 'ANIMAL_SAFE',
+  ).length
+  const humanCount = liveCount - animalCount
+
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      {/* Top nav — clean, no fake search pill */}
-      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:h-20 sm:px-6 lg:px-10">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-600 text-white">
-              <Utensils className="h-5 w-5" />
-            </div>
-            <span className="text-lg font-bold tracking-tight">FoodSetu</span>
-          </Link>
+    <div className="paper-grain min-h-screen text-[var(--color-ink)] antialiased">
+      <TopTape liveCount={liveCount} />
+      <SiteHeader user={user} isPending={isPending} />
 
-          <nav className="ml-auto flex items-center gap-1 sm:gap-2">
-            <Link
-              to="/listings"
-              className="hidden rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 md:inline-flex"
-            >
-              Browse listings
-            </Link>
-            <a
-              href="#how"
-              className="hidden rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 lg:inline-flex"
-            >
-              How it works
-            </a>
-            <a
-              href="#partners"
-              className="hidden rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 lg:inline-flex"
-            >
-              For partners
-            </a>
-            {!isPending && user ? (
-              <Link to={roleToDashboard(user.role)}>
-                <Button rightIcon={<ArrowRight className="h-4 w-4" />}>
-                  Open dashboard
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link to="/login">
-                  <Button
-                    variant="ghost"
-                    leftIcon={<LogIn className="h-4 w-4" />}
-                  >
-                    Sign in
-                  </Button>
-                </Link>
-                <Link to="/register">
-                  <Button leftIcon={<UserPlus className="h-4 w-4" />}>
-                    Get started
-                  </Button>
-                </Link>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
-
-      {/* Hero with REAL CTAs (no fake search pill) */}
+      {/* HERO — asymmetric editorial split */}
       <section className="relative">
-        <div className="mx-auto max-w-7xl px-4 pb-12 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-10">
-          <div className="relative overflow-hidden rounded-3xl">
-            <img
-              src={HERO_IMG}
-              alt="Surplus food laid out"
-              className="h-[420px] w-full object-cover sm:h-[500px] lg:h-[580px]"
-            />
-            <div className="absolute inset-0 bg-black/45" />
-            <div className="absolute inset-0 flex flex-col items-start justify-end p-6 sm:p-10 lg:p-14">
-              <div className="max-w-2xl">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium uppercase tracking-wider text-white backdrop-blur-sm">
-                  <Sparkles className="h-3 w-3" />
-                  Surplus food, redistributed
-                </div>
-                <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
-                  Find the food
-                  <br />
-                  before it&apos;s wasted.
-                </h1>
-                <p className="mt-4 max-w-xl text-base text-white/90 sm:text-lg">
-                  Restaurants post surplus meals nearby. NGOs and animal rescues
-                  claim them in minutes — fresh, free, and verified.
-                </p>
+        <div className="mx-auto max-w-[1400px] px-5 pb-10 pt-8 sm:px-8 lg:px-14 lg:pb-16 lg:pt-14">
+          <div className="grid items-end gap-10 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-7">
+              <div className="flex items-center gap-3 text-[var(--color-ink-500)]">
+                <BowlMark className="h-5 w-5 text-[var(--color-ember)]" />
+                <span className="eyebrow">
+                  Vol. I · Issue No.{' '}
+                  <span className="tabular-nums">{issueNumber}</span>
+                </span>
+                <hr
+                  aria-hidden="true"
+                  className="hairline w-12 border-[var(--color-rule)]"
+                />
+                <span className="eyebrow">Bengaluru &amp; beyond</span>
               </div>
+              <h1 className="font-display mt-6 text-[clamp(3rem,7.5vw,6.25rem)] font-light leading-[0.92] tracking-tight text-[var(--color-ink)]">
+                The food
+                <br />
+                <span className="font-display-italic font-normal text-[var(--color-ember)]">
+                  before
+                </span>{' '}
+                it&rsquo;s
+                <br />
+                wasted.
+              </h1>
+              <p className="mt-7 max-w-xl text-base leading-relaxed text-[var(--color-ink-700)] sm:text-[17px]">
+                A working ledger of surplus from kitchens across the city —
+                claimed, in minutes, by the rescues and shelters who need it
+                most. Honest food, plainly listed, no waste.
+              </p>
 
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                <Link to="/listings">
-                  <Button
-                    size="lg"
-                    leftIcon={<Search className="h-4 w-4" />}
-                    className="h-12 px-6 text-sm"
-                  >
-                    Browse listings
-                  </Button>
+              <div className="mt-9 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/listings"
+                  className="inline-flex h-12 items-center gap-2 rounded-full bg-[var(--color-ink)] px-6 text-sm font-medium tracking-wide text-[var(--color-paper)] transition-colors hover:bg-[var(--color-ember)]"
+                >
+                  Read today&rsquo;s ledger
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
                 {user ? (
-                  <Link to={roleToDashboard(user.role)}>
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      rightIcon={<ArrowRight className="h-4 w-4" />}
-                      className="h-12 border-white/40 bg-white/10 px-6 text-sm text-white backdrop-blur hover:bg-white/20"
-                    >
-                      Open dashboard
-                    </Button>
+                  <Link
+                    to={roleToDashboard(user.role)}
+                    className="inline-flex h-12 items-center gap-2 rounded-full border border-[var(--color-ink)] px-6 text-sm font-medium tracking-wide text-[var(--color-ink)] transition-colors hover:bg-[var(--color-ink)] hover:text-[var(--color-paper)]"
+                  >
+                    Open dashboard
+                    <ArrowUpRight className="h-4 w-4" />
                   </Link>
                 ) : (
-                  <Link to="/register">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      rightIcon={<ArrowRight className="h-4 w-4" />}
-                      className="h-12 border-white/40 bg-white/10 px-6 text-sm text-white backdrop-blur hover:bg-white/20"
-                    >
-                      Sign up — it&apos;s free
-                    </Button>
+                  <Link
+                    to="/register"
+                    className="inline-flex h-12 items-center gap-2 rounded-full border border-[var(--color-ink)] px-6 text-sm font-medium tracking-wide text-[var(--color-ink)] transition-colors hover:bg-[var(--color-ink)] hover:text-[var(--color-paper)]"
+                  >
+                    Sign up — it&rsquo;s free
                   </Link>
                 )}
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Category strip — visual only, honest */}
-      <section className="border-b border-gray-200">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
-          <div className="scrollbar-hide flex gap-8 overflow-x-auto py-5">
-            {CATEGORIES.map(({ icon: Icon, label }) => (
-              <Link
-                key={label}
-                to="/listings"
-                className="group flex min-w-[64px] flex-shrink-0 flex-col items-center gap-2 border-b-2 border-transparent pb-3 text-xs font-medium text-gray-500 hover:border-orange-500 hover:text-gray-900"
-              >
-                <Icon className="h-6 w-6" />
-                <span className="whitespace-nowrap">{label}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured listings — REAL data */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-10">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
-                Surplus available right now
-              </h2>
-              <p className="mt-1.5 text-sm text-gray-500">
-                {listings.length > 0
-                  ? `${listings.length} listing${listings.length === 1 ? '' : 's'} live across our partner kitchens.`
-                  : 'No live listings yet — be the first to post or sign up to get notified.'}
-              </p>
+            {/* Hero photo block — slightly oversized, with corner stamp */}
+            <div className="relative lg:col-span-5">
+              <div className="relative overflow-hidden rounded-[28px] border border-[var(--color-rule)] bg-[var(--color-paper-200)]">
+                <img
+                  src={HERO_IMG}
+                  alt="A spread of seasonal surplus from a partner kitchen"
+                  className="aspect-[4/5] h-full w-full object-cover"
+                />
+                <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-[var(--color-paper)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-ember)]" />
+                  Fresh today
+                </span>
+              </div>
+              {/* Vintage round stamp — pure SVG, no shadow */}
+              <RoundStamp className="pointer-events-none absolute -bottom-6 -right-4 h-28 w-28 text-[var(--color-ink)] sm:-right-8 sm:h-32 sm:w-32" />
             </div>
-            <Link
-              to="/listings"
-              className="inline-flex items-center gap-1 text-sm font-semibold text-gray-900 underline-offset-4 hover:underline"
-            >
-              See all
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
+
+          {/* Hero metadata strip — like a magazine masthead row */}
+          <dl className="mt-14 grid grid-cols-2 gap-y-6 border-t border-[var(--color-rule)] pt-6 sm:grid-cols-4">
+            <Meta k="Live now" v={String(liveCount).padStart(2, '0')} />
+            <Meta
+              k="Cities"
+              v={cityCount > 0 ? String(cityCount).padStart(2, '0') : '01'}
+            />
+            <Meta k="Human-safe" v={String(humanCount).padStart(2, '0')} />
+            <Meta k="Animal-safe" v={String(animalCount).padStart(2, '0')} />
+          </dl>
+        </div>
+      </section>
+
+      {/* TODAY'S LEDGER — editorial listings */}
+      <section
+        id="ledger"
+        className="border-t border-[var(--color-rule)] bg-[var(--color-paper)]"
+      >
+        <div className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 lg:px-14 lg:py-24">
+          <SectionHeader
+            chapter="I"
+            kicker="Today's ledger"
+            title={
+              <>
+                What&rsquo;s on the counter,{' '}
+                <span className="font-display-italic">right now.</span>
+              </>
+            }
+            sub={
+              listings.length > 0
+                ? `${listings.length} live listing${listings.length === 1 ? '' : 's'} from partner kitchens. New entries arrive throughout the day.`
+                : 'No live listings yet. Restaurant partners post surplus throughout the day.'
+            }
+            cta={{ to: '/listings', label: 'Open the full ledger' }}
+          />
           {listings.length > 0 ? (
-            <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {listings.slice(0, 4).map((item) => (
-                <ListingCard key={item.id} item={item} />
-              ))}
-            </div>
+            <EditorialListings items={listings.slice(0, 5)} />
           ) : (
-            <div className="mt-7 rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-10 text-center">
-              <Utensils className="mx-auto h-8 w-8 text-gray-400" />
-              <p className="mt-3 text-sm font-medium text-gray-900">
-                No live listings right now
+            <div className="mt-12 rounded-2xl border border-dashed border-[var(--color-rule)] p-14 text-center">
+              <BowlMark className="mx-auto h-8 w-8 text-[var(--color-ember)]" />
+              <p className="font-display mt-4 text-2xl font-light text-[var(--color-ink)]">
+                The ledger is empty.
               </p>
-              <p className="mt-1 text-sm text-gray-500">
-                Restaurant partners post surplus throughout the day.
+              <p className="mt-2 text-sm text-[var(--color-ink-500)]">
+                Become a partner to be the first entry of the day.
               </p>
-              <Link to="/register" className="mt-4 inline-block">
-                <Button leftIcon={<UserPlus className="h-4 w-4" />}>
-                  Become a partner
-                </Button>
+              <Link
+                to="/register"
+                className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-[var(--color-ink)] px-5 text-sm font-medium text-[var(--color-paper)] hover:bg-[var(--color-ember)]"
+              >
+                <UserPlus className="h-4 w-4" /> Become a partner
               </Link>
             </div>
           )}
         </div>
       </section>
 
-      {/* Stats strip */}
-      <section className="bg-gray-50" id="impact">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-10">
-          <Stat label="Meals rescued" value="12,480" hint="Last 12 months" />
-          <Stat label="Partner orgs" value="184" hint="Across 38 cities" />
-          <Stat label="Avg pickup" value="2h 14m" hint="Post → handover" />
-          <Stat label="Waste avoided" value="6.2t" hint="Estimated CO₂e" />
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how" className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-10 lg:py-20">
-          <div className="max-w-2xl">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-orange-600">
-              How it works
-            </div>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
-              From kitchen to community in three steps
-            </h2>
-          </div>
-          <div className="mt-10 grid gap-6 lg:grid-cols-3">
-            <StepCard
-              n="01"
-              tone="bg-orange-100 text-orange-700"
-              title="Restaurants post"
-              body="Pick a category, set quantity and pickup window. Listings go live in seconds."
-            />
-            <StepCard
-              n="02"
-              tone="bg-emerald-100 text-emerald-700"
-              title="Partners claim"
-              body="Verified NGOs and rescues see nearby food in real time and reserve with one tap."
-            />
-            <StepCard
-              n="03"
-              tone="bg-blue-100 text-blue-700"
-              title="Pickup confirmed"
-              body="Both sides confirm handover. Every step is logged for compliance and impact reporting."
-            />
+      {/* BY THE NUMBERS — ledger-style stats with hairline rules */}
+      <section className="border-t border-[var(--color-rule)] bg-[var(--color-paper-200)]">
+        <div className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 lg:px-14 lg:py-24">
+          <SectionHeader
+            chapter="II"
+            kicker="By the numbers"
+            title={
+              <>
+                A small, stubborn{' '}
+                <span className="font-display-italic">dent</span> in food
+                waste.
+              </>
+            }
+            sub="What our partner kitchens and rescues have moved together — counted plainly, audited at every handover."
+          />
+          <div className="col-rules mt-12 grid grid-cols-2 border-y border-[var(--color-rule)] lg:grid-cols-4">
+            <Ledger n="12,480" l="Meals rescued" h="Last 12 months" />
+            <Ledger n="184" l="Partner orgs" h="38 cities" />
+            <Ledger n="2h 14m" l="Avg. pickup" h="Post → handover" />
+            <Ledger n="6.2t" l="Waste avoided" h="Estimated CO₂e" />
           </div>
         </div>
       </section>
 
-      {/* Roles */}
-      <section id="partners" className="bg-gray-50">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-10 lg:py-20">
-          <div className="max-w-2xl">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-orange-600">
-              Built for everyone in the chain
-            </div>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
-              One platform, three workflows
-            </h2>
+      {/* THE METHOD — three vertical chapters with oversized roman numerals */}
+      <section
+        id="how"
+        className="border-t border-[var(--color-rule)] bg-[var(--color-paper)]"
+      >
+        <div className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 lg:px-14 lg:py-24">
+          <SectionHeader
+            chapter="III"
+            kicker="The method"
+            title={
+              <>
+                From kitchen to community,{' '}
+                <span className="font-display-italic">in three motions.</span>
+              </>
+            }
+            sub="No app gymnastics. Restaurants post in seconds, partners reserve in one tap, both sides confirm at handover."
+          />
+          <div className="mt-14 divide-y divide-[var(--color-rule)] border-y border-[var(--color-rule)]">
+            <Chapter
+              roman="I."
+              title="The kitchen posts."
+              body="A line cook taps a category, sets the quantity, and picks a window. A photo, a city, a phone number — and the listing is live to verified partners."
+            />
+            <Chapter
+              roman="II."
+              title="A partner reserves."
+              body="Verified NGOs and animal rescues in range see it instantly. One tap puts the listing on their route — restaurant phone revealed only on accept."
+            />
+            <Chapter
+              roman="III."
+              title="The handover, on the record."
+              body="Both sides confirm at pickup. Every step is logged — for compliance, for honest impact reports, and so the next listing arrives faster."
+            />
           </div>
-          <div className="mt-10 grid gap-6 lg:grid-cols-3">
-            <RoleCard
+        </div>
+      </section>
+
+      {/* ROLES — magazine-style contributor cards */}
+      <section
+        id="partners"
+        className="border-t border-[var(--color-rule)] bg-[var(--color-paper-200)]"
+      >
+        <div className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 lg:px-14 lg:py-24">
+          <SectionHeader
+            chapter="IV"
+            kicker="At the table"
+            title={
+              <>
+                Three workflows,{' '}
+                <span className="font-display-italic">one bridge.</span>
+              </>
+            }
+            sub="The platform is the same — the verbs change with who's signed in."
+          />
+          <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-[var(--color-rule)] bg-[var(--color-rule)] lg:grid-cols-3">
+            <Contributor
+              tag="No. 01 — Restaurants"
               icon={Utensils}
-              tone="text-orange-700"
-              tag="For restaurants"
-              title="Turn surplus into impact, not landfill"
-              body="Post listings in seconds. Approve claims. Track every pickup with a full audit trail."
+              tone="text-[var(--color-ember)]"
+              title="Surplus, made useful — not landfill."
+              body="Post listings in seconds. Approve claims. Audit every pickup."
               img="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=900&auto=format&fit=crop&q=80"
             />
-            <RoleCard
+            <Contributor
+              tag="No. 02 — NGOs &amp; shelters"
               icon={Sparkles}
-              tone="text-blue-700"
-              tag="For NGOs & shelters"
-              title="Reliable, fresh meals — sourced nearby"
-              body="Discover human-safe surplus near you. Claim, get directions, and confirm handover."
+              tone="text-[var(--color-ink)]"
+              title="Reliable, fresh meals — sourced nearby."
+              body="Discover human-safe surplus. Claim, route, and confirm handover."
               img="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900&auto=format&fit=crop&q=80"
             />
-            <RoleCard
+            <Contributor
+              tag="No. 03 — Animal rescues"
               icon={Heart}
-              tone="text-emerald-700"
-              tag="For animal rescues"
-              title="Animal-safe scraps that would otherwise be wasted"
-              body="Filter for animal-safe categories, coordinate around routes, and reduce feed costs."
+              tone="text-[var(--color-ember)]"
+              title="Animal-safe scraps, redirected with care."
+              body="Filter for what your animals can eat. Cut feed costs, cut waste."
               img="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=900&auto=format&fit=crop&q=80"
             />
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-10">
-          <div className="overflow-hidden rounded-3xl border border-gray-200 bg-gray-900 text-white">
-            <div className="grid gap-0 lg:grid-cols-2">
-              <div className="p-8 sm:p-10 lg:p-14">
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-orange-300">
-                  Ready when you are
+      {/* MANIFESTO CTA — oversized serif quote on dark cream */}
+      <section className="border-t border-[var(--color-rule)]">
+        <div className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 lg:px-14 lg:py-24">
+          <div className="ink-grain relative overflow-hidden rounded-[32px] border border-[var(--color-ink)] px-7 py-14 text-[var(--color-paper)] sm:px-12 sm:py-20 lg:px-20 lg:py-28">
+            <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
+              <div className="lg:col-span-8">
+                <div className="eyebrow text-[var(--color-paper-200)]">
+                  A working manifesto
                 </div>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                  Start rescuing surplus food in your city today.
-                </h2>
-                <p className="mt-3 max-w-md text-sm text-gray-300 sm:text-base">
-                  Free for restaurants and verified non-profits. No card
-                  required. Up and running in minutes.
+                <p className="font-display mt-6 text-[clamp(2.25rem,4.5vw,4rem)] font-light leading-[1.02] tracking-tight">
+                  &ldquo;Good food shouldn&rsquo;t need{' '}
+                  <span className="font-display-italic text-[var(--color-ember)]">
+                    a second life
+                  </span>{' '}
+                  to be useful — but when it does, it deserves an honest
+                  bridge.&rdquo;
                 </p>
-                <div className="mt-7 flex flex-wrap gap-3">
-                  <Link to="/register">
-                    <Button
-                      size="lg"
-                      rightIcon={<ArrowRight className="h-4 w-4" />}
-                    >
-                      Create an account
-                    </Button>
-                  </Link>
-                  <Link to="/login">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="border-white/30 bg-transparent text-white hover:bg-white/10"
-                    >
-                      Sign in
-                    </Button>
-                  </Link>
+                <div className="mt-8 flex flex-wrap items-center gap-4 text-sm text-[var(--color-paper-200)]">
+                  <hr
+                    aria-hidden="true"
+                    className="hairline w-10 border-[var(--color-paper-200)]"
+                  />
+                  <span className="eyebrow">FoodSetu, Vol. I</span>
                 </div>
               </div>
-              <div className="relative hidden lg:block">
-                <img
-                  src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=1200&auto=format&fit=crop&q=80"
-                  alt="Fresh produce"
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
+              <div className="flex flex-col gap-3 lg:col-span-4">
+                <Link
+                  to="/register"
+                  className="inline-flex h-12 items-center justify-between gap-3 rounded-full bg-[var(--color-ember)] px-6 text-sm font-medium text-white transition-colors hover:bg-[oklch(0.58_0.21_38)]"
+                >
+                  <span>Create an account</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  to="/login"
+                  className="inline-flex h-12 items-center justify-between gap-3 rounded-full border border-[var(--color-paper-200)] px-6 text-sm font-medium text-[var(--color-paper)] transition-colors hover:bg-[var(--color-paper)] hover:text-[var(--color-ink)]"
+                >
+                  <span>Sign in</span>
+                  <LogIn className="h-4 w-4" />
+                </Link>
+                <Link
+                  to="/listings"
+                  className="inline-flex h-12 items-center justify-between gap-3 rounded-full px-6 text-sm font-medium text-[var(--color-paper-200)] transition-colors hover:text-[var(--color-paper)]"
+                >
+                  <span>Just browse the ledger</span>
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-10">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-600 text-white">
-              <Utensils className="h-4 w-4" />
-            </div>
-            <div>
-              <div className="text-base font-bold">FoodSetu</div>
-              <div className="text-xs text-gray-500">
-                © {new Date().getFullYear()} — A bridge between kitchens and
-                communities.
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
-            <Link to="/listings" className="hover:text-gray-900">
-              Browse listings
-            </Link>
-            <a href="#how" className="hover:text-gray-900">
-              How it works
-            </a>
-            <a href="#partners" className="hover:text-gray-900">
-              Partners
-            </a>
-            <Link to="/login" className="hover:text-gray-900">
-              Sign in
-            </Link>
-            <Link to="/register" className="hover:text-gray-900">
-              Get started
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <Colophon issueNumber={issueNumber} />
     </div>
   )
 }
 
-function ListingCard({ item }: { item: PublicListingRow }) {
-  const tone =
-    item.foodCategory === 'ANIMAL_SAFE'
-      ? 'bg-blue-100 text-blue-700'
-      : 'bg-emerald-100 text-emerald-700'
-  const label =
-    item.foodCategory === 'ANIMAL_SAFE' ? 'Animal-safe' : 'Human-safe'
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Top tape — a thin marquee of running stats. Sits above the masthead. */
+/* ────────────────────────────────────────────────────────────────────────── */
 
-  const pickup = formatPickup(item.pickupStartTime, item.pickupEndTime)
-  const subtitle =
-    item.cityName ?? item.orgName ?? 'Pickup location confirmed on claim'
+function TopTape({ liveCount }: { liveCount: number }) {
+  const tape = [
+    `${liveCount} live listings`,
+    'fresh from partner kitchens',
+    '12,480 meals rescued',
+    '184 verified partners',
+    '38 cities & growing',
+    'pickups in under 2h 14m',
+    'every handover, on record',
+    'free to join — always',
+  ]
+  return (
+    <div className="border-b border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]">
+      <div className="overflow-hidden">
+        <div
+          className="flex whitespace-nowrap py-2.5"
+          style={{ animation: 'var(--animate-marquee)' }}
+        >
+          {[...tape, ...tape, ...tape, ...tape].map((t, i) => (
+            <span
+              key={i}
+              className="eyebrow flex shrink-0 items-center gap-3 px-6 text-[var(--color-paper)]/85"
+            >
+              <span className="h-1 w-1 rounded-full bg-[var(--color-ember)]" />
+              {t}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Site header — masthead with serif logotype and pill nav. */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function SiteHeader({
+  user,
+  isPending,
+}: {
+  user: { role?: string | null } | undefined
+  isPending: boolean
+}) {
+  return (
+    <header className="sticky top-0 z-30 border-b border-[var(--color-rule)] bg-[var(--color-paper)]/85 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-6 px-5 sm:h-[72px] sm:px-8 lg:px-14">
+        <Link to="/" className="flex items-center gap-3">
+          <BowlMark className="h-7 w-7 text-[var(--color-ember)]" />
+          <div className="leading-none">
+            <div className="font-display text-[22px] font-medium tracking-tight text-[var(--color-ink)]">
+              FoodSetu
+            </div>
+            <div className="eyebrow mt-1 text-[var(--color-ink-500)]">
+              Est. 2024 — Bengaluru
+            </div>
+          </div>
+        </Link>
+
+        <nav className="ml-auto flex items-center gap-1 sm:gap-3">
+          <Link
+            to="/listings"
+            className="editorial-link hidden text-sm font-medium text-[var(--color-ink-700)] sm:inline-flex"
+          >
+            Today&rsquo;s ledger
+          </Link>
+          <a
+            href="#how"
+            className="editorial-link hidden text-sm font-medium text-[var(--color-ink-700)] lg:inline-flex"
+          >
+            The method
+          </a>
+          <a
+            href="#partners"
+            className="editorial-link hidden text-sm font-medium text-[var(--color-ink-700)] lg:inline-flex"
+          >
+            Partners
+          </a>
+          <span className="mx-2 hidden h-5 w-px bg-[var(--color-rule)] sm:block" />
+          {!isPending && user ? (
+            <Link
+              to={roleToDashboard(user.role)}
+              className="inline-flex h-10 items-center gap-2 rounded-full bg-[var(--color-ink)] px-5 text-sm font-medium text-[var(--color-paper)] hover:bg-[var(--color-ember)]"
+            >
+              Open dashboard
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-medium text-[var(--color-ink-700)] hover:bg-[var(--color-paper-200)]"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign in
+              </Link>
+              <Link
+                to="/register"
+                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[var(--color-ink)] px-5 text-sm font-medium text-[var(--color-paper)] hover:bg-[var(--color-ember)]"
+              >
+                Get started
+              </Link>
+            </>
+          )}
+        </nav>
+      </div>
+    </header>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Section header — chapter numeral + kicker + serif title + sub + cta. */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function SectionHeader({
+  chapter,
+  kicker,
+  title,
+  sub,
+  cta,
+}: {
+  chapter: string
+  kicker: string
+  title: React.ReactNode
+  sub?: string
+  cta?: { to: string; label: string }
+}) {
+  return (
+    <div className="grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-10">
+      <div className="lg:col-span-2">
+        <div className="font-display select-none text-[64px] font-light leading-none text-[var(--color-ember)] sm:text-[88px]">
+          {chapter}.
+        </div>
+      </div>
+      <div className="lg:col-span-7">
+        <div className="eyebrow text-[var(--color-ink-500)]">{kicker}</div>
+        <h2 className="font-display mt-3 text-[clamp(2rem,4.2vw,3.5rem)] font-light leading-[1.02] tracking-tight text-[var(--color-ink)]">
+          {title}
+        </h2>
+        {sub ? (
+          <p className="mt-4 max-w-xl text-base text-[var(--color-ink-700)]">
+            {sub}
+          </p>
+        ) : null}
+      </div>
+      {cta ? (
+        <div className="lg:col-span-3 lg:text-right">
+          <Link
+            to={cta.to}
+            className="editorial-link inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-ink)]"
+          >
+            {cta.label}
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Editorial listings — first card large, others stacked, all hairline. */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function EditorialListings({ items }: { items: Array<PublicListingRow> }) {
+  if (items.length === 0) return null
+  const [lead, ...rest] = items
+  return (
+    <div className="mt-12 grid gap-10 lg:grid-cols-12">
+      <FeatureCard item={lead} index={0} />
+      <div className="divide-y divide-[var(--color-rule)] lg:col-span-5">
+        {rest.slice(0, 4).map((item, i) => (
+          <RowCard key={item.id} item={item} index={i + 1} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function FeatureCard({
+  item,
+  index,
+}: {
+  item: PublicListingRow
+  index: number
+}) {
+  const tag = item.foodCategory === 'ANIMAL_SAFE' ? 'Animal-safe' : 'Human-safe'
   return (
     <Link
       to="/listings"
-      className="group block overflow-hidden rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+      className="group relative block lg:col-span-7"
     >
-      <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100">
+      <div className="relative overflow-hidden rounded-[24px] border border-[var(--color-rule)] bg-[var(--color-paper-200)]">
         <img
           src={item.imageUrl ?? FALLBACK_LISTING_IMG}
           alt={item.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="aspect-[4/3] h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
         />
-        <span
-          className={`absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone}`}
-        >
-          {label}
+        <div className="absolute left-5 top-5 flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-paper)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-ember)]" />
+            Lead entry
+          </span>
+        </div>
+        <span className="font-display absolute right-5 top-3 text-[44px] font-light leading-none text-[var(--color-paper)] tabular-nums">
+          {String(index + 1).padStart(2, '0')}
         </span>
       </div>
-      <div className="px-1 pt-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold text-gray-900">
-              {subtitle}
-            </div>
-            <div className="truncate text-sm text-gray-500">{item.title}</div>
+      <div className="mt-5 grid grid-cols-12 items-end gap-6">
+        <div className="col-span-9">
+          <div className="eyebrow text-[var(--color-ink-500)]">
+            {tag} ·{' '}
+            {item.cityName ?? item.orgName ?? 'Pickup confirmed on claim'}
+          </div>
+          <h3 className="font-display mt-2 text-3xl font-light leading-tight text-[var(--color-ink)] sm:text-[34px]">
+            {item.title}
+          </h3>
+        </div>
+        <div className="col-span-3 text-right">
+          <div className="eyebrow text-[var(--color-ink-500)]">Window</div>
+          <div className="mt-2 text-sm font-medium tabular-nums text-[var(--color-ink)]">
+            {formatPickupShort(item.pickupStartTime, item.pickupEndTime)}
           </div>
         </div>
-        <div className="mt-1 text-sm text-gray-500">
-          <span className="font-medium text-gray-900 tabular-nums">
-            {item.quantity} {item.quantityUnit.toLowerCase()}
-          </span>{' '}
-          · {pickup}
-        </div>
+      </div>
+      <div className="mt-3 flex items-center gap-3 text-sm text-[var(--color-ink-700)]">
+        <span className="font-medium tabular-nums text-[var(--color-ink)]">
+          {item.quantity} {item.quantityUnit.toLowerCase()}
+        </span>
+        <hr aria-hidden="true" className="hairline w-10" />
+        <span className="editorial-link inline-flex items-center gap-1 font-medium text-[var(--color-ink)]">
+          Read entry
+          <ArrowUpRight className="h-3.5 w-3.5" />
+        </span>
       </div>
     </Link>
   )
 }
 
-function Stat({
-  label,
-  value,
-  hint,
-}: {
-  label: string
-  value: string
-  hint: string
-}) {
+function RowCard({ item, index }: { item: PublicListingRow; index: number }) {
+  const tag = item.foodCategory === 'ANIMAL_SAFE' ? 'Animal-safe' : 'Human-safe'
   return (
-    <div>
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-        {label}
+    <Link
+      to="/listings"
+      className="group grid grid-cols-12 items-center gap-4 py-5 first:pt-0"
+    >
+      <span className="font-display col-span-2 text-[34px] font-light leading-none text-[var(--color-ink-300)] tabular-nums sm:col-span-1">
+        {String(index + 1).padStart(2, '0')}
+      </span>
+      <div className="col-span-10 sm:col-span-7">
+        <div className="eyebrow text-[var(--color-ink-500)]">
+          {tag} · {item.cityName ?? 'Bengaluru'}
+        </div>
+        <h4 className="font-display mt-1 text-[20px] font-light leading-snug text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-ember)]">
+          {item.title}
+        </h4>
+        <div className="mt-1 text-xs text-[var(--color-ink-700)]">
+          <span className="font-medium tabular-nums text-[var(--color-ink)]">
+            {item.quantity} {item.quantityUnit.toLowerCase()}
+          </span>{' '}
+          · {formatPickupShort(item.pickupStartTime, item.pickupEndTime)}
+        </div>
       </div>
-      <div className="mt-2 text-4xl font-semibold tracking-tight text-gray-900 tabular-nums">
-        {value}
+      <div className="col-span-12 sm:col-span-4 sm:text-right">
+        <span className="editorial-link inline-flex items-center gap-1 text-sm font-medium text-[var(--color-ink)]">
+          Read
+          <ArrowUpRight className="h-3.5 w-3.5" />
+        </span>
       </div>
-      <div className="mt-1 text-sm text-gray-500">{hint}</div>
+    </Link>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Ledger numbers, chapters, contributors, meta — all hairline-driven. */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function Ledger({ n, l, h }: { n: string; l: string; h: string }) {
+  return (
+    <div className="px-2 py-8 sm:px-6 lg:px-8">
+      <div className="eyebrow text-[var(--color-ink-500)]">{l}</div>
+      <div className="font-display mt-3 text-[44px] font-light leading-none tracking-tight text-[var(--color-ink)] tabular-nums sm:text-[56px]">
+        {n}
+      </div>
+      <div className="mt-3 text-xs text-[var(--color-ink-500)]">{h}</div>
     </div>
   )
 }
 
-function StepCard({
-  n,
-  tone,
+function Meta({ k, v }: { k: string; v: string }) {
+  return (
+    <div>
+      <dt className="eyebrow text-[var(--color-ink-500)]">{k}</dt>
+      <dd className="font-display mt-2 text-[28px] font-light leading-none tracking-tight text-[var(--color-ink)] tabular-nums">
+        {v}
+      </dd>
+    </div>
+  )
+}
+
+function Chapter({
+  roman,
   title,
   body,
 }: {
-  n: string
-  tone: string
+  roman: string
   title: string
   body: string
 }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-7">
-      <div
-        className={`inline-flex h-10 w-10 items-center justify-center rounded-full font-semibold tabular-nums ${tone}`}
-      >
-        {n}
+    <div className="grid grid-cols-12 gap-4 py-10 sm:gap-8 sm:py-12">
+      <div className="col-span-2 sm:col-span-3 lg:col-span-2">
+        <div className="font-display text-[64px] font-light leading-none text-[var(--color-ember)] sm:text-[96px]">
+          {roman}
+        </div>
       </div>
-      <h3 className="mt-5 text-lg font-semibold text-gray-900">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-gray-600">{body}</p>
+      <div className="col-span-10 sm:col-span-9 lg:col-span-7">
+        <h3 className="font-display text-[28px] font-light leading-tight tracking-tight text-[var(--color-ink)] sm:text-[36px]">
+          {title}
+        </h3>
+        <p className="mt-3 max-w-xl text-base text-[var(--color-ink-700)]">
+          {body}
+        </p>
+      </div>
     </div>
   )
 }
 
-function RoleCard({
+function Contributor({
+  tag,
   icon: Icon,
   tone,
-  tag,
   title,
   body,
   img,
 }: {
+  tag: string
   icon: LucideIcon
   tone: string
-  tag: string
   title: string
   body: string
   img: string
 }) {
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-colors hover:border-gray-300">
-      <div className="aspect-[16/10] overflow-hidden bg-gray-100">
+    <article className="group flex flex-col gap-5 bg-[var(--color-paper)] p-7 transition-colors hover:bg-[var(--color-paper-200)] sm:p-8">
+      <div className="aspect-[16/10] overflow-hidden rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper-200)]">
         <img
           src={img}
           alt=""
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
         />
       </div>
-      <div className="flex flex-1 flex-col p-6">
-        <div
-          className={`inline-flex items-center gap-2 text-xs font-semibold ${tone}`}
-        >
-          <Icon className="h-4 w-4" />
-          {tag}
-        </div>
-        <h3 className="mt-3 text-lg font-semibold text-gray-900">{title}</h3>
-        <p className="mt-2 flex-1 text-sm text-gray-600">{body}</p>
+      <div className="flex items-center gap-2">
+        <Icon className={`h-4 w-4 ${tone}`} />
+        <span className="eyebrow text-[var(--color-ink-500)]">{tag}</span>
+      </div>
+      <h3 className="font-display text-[26px] font-light leading-tight tracking-tight text-[var(--color-ink)]">
+        {title}
+      </h3>
+      <p className="text-sm text-[var(--color-ink-700)]">{body}</p>
+      <div className="mt-auto flex items-center gap-3">
+        <hr aria-hidden="true" className="hairline flex-1" />
         <Link
           to="/register"
-          className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-gray-900 underline-offset-4 hover:underline"
+          className="editorial-link inline-flex items-center gap-1 text-sm font-medium text-[var(--color-ink)]"
         >
-          Learn more
-          <ArrowRight className="h-4 w-4" />
+          Apply
+          <ArrowUpRight className="h-3.5 w-3.5" />
         </Link>
       </div>
-    </div>
+    </article>
   )
 }
 
-// All times rendered in Asia/Kolkata so SSR (server TZ) and client (browser
-// TZ) produce identical strings — otherwise hydration mismatches.
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Colophon footer */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function Colophon({ issueNumber }: { issueNumber: string }) {
+  return (
+    <footer className="border-t border-[var(--color-rule)] bg-[var(--color-paper)]">
+      <div className="mx-auto max-w-[1400px] px-5 py-12 sm:px-8 lg:px-14">
+        <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-5">
+            <div className="flex items-center gap-3">
+              <BowlMark className="h-8 w-8 text-[var(--color-ember)]" />
+              <div className="leading-tight">
+                <div className="font-display text-[26px] font-medium text-[var(--color-ink)]">
+                  FoodSetu
+                </div>
+                <div className="eyebrow mt-1 text-[var(--color-ink-500)]">
+                  A bridge between kitchens &amp; communities
+                </div>
+              </div>
+            </div>
+            <p className="mt-5 max-w-md text-sm text-[var(--color-ink-700)]">
+              Set in <span className="font-display italic">Fraunces</span> &amp;
+              Poppins. Printed daily, in pixels, from Bengaluru.
+            </p>
+          </div>
+          <div className="lg:col-span-4">
+            <div className="eyebrow text-[var(--color-ink-500)]">Sections</div>
+            <ul className="mt-4 grid grid-cols-2 gap-y-2 text-sm text-[var(--color-ink-700)]">
+              <li>
+                <Link to="/listings" className="editorial-link">
+                  Ledger
+                </Link>
+              </li>
+              <li>
+                <a href="#how" className="editorial-link">
+                  Method
+                </a>
+              </li>
+              <li>
+                <a href="#partners" className="editorial-link">
+                  Partners
+                </a>
+              </li>
+              <li>
+                <Link to="/login" className="editorial-link">
+                  Sign in
+                </Link>
+              </li>
+              <li>
+                <Link to="/register" className="editorial-link">
+                  Get started
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div className="lg:col-span-3 lg:text-right">
+            <div className="eyebrow text-[var(--color-ink-500)]">Colophon</div>
+            <div className="mt-4 text-sm text-[var(--color-ink-700)]">
+              © {new Date().getFullYear()} · Vol. I, Issue No.{' '}
+              <span className="tabular-nums">{issueNumber}</span>
+            </div>
+          </div>
+        </div>
+        <div className="mt-10 border-t border-[var(--color-rule)] pt-5 text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-500)]">
+          Made with restraint · No card required · Always free for verified
+          partners
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Custom SVG marks — bowl & vintage round stamp. No external deps. */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function BowlMark({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 32 32"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M4 14.5h24c0 6.5-5.4 11.5-12 11.5S4 21 4 14.5z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2 14.5h28"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M16 4c-1.4 1.6-1.4 3.4 0 5s1.4 3.4 0 5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M11 6c-1 1.2-1 2.6 0 3.8M21 6c-1 1.2-1 2.6 0 3.8"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        opacity="0.7"
+      />
+    </svg>
+  )
+}
+
+function RoundStamp({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 200 200" className={className} aria-hidden="true">
+      <defs>
+        <path
+          id="stamp-circle"
+          d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"
+        />
+      </defs>
+      <circle
+        cx="100"
+        cy="100"
+        r="92"
+        fill="var(--color-paper)"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <circle
+        cx="100"
+        cy="100"
+        r="78"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="0.8"
+        strokeDasharray="2 3"
+      />
+      <text
+        fill="currentColor"
+        style={{
+          fontFamily: 'Poppins, sans-serif',
+          fontSize: '12px',
+          fontWeight: 600,
+          letterSpacing: '0.18em',
+        }}
+      >
+        <textPath href="#stamp-circle" startOffset="0">
+          FRESH · TODAY · CLAIM IN MINUTES · FRESH · TODAY ·
+        </textPath>
+      </text>
+      <g transform="translate(100,100)">
+        <circle r="22" fill="var(--color-ember)" />
+        <text
+          y="6"
+          textAnchor="middle"
+          fill="var(--color-paper)"
+          style={{
+            fontFamily: 'Fraunces, serif',
+            fontSize: '24px',
+            fontWeight: 500,
+          }}
+        >
+          FS
+        </text>
+      </g>
+    </svg>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Time formatting — fixed Asia/Kolkata so SSR + client agree (hydration). */
+/* ────────────────────────────────────────────────────────────────────────── */
+
 const TZ = 'Asia/Kolkata'
 const ymdInTz = (d: Date) =>
   new Intl.DateTimeFormat('en-CA', {
@@ -565,7 +924,7 @@ const ymdInTz = (d: Date) =>
     day: '2-digit',
   }).format(d)
 
-function formatPickup(startIso: string, endIso: string): string {
+function formatPickupShort(startIso: string, endIso: string): string {
   const start = new Date(startIso)
   const end = new Date(endIso)
   const now = new Date()
@@ -588,5 +947,5 @@ function formatPickup(startIso: string, endIso: string): string {
       hour: 'numeric',
       minute: '2-digit',
     }).format(d)
-  return `${dayLabel} · ${fmt(start)} – ${fmt(end)}`
+  return `${dayLabel} · ${fmt(start)}–${fmt(end)}`
 }

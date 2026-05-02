@@ -14,18 +14,58 @@ FoodSetu connects restaurants/hotels/bakeries that have surplus food with verifi
 
 ## UI / Design System
 
-Hybrid approach: **Airbnb-style consumer landing** + **Linear/Stripe-style enterprise dashboard shell**.
+Two distinct visual surfaces — kept separate on purpose:
 
-### Landing page (`src/routes/index.tsx`) — Airbnb-style
+1. **Public marketing routes** (`/`, `/listings`) — **"editorial almanac"** direction (this section).
+2. **Authenticated dashboards** (`/restaurant/*`, `/ngo/*`, `/animal/*`, `/admin/*`) — Linear/Stripe-style enterprise shell (further down).
 
-- Sticky pill nav with center search (`Anywhere · Any meal · Add filters`).
-- Full-bleed hero photo (`rounded-3xl`, `bg-black/35` overlay) with overlaid headline and floating search pill.
-- Category strip with `lucide-react` icons and underline-on-active.
-- Photo-first card grid (`rounded-2xl`, `aspect-[4/3]`, `hover:shadow-md`, image `scale-105` on hover).
-- Stats strip on `bg-gray-50`, then "How it works" step cards, then role photo cards (restaurants / NGOs / animals).
-- CTA: dark `bg-gray-900` rounded card with photo on the right.
-- Photos sourced from Unsplash CDN (auto-format, w=800–1600).
-- **Shadows are allowed only on photo cards (`hover:shadow-md`) and the search pill.** No background gradients (uses solid `bg-black/35` overlay).
+### Public routes (`src/routes/index.tsx`, `src/routes/listings.tsx`) — editorial almanac
+
+A warm, paper-feel newsroom aesthetic. **No shadows anywhere on the public surface.** Hierarchy comes from typography, hairline rules, color tone, and SVG grain — never elevation.
+
+**Type system**
+
+- **Display:** Fraunces (Google Fonts, opsz/SOFT axes loaded in `src/routes/__root.tsx`). Used as `font-display` / `font-display-italic`. The italic axis carries the brand voice (e.g. _before_, _plainly_).
+- **Body / UI:** Poppins (default `font-sans`).
+- **Numbers:** always `tabular-nums`.
+
+**Palette** (defined as `@theme` tokens in `src/styles.css`)
+
+| Token                                                        | Use                                                  |
+| ------------------------------------------------------------ | ---------------------------------------------------- |
+| `--color-paper` / `--color-paper-200` / `--color-paper-300`  | Page + section backgrounds (warm cream)              |
+| `--color-rule`                                               | Hairline borders                                     |
+| `--color-ink` / `--color-ink-700` / `--color-ink-500` / `-300` | Text scale (true ink → muted)                        |
+| `--color-ember`                                               | Brand accent (orange-600 family, italics + dot CTAs) |
+
+**Custom utilities** (in `src/styles.css`)
+
+- `font-display`, `font-display-italic` — Fraunces wrappers with optical-size hint.
+- `eyebrow` — `text-[11px] font-semibold uppercase tracking-[0.18em]` label.
+- `hairline` — 1px rule with the rule color baked in.
+- `paper-grain` — SVG `<feTurbulence>` noise overlay for paper texture.
+- `ink-grain` — same noise on the dark ink CTA panel.
+- `col-rules` — multi-column dotted vertical separators.
+- `editorial-link` — body-text link with a dotted underline + ember hover.
+- `marquee` keyframes for the top stats tape (`animate-marquee`).
+
+**Recurring components** (defined inside the route files, not extracted)
+
+- `TopTape` — thin marquee strip above the masthead with five running stats (live listings, partners, meals rescued, etc.).
+- `BowlMark` — hand-drawn SVG bowl logotype.
+- `RoundStamp` — rotating circular text stamp (`Fresh · Today · Claim`) — vintage typewriter feel.
+- Roman-numeral chapter anchors (I–IV) at section heads + giant ghosted romans on Method blocks.
+- `RowCard` / `FeatureCard` — listing entries with index numbers (`01`, `02`...) and hairline dividers.
+- `Colophon` footer — typeset like a magazine masthead, takes `issueNumber` from the loader.
+
+**Hard constraints (do not regress on the public surface)**
+
+- ❌ no `shadow-*`, no `box-shadow`, no soft elevation tricks
+- ❌ no fluid background gradients (a flat ink panel + grain is the only "depth")
+- ✅ all photos use Unsplash with `w=800–1600&auto=format&fit=crop&q=80`
+- ✅ chapter numerals (`I` / `II` / `III` / `IV`) lead each major section
+- ✅ rounded shapes are either `rounded-full` (pills, stamps) or `rounded-[28px]` (large flat panels) — no in-between
+- ✅ `ISSUE_NUMBER` is computed in the route loader (never at module top-level) so SSR + client always render the same week count
 
 ### Dashboard shell (`src/components/DashboardShell.tsx`) — Linear-style
 
