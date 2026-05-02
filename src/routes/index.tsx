@@ -651,7 +651,7 @@ function Numbers() {
               <div className="mt-4 text-[13px] font-medium text-white">
                 {s.k}
               </div>
-              <div className="mt-1 text-[12px] text-white/55">{s.sub}</div>
+              <div className="mt-1 text-[12px] text-white/75">{s.sub}</div>
             </div>
           ))}
         </div>
@@ -907,7 +907,7 @@ function Footer() {
 
         <div className="mt-14 flex flex-col items-start justify-between gap-3 border-t border-[var(--color-line)] pt-6 sm:flex-row sm:items-center">
           <div className="text-[12px] text-[var(--color-ink-3)] numeric">
-            © {new Date().getFullYear()} FoodSetu · Made in Bengaluru
+            © 2026 FoodSetu · Made in Bengaluru
           </div>
           <div className="flex items-center gap-5 text-[12px] text-[var(--color-ink-3)]">
             <a href="#" className="hover:text-[var(--color-ink)]">

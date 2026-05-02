@@ -16,56 +16,55 @@ FoodSetu connects restaurants/hotels/bakeries that have surplus food with verifi
 
 Two distinct visual surfaces — kept separate on purpose:
 
-1. **Public marketing routes** (`/`, `/listings`) — **"editorial almanac"** direction (this section).
-2. **Authenticated dashboards** (`/restaurant/*`, `/ngo/*`, `/animal/*`, `/admin/*`) — Linear/Stripe-style enterprise shell (further down).
+1. **Public marketing route** (`/`) — **minimal product-site** direction (Linear / Vercel / Notion family).
+2. **Other public routes (`/listings`, `/login`, `/register`) and authenticated dashboards** — older orange-accented surface, kept compatible via aliased tokens until they are redesigned.
 
-### Public routes (`src/routes/index.tsx`, `src/routes/listings.tsx`) — editorial almanac
+### Public homepage (`src/routes/index.tsx`) — minimal product-site
 
-A warm, paper-feel newsroom aesthetic. **No shadows anywhere on the public surface.** Hierarchy comes from typography, hairline rules, color tone, and SVG grain — never elevation.
+Quiet, monochrome layout with one emerald accent. Hierarchy comes from typography, hairline borders, generous whitespace, and a faint background grid — not from shadows or color floods.
 
-**Type system**
+**Type system** (loaded in `src/routes/__root.tsx`)
 
-- **Display:** Fraunces (Google Fonts, opsz/SOFT axes loaded in `src/routes/__root.tsx`). Used as `font-display` / `font-display-italic`. The italic axis carries the brand voice (e.g. _before_, _plainly_).
-- **Body / UI:** Poppins (default `font-sans`).
-- **Numbers:** always `tabular-nums`.
+- **Display + body:** Inter (single family, weights 400/500/600/700/800).
+- **Numerals:** `numeric` utility (Inter with `tabular-nums` + `cv11`/`ss01` features). Always used on stats/timestamps.
+- **Mono:** JetBrains Mono (eyebrow chips, codes).
+- **Italic editorial:** Instrument Serif is loaded but used sparingly (e.g. small expressive accents); it is **not** the page voice.
+- Poppins is loaded for legacy pages still on the older surface.
 
 **Palette** (defined as `@theme` tokens in `src/styles.css`)
 
-| Token                                                        | Use                                                  |
-| ------------------------------------------------------------ | ---------------------------------------------------- |
-| `--color-paper` / `--color-paper-200` / `--color-paper-300`  | Page + section backgrounds (warm cream)              |
-| `--color-rule`                                               | Hairline borders                                     |
-| `--color-ink` / `--color-ink-700` / `--color-ink-500` / `-300` | Text scale (true ink → muted)                        |
-| `--color-ember`                                               | Brand accent (orange-600 family, italics + dot CTAs) |
+| Token                                                                     | Use                                                       |
+| ------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `--color-bg`, `--color-bg-2`, `--color-bg-3`                              | White / off-white surfaces (`#ffffff` → `#f4f4f2`)        |
+| `--color-line`, `--color-line-2`                                          | Hairline borders                                          |
+| `--color-ink`, `--color-ink-2`, `--color-ink-3`, `--color-ink-4`          | Text scale (`#0a0a0a` → `#525252` → `#6b6b68` → `#b8b8b3`) |
+| `--color-accent` (`#0a7a3f`), `--color-accent-2` (hover), `--color-accent-soft` | Single deep emerald accent — used very sparingly          |
+
+Legacy aliases (`--color-paper*`, `--color-rule`, `--color-ember`, `--color-ink-700/500/300`, `--color-coral`, `--color-cream`, etc.) are still defined so unconverted pages render. Do **not** use them in new homepage work.
 
 **Custom utilities** (in `src/styles.css`)
 
-- `font-display`, `font-display-italic` — Fraunces wrappers with optical-size hint.
-- `eyebrow` — `text-[11px] font-semibold uppercase tracking-[0.18em]` label.
-- `hairline` — 1px rule with the rule color baked in.
-- `paper-grain` — SVG `<feTurbulence>` noise overlay for paper texture.
-- `ink-grain` — same noise on the dark ink CTA panel.
-- `col-rules` — multi-column dotted vertical separators.
-- `editorial-link` — body-text link with a dotted underline + ember hover.
-- `marquee` keyframes for the top stats tape (`animate-marquee`).
+- `numeric` — Inter tabular-nums with `cv11`/`ss01` for clean digits.
+- `live-dot` — pulsing accent dot for "Live" pill.
+- `grid-bg` — faint 24px grid background overlay (the only background "texture").
+- `mask-fade-x` — horizontal edge fade for marquees.
+- `marquee` — keyframes for the partner logo tape.
 
-**Recurring components** (defined inside the route files, not extracted)
+**Section components** (defined inside `src/routes/index.tsx`, not extracted)
 
-- `TopTape` — thin marquee strip above the masthead with five running stats (live listings, partners, meals rescued, etc.).
-- `BowlMark` — hand-drawn SVG bowl logotype.
-- `RoundStamp` — rotating circular text stamp (`Fresh · Today · Claim`) — vintage typewriter feel.
-- Roman-numeral chapter anchors (I–IV) at section heads + giant ghosted romans on Method blocks.
-- `RowCard` / `FeatureCard` — listing entries with index numbers (`01`, `02`...) and hairline dividers.
-- `Colophon` footer — typeset like a magazine masthead, takes `issueNumber` from the loader.
+`NavBar`, `Hero` (rotating word: minutes/meals/kilos/minds + food photo with floating stat cards), `LogosTape`, `HowItWorks` (3-step grid), `TodaysPicks` (live listings), `Numbers` (dark impact band), `Roles` (3 partner cards), `FinalCta` (with mini activity feed), `Footer`.
 
-**Hard constraints (do not regress on the public surface)**
+`BowlMascot` is exported from this file as a **minimal monogram** (rounded-square black tile with white "F" + green dot). Legacy props (`smiling`, `sleepy`, `steamCount`) are accepted-and-ignored so `login.tsx`, `register.tsx`, and `listings.tsx` continue to compile against the old API.
 
-- ❌ no `shadow-*`, no `box-shadow`, no soft elevation tricks
-- ❌ no fluid background gradients (a flat ink panel + grain is the only "depth")
+**Hard constraints (homepage)**
+
+- ❌ no editorial/magazine devices (Roman numerals, paper grain, oversized italics, dotted column rules, vintage stamps)
+- ❌ no cartoon mascots, blob shapes, squiggles, or rainbow palettes
+- ❌ no soft glows or large drop shadows; only the small `shadow-sm` on floating chips is allowed
+- ✅ one accent color only (`--color-accent`); everything else is ink + line + bg
+- ✅ rounded shapes: `rounded-full` for pills, `rounded-xl`/`rounded-2xl` for cards
 - ✅ all photos use Unsplash with `w=800–1600&auto=format&fit=crop&q=80`
-- ✅ chapter numerals (`I` / `II` / `III` / `IV`) lead each major section
-- ✅ rounded shapes are either `rounded-full` (pills, stamps) or `rounded-[28px]` (large flat panels) — no in-between
-- ✅ `ISSUE_NUMBER` is computed in the route loader (never at module top-level) so SSR + client always render the same week count
+- ✅ footer year is a **static literal** (not `new Date().getFullYear()`) to avoid SSR/timezone drift
 
 ### Dashboard shell (`src/components/DashboardShell.tsx`) — Linear-style
 
