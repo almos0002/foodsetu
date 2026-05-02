@@ -1,5 +1,6 @@
 import {
   CalendarClock,
+  KeyRound,
   MapPin,
   Phone,
   ShoppingBag,
@@ -95,8 +96,35 @@ export function MyClaimCard({ claim }: { claim: MyClaim }) {
         </div>
       ) : null}
       {status === 'ACCEPTED' ? (
-        <div className="border-t border-gray-100 bg-blue-50/50 px-4 py-2 text-xs text-blue-900">
-          The restaurant accepted — head over during the pickup window.
+        <div className="border-t border-gray-100 bg-blue-50/50 px-4 py-3 text-xs text-blue-900">
+          <div className="mb-2">
+            The restaurant accepted — head over during the pickup window.
+          </div>
+          {claim.otpCode ? (
+            <div className="flex items-center gap-2 rounded-lg bg-white p-3 ring-1 ring-blue-200">
+              <KeyRound className="h-5 w-5 text-blue-700" />
+              <div className="flex-1">
+                <div className="text-[10px] font-medium uppercase tracking-wide text-blue-700">
+                  Pickup OTP — show this to the restaurant
+                </div>
+                <div className="mt-0.5 font-mono text-lg font-semibold tracking-[0.3em] text-gray-900">
+                  {claim.otpCode}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+      {status === 'PICKED_UP' && claim.otpCode ? (
+        <div className="border-t border-gray-100 bg-emerald-50/50 px-4 py-2 text-xs text-emerald-900">
+          <KeyRound className="mr-1 inline h-3.5 w-3.5" />
+          Pickup confirmed (OTP{' '}
+          <span className="font-mono font-semibold">{claim.otpCode}</span>).
+        </div>
+      ) : null}
+      {status === 'REJECTED' ? (
+        <div className="border-t border-gray-100 bg-red-50/50 px-4 py-2 text-xs text-red-900">
+          The restaurant declined this claim.
         </div>
       ) : null}
     </article>

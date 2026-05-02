@@ -25,7 +25,9 @@ import { Route as AuthedAnimalDashboardRouteImport } from './routes/_authed/anim
 import { Route as AuthedAdminOrganizationsRouteImport } from './routes/_authed/admin/organizations'
 import { Route as AuthedAdminDashboardRouteImport } from './routes/_authed/admin/dashboard'
 import { Route as AuthedRestaurantListingsIndexRouteImport } from './routes/_authed/restaurant/listings/index'
+import { Route as AuthedRestaurantClaimsIndexRouteImport } from './routes/_authed/restaurant/claims/index'
 import { Route as AuthedRestaurantListingsNewRouteImport } from './routes/_authed/restaurant/listings/new'
+import { Route as AuthedRestaurantClaimsIdRouteImport } from './routes/_authed/restaurant/claims/$id'
 import { Route as AuthedRestaurantListingsIdIndexRouteImport } from './routes/_authed/restaurant/listings/$id/index'
 import { Route as AuthedRestaurantListingsIdEditRouteImport } from './routes/_authed/restaurant/listings/$id/edit'
 
@@ -112,10 +114,22 @@ const AuthedRestaurantListingsIndexRoute =
     path: '/restaurant/listings/',
     getParentRoute: () => AuthedRoute,
   } as any)
+const AuthedRestaurantClaimsIndexRoute =
+  AuthedRestaurantClaimsIndexRouteImport.update({
+    id: '/restaurant/claims/',
+    path: '/restaurant/claims/',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 const AuthedRestaurantListingsNewRoute =
   AuthedRestaurantListingsNewRouteImport.update({
     id: '/restaurant/listings/new',
     path: '/restaurant/listings/new',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedRestaurantClaimsIdRoute =
+  AuthedRestaurantClaimsIdRouteImport.update({
+    id: '/restaurant/claims/$id',
+    path: '/restaurant/claims/$id',
     getParentRoute: () => AuthedRoute,
   } as any)
 const AuthedRestaurantListingsIdIndexRoute =
@@ -146,7 +160,9 @@ export interface FileRoutesByFullPath {
   '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/restaurant/claims/$id': typeof AuthedRestaurantClaimsIdRoute
   '/restaurant/listings/new': typeof AuthedRestaurantListingsNewRoute
+  '/restaurant/claims/': typeof AuthedRestaurantClaimsIndexRoute
   '/restaurant/listings/': typeof AuthedRestaurantListingsIndexRoute
   '/restaurant/listings/$id/edit': typeof AuthedRestaurantListingsIdEditRoute
   '/restaurant/listings/$id/': typeof AuthedRestaurantListingsIdIndexRoute
@@ -166,7 +182,9 @@ export interface FileRoutesByTo {
   '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/restaurant/claims/$id': typeof AuthedRestaurantClaimsIdRoute
   '/restaurant/listings/new': typeof AuthedRestaurantListingsNewRoute
+  '/restaurant/claims': typeof AuthedRestaurantClaimsIndexRoute
   '/restaurant/listings': typeof AuthedRestaurantListingsIndexRoute
   '/restaurant/listings/$id/edit': typeof AuthedRestaurantListingsIdEditRoute
   '/restaurant/listings/$id': typeof AuthedRestaurantListingsIdIndexRoute
@@ -188,7 +206,9 @@ export interface FileRoutesById {
   '/_authed/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/_authed/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_authed/restaurant/claims/$id': typeof AuthedRestaurantClaimsIdRoute
   '/_authed/restaurant/listings/new': typeof AuthedRestaurantListingsNewRoute
+  '/_authed/restaurant/claims/': typeof AuthedRestaurantClaimsIndexRoute
   '/_authed/restaurant/listings/': typeof AuthedRestaurantListingsIndexRoute
   '/_authed/restaurant/listings/$id/edit': typeof AuthedRestaurantListingsIdEditRoute
   '/_authed/restaurant/listings/$id/': typeof AuthedRestaurantListingsIdIndexRoute
@@ -210,7 +230,9 @@ export interface FileRouteTypes {
     | '/onboarding/organization'
     | '/restaurant/dashboard'
     | '/api/auth/$'
+    | '/restaurant/claims/$id'
     | '/restaurant/listings/new'
+    | '/restaurant/claims/'
     | '/restaurant/listings/'
     | '/restaurant/listings/$id/edit'
     | '/restaurant/listings/$id/'
@@ -230,7 +252,9 @@ export interface FileRouteTypes {
     | '/onboarding/organization'
     | '/restaurant/dashboard'
     | '/api/auth/$'
+    | '/restaurant/claims/$id'
     | '/restaurant/listings/new'
+    | '/restaurant/claims'
     | '/restaurant/listings'
     | '/restaurant/listings/$id/edit'
     | '/restaurant/listings/$id'
@@ -251,7 +275,9 @@ export interface FileRouteTypes {
     | '/_authed/onboarding/organization'
     | '/_authed/restaurant/dashboard'
     | '/api/auth/$'
+    | '/_authed/restaurant/claims/$id'
     | '/_authed/restaurant/listings/new'
+    | '/_authed/restaurant/claims/'
     | '/_authed/restaurant/listings/'
     | '/_authed/restaurant/listings/$id/edit'
     | '/_authed/restaurant/listings/$id/'
@@ -379,11 +405,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRestaurantListingsIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/restaurant/claims/': {
+      id: '/_authed/restaurant/claims/'
+      path: '/restaurant/claims'
+      fullPath: '/restaurant/claims/'
+      preLoaderRoute: typeof AuthedRestaurantClaimsIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/restaurant/listings/new': {
       id: '/_authed/restaurant/listings/new'
       path: '/restaurant/listings/new'
       fullPath: '/restaurant/listings/new'
       preLoaderRoute: typeof AuthedRestaurantListingsNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/restaurant/claims/$id': {
+      id: '/_authed/restaurant/claims/$id'
+      path: '/restaurant/claims/$id'
+      fullPath: '/restaurant/claims/$id'
+      preLoaderRoute: typeof AuthedRestaurantClaimsIdRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/restaurant/listings/$id/': {
@@ -414,7 +454,9 @@ interface AuthedRouteChildren {
   AuthedNgoNearbyFoodRoute: typeof AuthedNgoNearbyFoodRoute
   AuthedOnboardingOrganizationRoute: typeof AuthedOnboardingOrganizationRoute
   AuthedRestaurantDashboardRoute: typeof AuthedRestaurantDashboardRoute
+  AuthedRestaurantClaimsIdRoute: typeof AuthedRestaurantClaimsIdRoute
   AuthedRestaurantListingsNewRoute: typeof AuthedRestaurantListingsNewRoute
+  AuthedRestaurantClaimsIndexRoute: typeof AuthedRestaurantClaimsIndexRoute
   AuthedRestaurantListingsIndexRoute: typeof AuthedRestaurantListingsIndexRoute
   AuthedRestaurantListingsIdEditRoute: typeof AuthedRestaurantListingsIdEditRoute
   AuthedRestaurantListingsIdIndexRoute: typeof AuthedRestaurantListingsIdIndexRoute
@@ -431,7 +473,9 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedNgoNearbyFoodRoute: AuthedNgoNearbyFoodRoute,
   AuthedOnboardingOrganizationRoute: AuthedOnboardingOrganizationRoute,
   AuthedRestaurantDashboardRoute: AuthedRestaurantDashboardRoute,
+  AuthedRestaurantClaimsIdRoute: AuthedRestaurantClaimsIdRoute,
   AuthedRestaurantListingsNewRoute: AuthedRestaurantListingsNewRoute,
+  AuthedRestaurantClaimsIndexRoute: AuthedRestaurantClaimsIndexRoute,
   AuthedRestaurantListingsIndexRoute: AuthedRestaurantListingsIndexRoute,
   AuthedRestaurantListingsIdEditRoute: AuthedRestaurantListingsIdEditRoute,
   AuthedRestaurantListingsIdIndexRoute: AuthedRestaurantListingsIdIndexRoute,

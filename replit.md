@@ -146,11 +146,13 @@ Routes (under `src/routes/_authed/restaurant/`):
 
 | Route | Purpose |
 |-------|---------|
-| `/restaurant/dashboard` | Stats cards (active/history counts) + quick actions + recent active listings |
+| `/restaurant/dashboard` | Stats cards (active/history listings, pending claims) + quick actions + recent active listings |
 | `/restaurant/listings` | Active/history tabbed table |
 | `/restaurant/listings/new` | Create form (verification gate inside page) |
 | `/restaurant/listings/$id` | Detail view + Cancel button + Edit link |
 | `/restaurant/listings/$id/edit` | Edit form (locked when status not editable) |
+| `/restaurant/claims` | Active/history tabbed list of incoming claim requests with inline Accept/Reject |
+| `/restaurant/claims/$id` | Claim detail view (claimant org + listing) with Accept/Reject decision panel |
 
 All routes use a plain role check (`RESTAURANT|ADMIN`) in `beforeLoad`. The verification gate is checked inside the page render (via `canCreateFoodListing`) — same pattern as the dashboard, to avoid redirect loops.
 
@@ -220,6 +222,39 @@ Server fns live in `src/lib/claim-server.ts`. Internal helpers
 | `createClaimFn({id})` / `createAnimalClaimFn({id})` | verified org of matching type | Atomic Drizzle `db.transaction`: (1) `UPDATE food_listings SET status='CLAIM_REQUESTED' WHERE id=? AND status='AVAILABLE' AND food_category=<kind> AND pickup_end_time > NOW() AND expiry_time > NOW()` returning row — primary race guard + temporal guard for stale-but-still-AVAILABLE rows; (2) `INSERT INTO claims (..., status='PENDING')` — secondary guard via partial unique index `claims_listing_active_uq`. Throws user-friendly errors (`Listing not found` / `Only <category> food can be claimed by <org type>s` / `This listing has expired` / `This listing is no longer available to claim`). |
 
 `requireVerifiedClaimantOrg(user, kind)`: generic gate. ADMIN bypasses the verification check but still needs to own an org of the expected type (no magic `claimantOrgId` for admins).
+
+### Restaurant-side claim management (Accept / Reject + OTP)
+
+The restaurant (donor) side of the claim workflow lives in
+`src/lib/claim-server.ts` alongside the claimant flow. UI is in
+`src/components/food/RestaurantClaimCard.tsx` plus the two routes listed
+above (`/restaurant/claims`, `/restaurant/claims/$id`).
+
+| Function | Auth | Purpose |
+|----------|------|---------|
+| `listClaimRequestsForRestaurantFn({scope})` | session | `scope` = `active` / `history` / `all`; filters via `cl.status = ANY($::claim_status[])` mapped to `ACTIVE_CLAIM_STATUSES` / `HISTORY_CLAIM_STATUSES`. Joins claimant org for name/type/phone/address. Returns `[]` for callers without a RESTAURANT org. |
+| `getClaimForRestaurantFn({id})` | session, must own listing | throws `NOT_FOUND` (route catches and shows 404) when claim id doesn't belong to a listing owned by the caller's RESTAURANT org. Mirrors `getMyListingFn`'s "don't leak existence" pattern. |
+| `acceptClaimFn({id})` | verified RESTAURANT, must own listing | atomic Drizzle `db.transaction`: (1) SELECT claim+listing, verify ownership + claim is `PENDING` + listing is `CLAIM_REQUESTED`; (2) UPDATE listing `CLAIM_REQUESTED`→`CLAIMED` + set `accepted_claim_id`, status-gated; (3) UPDATE claim `PENDING`→`ACCEPTED` + set 6-digit `otp_code`. Retries up to 5× on per-listing OTP collision (`23505` against `claims_listing_otp_uq`). |
+| `rejectClaimFn({id})` | verified RESTAURANT, must own listing | atomic Drizzle `db.transaction`: (1) SELECT claim+listing, verify ownership + claim is `PENDING`; (2) UPDATE claim `PENDING`→`REJECTED`, status-gated; (3) if no other active claims remain on the listing AND the listing is still `CLAIM_REQUESTED`, UPDATE listing `CLAIM_REQUESTED`→`AVAILABLE` and clear `accepted_claim_id`. The "other active claims" check is defensive — `claims_listing_active_uq` already enforces a single active claim per listing today. |
+
+`requireVerifiedRestaurantOrg(user)` (in `claim-server.ts`): mirrors the
+listing-server gate. ADMIN bypasses the verification check but still needs
+to own a RESTAURANT org.
+
+**OTP visibility / handoff model** (mirrors `WORKFLOW.md` step 7-9):
+- Generated server-side as a 6-digit string (`000000`-`999999`) on Accept.
+- **Receiver (NGO / Animal Rescue)** sees the value via `MyClaim.otpCode`,
+  which is server-side redacted to `null` unless claim status is `ACCEPTED`
+  or `PICKED_UP` (`OTP_VISIBLE_CLAIM_STATUSES`). Rendered prominently in
+  `MyClaimCard` so they can show it at pickup.
+- **Donor (Restaurant)** never sees the value — only `RestaurantClaim.otpIssued`
+  (a boolean) is sent to them. The donor enters the code at pickup to verify
+  (separate "verify pickup" flow, not part of this iteration).
+
+**Restaurant dashboard** (`/restaurant/dashboard`) loads
+`listClaimRequestsForRestaurantFn({scope:'active'})` in parallel with the
+listing fetches and renders a "Pending claims" stat card (linking to
+`/restaurant/claims`) plus a Claims quick-action button with a count badge.
 
 `haversineKm(lat1, lng1, lat2, lng2)`: great-circle distance in km, exported from `claim-server.ts`. Pure TS — no PostGIS dependency.
 
