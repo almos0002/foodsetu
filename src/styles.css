@@ -2,254 +2,243 @@
 
 @theme {
   --font-sans:
-    'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --font-poppins: 'Poppins', ui-sans-serif, system-ui, sans-serif;
   --font-display:
-    'Bricolage Grotesque', 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* ─── Friendly delivery-app palette ─────────────────────────────────────
-     Warm white surface, coral primary, mint secondary, deep slate ink.
-     No grays — everything tinted slightly warm so the app never feels cold.
+  /* ─── Minimal palette ──────────────────────────────────────────────────
+     White / off-white surfaces, near-black ink, single emerald accent.
+     One color does all the heavy lifting. No tints, no soft elevation,
+     no rainbow. Hierarchy comes from spacing + type weight + hairlines.
      ──────────────────────────────────────────────────────────────────── */
 
   /* Surfaces */
-  --color-canvas: #ffffff; /* page bg */
-  --color-cream: #fff8f1; /* warm panel bg */
-  --color-cream-2: #ffeedd; /* secondary panel */
-  --color-line: #f1e6d8; /* warm cream borders */
-  --color-line-strong: #1a1f2e; /* outlined buttons / sticker borders */
+  --color-canvas: #ffffff;       /* page bg */
+  --color-canvas-2: #fafaf9;     /* secondary panel */
+  --color-canvas-3: #f4f4f2;     /* tertiary panel */
+  --color-paper: #ffffff;        /* card surfaces */
+  --color-line: #ececea;         /* hairline rules */
+  --color-line-strong: #d8d8d4;  /* stronger borders */
 
   /* Ink */
-  --color-ink: #1a1f2e; /* primary text + outlines */
-  --color-ink-2: #4b5266; /* secondary text */
-  --color-ink-3: #8a91a6; /* tertiary text / placeholders */
+  --color-ink: #0a0a0a;          /* primary text + outlines */
+  --color-ink-2: #525252;        /* secondary text */
+  --color-ink-3: #8a8a87;        /* tertiary text / placeholders */
+  --color-ink-4: #b8b8b3;        /* faint marks */
 
-  /* Brand */
-  --color-coral: #ff5a47; /* primary CTA + brand */
-  --color-coral-2: #ff7e6c; /* hover */
-  --color-coral-soft: #ffe2dc; /* tint fills + tags */
-  --color-coral-ink: #b62d1c; /* coral-on-coral-soft text */
+  /* Accent — a single deep, slightly muted emerald.
+     Reads as "fresh food + trust" without screaming. */
+  --color-accent: #0a7a3f;
+  --color-accent-2: #075c30;     /* hover / pressed */
+  --color-accent-soft: #e3f1e8;  /* tints */
+  --color-accent-ink: #053c1f;
 
-  --color-mint: #2dc4a3; /* secondary action / NGO */
-  --color-mint-2: #3ad6b4; /* hover */
-  --color-mint-soft: #d8f2ea; /* tint fills + tags */
-  --color-mint-ink: #11695a;
+  /* Status (kept for dashboards) */
+  --color-success: #0a7a3f;
+  --color-warn: #b07a1f;
+  --color-danger: #c5392f;
 
-  --color-sun: #ffc94a; /* tertiary accent / animal rescue */
-  --color-sun-soft: #fff0bd;
-  --color-sun-ink: #7a5300;
-
-  --color-berry: #c46286; /* accent / admin / report */
-  --color-berry-soft: #f7dde7;
-  --color-berry-ink: #6e2e48;
-
-  --color-sky: #5cc6f5; /* accent / info */
-  --color-sky-soft: #d8eefc;
-  --color-sky-ink: #0f5d85;
-
-  /* Status */
-  --color-success: #2dc4a3;
-  --color-warn: #ffb01f;
-  --color-danger: #ff5a47;
+  /* Compatibility aliases for pages still using the old token names.
+     Mapped to the minimal palette so nothing else breaks. */
+  --color-cream: #fafaf9;
+  --color-cream-2: #f4f4f2;
+  --color-coral: #0a7a3f;
+  --color-coral-2: #075c30;
+  --color-coral-soft: #e3f1e8;
+  --color-coral-ink: #053c1f;
+  --color-mint: #0a7a3f;
+  --color-mint-2: #075c30;
+  --color-mint-soft: #e3f1e8;
+  --color-mint-ink: #053c1f;
+  --color-sun: #b07a1f;
+  --color-sun-soft: #f3e9d0;
+  --color-sun-ink: #6b4810;
+  --color-berry: #8e3a52;
+  --color-berry-soft: #ecd6dd;
+  --color-berry-ink: #5a2333;
+  --color-sky: #355a6b;
+  --color-sky-soft: #d8e4ea;
+  --color-sky-ink: #1c3744;
 
   --animate-bob: bob 6s ease-in-out infinite;
-  --animate-wiggle: wiggle 0.5s ease-in-out;
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
 }
 
-/* Subtle floating motion used on hero illustration sprites. */
 @keyframes bob {
-  0%,
-  100% {
-    transform: translateY(0) rotate(var(--bob-rot, 0deg));
-  }
-  50% {
-    transform: translateY(-6px) rotate(var(--bob-rot, 0deg));
-  }
+  0%, 100% { transform: translateY(0) rotate(var(--bob-rot, 0deg)); }
+  50%      { transform: translateY(-3px) rotate(var(--bob-rot, 0deg)); }
 }
 
-@keyframes wiggle {
-  0%,
-  100% {
-    transform: rotate(0);
-  }
-  25% {
-    transform: rotate(-3deg);
-  }
-  75% {
-    transform: rotate(3deg);
-  }
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-* {
-  box-sizing: border-box;
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.9); }
 }
 
-html,
-body,
-#app {
-  min-height: 100%;
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
+
+@keyframes ticker-up {
+  0%   { transform: translateY(100%); opacity: 0; }
+  20%  { transform: translateY(0);   opacity: 1; }
+  80%  { transform: translateY(0);   opacity: 1; }
+  100% { transform: translateY(-100%); opacity: 0; }
+}
+
+* { box-sizing: border-box; }
+
+html, body, #app { min-height: 100%; }
 
 body {
   margin: 0;
   font-family: var(--font-sans);
-  font-feature-settings: 'ss01';
+  font-feature-settings: 'ss01', 'cv11';
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--color-ink);
   background-color: var(--color-canvas);
+  letter-spacing: -0.005em;
 }
 
-/* ── Display type — Bricolage Grotesque, friendly + bouncy ─────────────── */
+/* ── Display type — Inter, very tight tracking, used at large sizes. ──── */
 @utility font-display {
   font-family: var(--font-display);
-  font-optical-sizing: auto;
-  font-variation-settings:
-    'opsz' 96,
-    'wdth' 100;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  font-feature-settings: 'ss01', 'cv11', 'kern';
 }
 
-@utility font-display-tight {
+@utility font-display-italic {
   font-family: var(--font-display);
-  font-variation-settings:
-    'opsz' 96,
-    'wdth' 75;
+  font-style: italic;
+  font-weight: 500;
   letter-spacing: -0.025em;
 }
 
-/* ── Chips, stickers, bubbles ─────────────────────────────────────────── */
+/* ── Eyebrow — small caps label above sections ────────────────────────── */
+@utility eyebrow {
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-ink-2);
+}
 
-/* Sticker badge — rotates slightly, bordered in ink. Used for tags + status. */
+@utility tiny-cap {
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ── Hairline rule ────────────────────────────────────────────────────── */
+@utility hairline {
+  border-color: var(--color-line);
+  border-width: 1px;
+}
+
+/* ── Tag — minimal label with hairline border ─────────────────────────── */
+@utility tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-line);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  background: var(--color-paper);
+  color: var(--color-ink-2);
+  white-space: nowrap;
+}
+
+/* Compatibility aliases — old utility names mapped to minimal equivalents
+   so existing pages keep rendering until they get touched individually. */
 @utility sticker {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  border: 1.5px solid var(--color-line-strong);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  background: var(--color-canvas);
-  color: var(--color-ink);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-line);
+  font-size: 0.7rem;
+  font-weight: 500;
+  background: var(--color-paper);
+  color: var(--color-ink-2);
   white-space: nowrap;
 }
 
-/* Soft chip — no border, used inline. */
 @utility chip {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 500;
 }
 
-/* Outline pill — used for nav + tabs. */
 @utility pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.55rem 1rem;
   border-radius: 999px;
-  border: 1.5px solid transparent;
+  border: 1px solid transparent;
   font-size: 0.875rem;
   font-weight: 500;
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-/* Bouncy card — white bg, ink outline, slight lift on hover (no shadow). */
 @utility bouncy-card {
-  border-radius: 1.75rem;
-  border: 1.5px solid var(--color-line);
-  background: var(--color-canvas);
-  transition:
-    transform 0.18s ease,
-    border-color 0.18s ease;
-  &:hover {
-    transform: translateY(-3px);
-    border-color: var(--color-line-strong);
-  }
+  border-radius: 12px;
+  border: 1px solid var(--color-line);
+  background: var(--color-paper);
+  transition: border-color 0.18s ease;
+  &:hover { border-color: var(--color-line-strong); }
 }
 
-/* Speech-bubble label with a tiny tail. Used for the hero hint + tooltips. */
 @utility bubble {
-  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.85rem;
-  border-radius: 1.25rem;
-  background: var(--color-ink);
-  color: var(--color-canvas);
+  gap: 0.45rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  background: var(--color-paper);
+  color: var(--color-ink);
   font-size: 0.75rem;
   font-weight: 500;
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -6px;
-    left: 1.25rem;
-    width: 12px;
-    height: 12px;
-    background: var(--color-ink);
-    transform: rotate(45deg);
-    border-radius: 2px;
-  }
 }
 
-/* Small caps eyebrow — friendly weight. */
-@utility tiny-cap {
-  font-size: 0.7rem;
-  line-height: 1;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-weight: 700;
-}
+@utility squiggle      { height: 1px; background: var(--color-line); }
+@utility squiggle-mint { height: 1px; background: var(--color-line); }
 
-/* Squiggle divider — hand-drawn-feeling SVG, used between sections. */
-@utility squiggle {
-  height: 14px;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 14' preserveAspectRatio='none'><path d='M0 7 Q 10 0 20 7 T 40 7 T 60 7 T 80 7' fill='none' stroke='%23ff5a47' stroke-width='2.5' stroke-linecap='round'/></svg>");
-  background-repeat: repeat-x;
-  background-size: 80px 14px;
-}
-
-@utility squiggle-mint {
-  height: 14px;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 14' preserveAspectRatio='none'><path d='M0 7 Q 10 0 20 7 T 40 7 T 60 7 T 80 7' fill='none' stroke='%232dc4a3' stroke-width='2.5' stroke-linecap='round'/></svg>");
-  background-repeat: repeat-x;
-  background-size: 80px 14px;
-}
-
-/* Confetti dot grid — playful background pattern for hero / empty states. */
 @utility dotgrid {
   background-image: radial-gradient(
     circle,
-    var(--color-line) 1.2px,
-    transparent 1.2px
+    var(--color-line-strong) 1px,
+    transparent 1px
   );
-  background-size: 18px 18px;
+  background-size: 24px 24px;
+  opacity: 0.55;
 }
 
-/* Hide scrollbar (used on horizontal nav rails). */
-@utility scrollbar-hide {
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Underline-on-hover that grows from left — for nav links. */
 @utility wavey-link {
   position: relative;
   &::after {
@@ -257,17 +246,67 @@ body {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: -4px;
-    height: 6px;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 6' preserveAspectRatio='none'><path d='M0 3 Q 7.5 0 15 3 T 30 3 T 45 3 T 60 3' fill='none' stroke='%23ff5a47' stroke-width='1.6' stroke-linecap='round'/></svg>");
-    background-repeat: repeat-x;
-    background-size: 60px 6px;
+    bottom: -3px;
+    height: 1px;
+    background: currentColor;
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.2s ease;
   }
   &:hover::after,
-  &[data-active='true']::after {
-    transform: scaleX(1);
+  &[data-active='true']::after { transform: scaleX(1); }
+}
+
+@utility scrollbar-hide {
+  &::-webkit-scrollbar { display: none; }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@utility marquee {
+  animation: marquee-x 60s linear infinite;
+  will-change: transform;
+}
+
+@utility editorial-link {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--color-line-strong);
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  &:hover {
+    color: var(--color-accent);
+    text-decoration-color: var(--color-accent);
   }
+}
+
+@utility numeric {
+  font-feature-settings: 'tnum', 'lnum';
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* ── Live dot — pulsing accent indicator ─────────────────────────────── */
+@utility live-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  animation: var(--animate-pulse-dot);
+}
+
+/* ── Subtle grid backdrop (creative texture, not loud) ───────────────── */
+@utility grid-bg {
+  background-image:
+    linear-gradient(to right, var(--color-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: -1px -1px;
+}
+
+/* ── Gradient mask for fade edges on marquees / scrollers ────────────── */
+@utility mask-fade-x {
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
 }
