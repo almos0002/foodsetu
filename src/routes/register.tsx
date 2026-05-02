@@ -11,6 +11,7 @@ import { signUp } from '../lib/auth-client'
 import { getServerSession } from '../lib/auth-server'
 import { ROLE_LABELS, SIGNUP_ROLES, roleToDashboard } from '../lib/permissions'
 import type { SignupRole } from '../lib/permissions'
+import { pageHead } from '../lib/seo'
 import { BowlMascot } from './index'
 
 const ROLE_META: Record<
@@ -32,6 +33,13 @@ const ROLE_META: Record<
 }
 
 export const Route = createFileRoute('/register')({
+  head: () =>
+    pageHead({
+      title: 'Get started',
+      description:
+        'Create a free FoodSetu account in under a minute. Restaurants, NGOs, and animal rescues welcome.',
+      path: '/register',
+    }),
   beforeLoad: async () => {
     const session = await getServerSession()
     if (session?.user) {

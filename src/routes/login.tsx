@@ -9,6 +9,7 @@ import { ArrowLeft, ChevronDown, LogIn } from 'lucide-react'
 import { signIn } from '../lib/auth-client'
 import { getServerSession } from '../lib/auth-server'
 import { roleToDashboard, safeRedirectPath } from '../lib/permissions'
+import { pageHead } from '../lib/seo'
 import { BowlMascot } from './index'
 
 type LoginSearch = { redirect?: string }
@@ -21,6 +22,14 @@ const DEMO_ACCOUNTS: Array<{ label: string; email: string }> = [
 ]
 
 export const Route = createFileRoute('/login')({
+  head: () =>
+    pageHead({
+      title: 'Sign in',
+      description:
+        'Sign in to FoodSetu to post surplus food, claim listings, or manage your verified organization.',
+      path: '/login',
+      noindex: true,
+    }),
   validateSearch: (s: Record<string, unknown>): LoginSearch => ({
     redirect: typeof s.redirect === 'string' ? s.redirect : undefined,
   }),

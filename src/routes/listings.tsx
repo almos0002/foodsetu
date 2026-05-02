@@ -11,6 +11,7 @@ import { useSession } from '../lib/auth-client'
 import { roleToDashboard } from '../lib/permissions'
 import { listPublicAvailableListingsFn } from '../lib/public-listings-server'
 import type { PublicListingRow } from '../lib/public-listings-server'
+import { pageHead } from '../lib/seo'
 import { BowlMascot } from './index'
 
 const FALLBACK_IMG =
@@ -19,6 +20,13 @@ const FALLBACK_IMG =
 type CategoryFilter = 'ALL' | 'HUMAN_SAFE' | 'ANIMAL_SAFE'
 
 export const Route = createFileRoute('/listings')({
+  head: () =>
+    pageHead({
+      title: 'Live surplus food listings',
+      description:
+        'Browse human-safe meals and animal-safe scraps posted by partner restaurants in Kathmandu, Pokhara, Lalitpur and beyond. Updated throughout the day.',
+      path: '/listings',
+    }),
   loader: async () => {
     const listings = await listPublicAvailableListingsFn({
       data: { category: 'ALL', limit: 60 },

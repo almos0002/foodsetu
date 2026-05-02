@@ -1,3 +1,13 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /onboarding/
+Disallow: /settings/
+Disallow: /restaurant/
+Disallow: /ngo/
+Disallow: /animal/
+Disallow: /reports/
+Disallow: /api/
+
+Sitemap: https://foodsetu.app/sitemap.xml

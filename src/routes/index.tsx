@@ -18,8 +18,16 @@ import { useSession } from '../lib/auth-client'
 import { roleToDashboard } from '../lib/permissions'
 import { listPublicAvailableListingsFn } from '../lib/public-listings-server'
 import type { PublicListingRow } from '../lib/public-listings-server'
+import { pageHead } from '../lib/seo'
 
 export const Route = createFileRoute('/')({
+  head: () =>
+    pageHead({
+      title: 'FoodSetu',
+      description:
+        'FoodSetu redirects surplus restaurant food to verified NGOs and animal rescues across Nepal. OTP-secured handoffs, audited claims, free forever.',
+      path: '/',
+    }),
   loader: async () => {
     const listings = await listPublicAvailableListingsFn({
       data: { category: 'ALL', limit: 6 },

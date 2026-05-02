@@ -5,6 +5,11 @@ import type { OrganizationRow } from '../lib/org-server'
 import { requiresOrganization, roleToDashboard } from '../lib/permissions'
 
 export const Route = createFileRoute('/_authed')({
+  // Authed surfaces (dashboards, admin, settings) are not public content —
+  // tell search engines to skip them. Child routes inherit this.
+  head: () => ({
+    meta: [{ name: 'robots', content: 'noindex, nofollow' }],
+  }),
   beforeLoad: async ({ location }) => {
     const session = await getServerSession()
     if (!session?.user) {
