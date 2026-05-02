@@ -245,12 +245,15 @@ to own a RESTAURANT org.
 **OTP visibility / handoff model** (mirrors `WORKFLOW.md` step 7-9):
 - Generated server-side as a 6-digit string (`000000`-`999999`) on Accept.
 - **Receiver (NGO / Animal Rescue)** sees the value via `MyClaim.otpCode`,
-  which is server-side redacted to `null` unless claim status is `ACCEPTED`
-  or `PICKED_UP` (`OTP_VISIBLE_CLAIM_STATUSES`). Rendered prominently in
-  `MyClaimCard` so they can show it at pickup.
+  which is server-side redacted to `null` unless claim status is `ACCEPTED`,
+  `PICKED_UP`, or `COMPLETED` (`OTP_VISIBLE_CLAIM_STATUSES`). Rendered
+  prominently in `MyClaimCard` so they can show it at pickup, and kept
+  visible after `COMPLETED` as a receipt of the handoff.
 - **Donor (Restaurant)** never sees the value — only `RestaurantClaim.otpIssued`
-  (a boolean) is sent to them. The donor enters the code at pickup to verify
-  (separate "verify pickup" flow, not part of this iteration).
+  (a boolean) is sent to them. The donor enters the code at pickup via the
+  `verifyPickupFn` flow on `/restaurant/claims/$id` (OTP input is a
+  numeric-only `<input>` that strips non-digits both client- and
+  server-side, then constant-time-compared to the stored `otp_code`).
 
 **Restaurant dashboard** (`/restaurant/dashboard`) loads
 `listClaimRequestsForRestaurantFn({scope:'active'})` in parallel with the
