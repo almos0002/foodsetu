@@ -7,7 +7,6 @@ import {
   Heart,
   Leaf,
   LogIn,
-  MapPin,
   PawPrint,
   Recycle,
   Search,
@@ -19,60 +18,24 @@ import type { LucideIcon } from 'lucide-react'
 import { useSession } from '../lib/auth-client'
 import { Button } from '../components/ui/Button'
 import { roleToDashboard } from '../lib/permissions'
+import { listPublicAvailableListingsFn } from '../lib/public-listings-server'
+import type { PublicListingRow } from '../lib/public-listings-server'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/')({
+  loader: async () => {
+    const listings = await listPublicAvailableListingsFn({
+      data: { category: 'ALL', limit: 8 },
+    }).catch(() => [] as PublicListingRow[])
+    return { listings }
+  },
+  component: Home,
+})
 
 const HERO_IMG =
   'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&auto=format&fit=crop&q=80'
 
-type Listing = {
-  img: string
-  city: string
-  title: string
-  meals: string
-  pickup: string
-  type: string
-  tone: 'orange' | 'green' | 'blue'
-}
-
-const FEATURED: Listing[] = [
-  {
-    img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&auto=format&fit=crop&q=80',
-    city: 'Mumbai · Bandra West',
-    title: 'Wood-fired pizzas, 14 portions',
-    meals: '14 servings',
-    pickup: 'Today · 4:30 – 6:00 PM',
-    type: 'Human-safe',
-    tone: 'green',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80',
-    city: 'Pune · Koregaon Park',
-    title: 'Dal makhani & jeera rice',
-    meals: '32 servings',
-    pickup: 'Today · 9:00 – 10:30 PM',
-    type: 'Human-safe',
-    tone: 'green',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&auto=format&fit=crop&q=80',
-    city: 'Bangalore · Indiranagar',
-    title: 'Bakery surplus — pastries',
-    meals: '40 pieces',
-    pickup: 'Tomorrow · 7:30 AM',
-    type: 'Human-safe',
-    tone: 'orange',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=800&auto=format&fit=crop&q=80',
-    city: 'Delhi · Connaught Place',
-    title: 'Catering scraps · animal-safe',
-    meals: '18 kg',
-    pickup: 'Today · 11:00 PM',
-    type: 'Animal-safe',
-    tone: 'blue',
-  },
-]
+const FALLBACK_LISTING_IMG =
+  'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80'
 
 const CATEGORIES: Array<{ icon: LucideIcon; label: string }> = [
   { icon: Utensils, label: 'Hot meals' },
@@ -87,59 +50,51 @@ const CATEGORIES: Array<{ icon: LucideIcon; label: string }> = [
 
 function Home() {
   const { data: session, isPending } = useSession()
+  const { listings } = Route.useLoaderData()
   const user = session?.user as
     | { name?: string | null; email?: string | null; role?: string | null }
     | undefined
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
-      {/* Top nav */}
-      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto flex h-20 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-10">
+      {/* Top nav — clean, no fake search pill */}
+      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:h-20 sm:px-6 lg:px-10">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-600 text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-600 text-white">
               <Utensils className="h-5 w-5" />
             </div>
             <span className="text-lg font-bold tracking-tight">FoodSetu</span>
           </Link>
 
-          {/* Pill search (desktop) */}
-          <div className="mx-auto hidden lg:block">
-            <button
-              type="button"
-              className="flex items-center divide-x divide-gray-200 rounded-full border border-gray-200 bg-white py-1.5 pl-6 pr-1.5 text-sm font-medium text-gray-700 transition-shadow hover:shadow-sm"
+          <nav className="ml-auto flex items-center gap-1 sm:gap-2">
+            <Link
+              to="/listings"
+              className="hidden rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 md:inline-flex"
             >
-              <span className="pr-4">Anywhere</span>
-              <span className="px-4">Any meal</span>
-              <span className="pl-4 pr-3 text-gray-400">Add filters</span>
-              <span className="ml-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-orange-600 text-white">
-                <Search className="h-4 w-4" />
-              </span>
-            </button>
-          </div>
-
-          <nav className="ml-auto flex items-center gap-2">
+              Browse listings
+            </Link>
             <a
               href="#how"
-              className="hidden rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 md:inline-flex"
+              className="hidden rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 lg:inline-flex"
             >
               How it works
             </a>
             <a
               href="#partners"
-              className="hidden rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 md:inline-flex"
+              className="hidden rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 lg:inline-flex"
             >
-              Become a partner
+              For partners
             </a>
-            {isPending ? null : user ? (
+            {!isPending && user ? (
               <Link to={roleToDashboard(user.role)}>
                 <Button rightIcon={<ArrowRight className="h-4 w-4" />}>
-                  Dashboard
+                  Open dashboard
                 </Button>
               </Link>
             ) : (
               <>
-                <Link to="/login" className="hidden sm:block">
+                <Link to="/login">
                   <Button
                     variant="ghost"
                     leftIcon={<LogIn className="h-4 w-4" />}
@@ -158,17 +113,17 @@ function Home() {
         </div>
       </header>
 
-      {/* Hero */}
+      {/* Hero with REAL CTAs (no fake search pill) */}
       <section className="relative">
-        <div className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-10 lg:pb-16 lg:pt-12">
+        <div className="mx-auto max-w-7xl px-4 pb-12 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-10">
           <div className="relative overflow-hidden rounded-3xl">
             <img
               src={HERO_IMG}
               alt="Surplus food laid out"
-              className="h-[440px] w-full object-cover sm:h-[520px] lg:h-[600px]"
+              className="h-[420px] w-full object-cover sm:h-[500px] lg:h-[580px]"
             />
-            <div className="absolute inset-0 bg-black/35" />
-            <div className="absolute inset-0 flex flex-col items-start justify-end p-6 sm:p-10 lg:p-16">
+            <div className="absolute inset-0 bg-black/45" />
+            <div className="absolute inset-0 flex flex-col items-start justify-end p-6 sm:p-10 lg:p-14">
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium uppercase tracking-wider text-white backdrop-blur-sm">
                   <Sparkles className="h-3 w-3" />
@@ -185,93 +140,107 @@ function Home() {
                 </p>
               </div>
 
-              {/* Hero search pill */}
-              <div className="mt-6 w-full max-w-3xl">
-                <div className="flex flex-col items-stretch gap-2 rounded-2xl bg-white p-2 sm:flex-row sm:items-center sm:rounded-full sm:p-1.5">
-                  <div className="flex flex-1 items-center gap-3 rounded-xl px-4 py-2.5 hover:bg-gray-50 sm:rounded-full">
-                    <MapPin className="h-4 w-4 flex-shrink-0 text-gray-500" />
-                    <div className="min-w-0">
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-700">
-                        Where
-                      </div>
-                      <div className="truncate text-sm text-gray-500">
-                        City or neighbourhood
-                      </div>
-                    </div>
-                  </div>
-                  <div className="hidden h-8 w-px bg-gray-200 sm:block" />
-                  <div className="flex flex-1 items-center gap-3 rounded-xl px-4 py-2.5 hover:bg-gray-50 sm:rounded-full">
-                    <Utensils className="h-4 w-4 flex-shrink-0 text-gray-500" />
-                    <div className="min-w-0">
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-700">
-                        What
-                      </div>
-                      <div className="truncate text-sm text-gray-500">
-                        Any meal · vegetarian · animal-safe
-                      </div>
-                    </div>
-                  </div>
-                  <Link
-                    to={user ? roleToDashboard(user.role) : '/register'}
-                    className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-orange-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-orange-700 sm:rounded-full"
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <Link to="/listings">
+                  <Button
+                    size="lg"
+                    leftIcon={<Search className="h-4 w-4" />}
+                    className="h-12 px-6 text-sm"
                   >
-                    <Search className="h-4 w-4" />
-                    Search
+                    Browse listings
+                  </Button>
+                </Link>
+                {user ? (
+                  <Link to={roleToDashboard(user.role)}>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      rightIcon={<ArrowRight className="h-4 w-4" />}
+                      className="h-12 border-white/40 bg-white/10 px-6 text-sm text-white backdrop-blur hover:bg-white/20"
+                    >
+                      Open dashboard
+                    </Button>
                   </Link>
-                </div>
+                ) : (
+                  <Link to="/register">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      rightIcon={<ArrowRight className="h-4 w-4" />}
+                      className="h-12 border-white/40 bg-white/10 px-6 text-sm text-white backdrop-blur hover:bg-white/20"
+                    >
+                      Sign up — it&apos;s free
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Category strip */}
+      {/* Category strip — visual only, honest */}
       <section className="border-b border-gray-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
           <div className="scrollbar-hide flex gap-8 overflow-x-auto py-5">
-            {CATEGORIES.map(({ icon: Icon, label }, i) => (
-              <button
+            {CATEGORIES.map(({ icon: Icon, label }) => (
+              <Link
                 key={label}
-                type="button"
-                className={`group flex min-w-[64px] flex-shrink-0 flex-col items-center gap-2 border-b-2 pb-3 text-xs font-medium ${
-                  i === 0
-                    ? 'border-gray-900 text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-900'
-                }`}
+                to="/listings"
+                className="group flex min-w-[64px] flex-shrink-0 flex-col items-center gap-2 border-b-2 border-transparent pb-3 text-xs font-medium text-gray-500 hover:border-orange-500 hover:text-gray-900"
               >
                 <Icon className="h-6 w-6" />
                 <span className="whitespace-nowrap">{label}</span>
-              </button>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Featured listings */}
+      {/* Featured listings — REAL data */}
       <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-10">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
-                Surplus near you, today
+                Surplus available right now
               </h2>
               <p className="mt-1.5 text-sm text-gray-500">
-                A glimpse of what kitchens have posted in the last few hours.
+                {listings.length > 0
+                  ? `${listings.length} listing${listings.length === 1 ? '' : 's'} live across our partner kitchens.`
+                  : 'No live listings yet — be the first to post or sign up to get notified.'}
               </p>
             </div>
             <Link
-              to="/register"
+              to="/listings"
               className="inline-flex items-center gap-1 text-sm font-semibold text-gray-900 underline-offset-4 hover:underline"
             >
               See all
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {FEATURED.map((item) => (
-              <ListingCard key={item.title} item={item} />
-            ))}
-          </div>
+          {listings.length > 0 ? (
+            <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {listings.slice(0, 4).map((item) => (
+                <ListingCard key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-7 rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-10 text-center">
+              <Utensils className="mx-auto h-8 w-8 text-gray-400" />
+              <p className="mt-3 text-sm font-medium text-gray-900">
+                No live listings right now
+              </p>
+              <p className="mt-1 text-sm text-gray-500">
+                Restaurant partners post surplus throughout the day.
+              </p>
+              <Link to="/register" className="mt-4 inline-block">
+                <Button leftIcon={<UserPlus className="h-4 w-4" />}>
+                  Become a partner
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
@@ -322,15 +291,13 @@ function Home() {
       {/* Roles */}
       <section id="partners" className="bg-gray-50">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-10 lg:py-20">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div className="max-w-2xl">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-orange-600">
-                Built for everyone in the chain
-              </div>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
-                One platform, three workflows
-              </h2>
+          <div className="max-w-2xl">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-orange-600">
+              Built for everyone in the chain
             </div>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+              One platform, three workflows
+            </h2>
           </div>
           <div className="mt-10 grid gap-6 lg:grid-cols-3">
             <RoleCard
@@ -413,7 +380,7 @@ function Home() {
       <footer className="border-t border-gray-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-10">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-600 text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-600 text-white">
               <Utensils className="h-4 w-4" />
             </div>
             <div>
@@ -425,14 +392,14 @@ function Home() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
+            <Link to="/listings" className="hover:text-gray-900">
+              Browse listings
+            </Link>
             <a href="#how" className="hover:text-gray-900">
               How it works
             </a>
             <a href="#partners" className="hover:text-gray-900">
               Partners
-            </a>
-            <a href="#impact" className="hover:text-gray-900">
-              Impact
             </a>
             <Link to="/login" className="hover:text-gray-900">
               Sign in
@@ -447,43 +414,49 @@ function Home() {
   )
 }
 
-function ListingCard({ item }: { item: Listing }) {
-  const TYPE_TONE: Record<Listing['tone'], string> = {
-    orange: 'bg-orange-100 text-orange-700',
-    green: 'bg-emerald-100 text-emerald-700',
-    blue: 'bg-blue-100 text-blue-700',
-  }
+function ListingCard({ item }: { item: PublicListingRow }) {
+  const tone =
+    item.foodCategory === 'ANIMAL_SAFE'
+      ? 'bg-blue-100 text-blue-700'
+      : 'bg-emerald-100 text-emerald-700'
+  const label =
+    item.foodCategory === 'ANIMAL_SAFE' ? 'Animal-safe' : 'Human-safe'
+
+  const pickup = formatPickup(item.pickupStartTime, item.pickupEndTime)
+  const subtitle =
+    item.cityName ?? item.orgName ?? 'Pickup location confirmed on claim'
+
   return (
     <Link
-      to="/register"
-      className="group block overflow-hidden rounded-2xl transition-shadow hover:shadow-md"
+      to="/listings"
+      className="group block overflow-hidden rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100">
         <img
-          src={item.img}
+          src={item.imageUrl ?? FALLBACK_LISTING_IMG}
           alt={item.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <span
-          className={`absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${TYPE_TONE[item.tone]}`}
+          className={`absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone}`}
         >
-          {item.type}
+          {label}
         </span>
       </div>
       <div className="px-1 pt-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold text-gray-900">
-              {item.city}
+              {subtitle}
             </div>
             <div className="truncate text-sm text-gray-500">{item.title}</div>
           </div>
         </div>
         <div className="mt-1 text-sm text-gray-500">
           <span className="font-medium text-gray-900 tabular-nums">
-            {item.meals}
+            {item.quantity} {item.quantityUnit.toLowerCase()}
           </span>{' '}
-          · {item.pickup}
+          · {pickup}
         </div>
       </div>
     </Link>
@@ -552,7 +525,7 @@ function RoleCard({
   img: string
 }) {
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-shadow hover:shadow-md">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-colors hover:border-gray-300">
       <div className="aspect-[16/10] overflow-hidden bg-gray-100">
         <img
           src={img}
@@ -579,4 +552,22 @@ function RoleCard({
       </div>
     </div>
   )
+}
+
+function formatPickup(startIso: string, endIso: string): string {
+  const start = new Date(startIso)
+  const end = new Date(endIso)
+  const now = new Date()
+  const sameDay = start.toDateString() === now.toDateString()
+  const tomorrow = new Date(now)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const isTomorrow = start.toDateString() === tomorrow.toDateString()
+  const dayLabel = sameDay
+    ? 'Today'
+    : isTomorrow
+      ? 'Tomorrow'
+      : start.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })
+  const fmt = (d: Date) =>
+    d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+  return `${dayLabel} · ${fmt(start)} – ${fmt(end)}`
 }
