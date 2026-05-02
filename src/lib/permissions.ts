@@ -60,6 +60,21 @@ export function canCreateFoodListing(u: AuthUser, org?: AuthOrganization): boole
   return roleAndVerified(u, org ?? null, ['RESTAURANT'])
 }
 
+// Stricter than canCreateFoodListing: the caller must actually own a RESTAURANT
+// org (admins included). Mirrors `requireVerifiedRestaurantOrg` server-side, so
+// the publish UI never appears for an admin who has no restaurant org to act on.
+export function canManageRestaurantListings(
+  u: AuthUser,
+  org?: AuthOrganization,
+): boolean {
+  const r = roleOf(u)
+  if (!r) return false
+  if (!org || org.type !== 'RESTAURANT') return false
+  if (r === 'ADMIN') return true
+  if (r !== 'RESTAURANT') return false
+  return isOrgVerified(org)
+}
+
 export function canClaimHumanFood(u: AuthUser, org?: AuthOrganization): boolean {
   return roleAndVerified(u, org ?? null, ['NGO'])
 }
@@ -116,6 +131,119 @@ export const VERIFICATION_BADGE_CLASSES: Record<VerificationStatus, string> = {
   REJECTED: 'bg-red-100 text-red-800 ring-1 ring-red-200',
   SUSPENDED: 'bg-gray-200 text-gray-800 ring-1 ring-gray-300',
 }
+
+// ---------------------------------------------------------------------------
+// Food listings
+// ---------------------------------------------------------------------------
+
+export const LISTING_STATUSES = [
+  'DRAFT',
+  'AVAILABLE',
+  'CLAIM_REQUESTED',
+  'CLAIMED',
+  'PICKED_UP',
+  'EXPIRED',
+  'CANCELLED',
+  'REPORTED',
+] as const
+export type ListingStatus = (typeof LISTING_STATUSES)[number]
+
+export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
+  DRAFT: 'Draft',
+  AVAILABLE: 'Available',
+  CLAIM_REQUESTED: 'Claim requested',
+  CLAIMED: 'Claimed',
+  PICKED_UP: 'Picked up',
+  EXPIRED: 'Expired',
+  CANCELLED: 'Cancelled',
+  REPORTED: 'Reported',
+}
+
+export const LISTING_STATUS_BADGE_CLASSES: Record<ListingStatus, string> = {
+  DRAFT: 'bg-gray-100 text-gray-700 ring-1 ring-gray-200',
+  AVAILABLE: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
+  CLAIM_REQUESTED: 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
+  CLAIMED: 'bg-indigo-100 text-indigo-800 ring-1 ring-indigo-200',
+  PICKED_UP: 'bg-purple-100 text-purple-800 ring-1 ring-purple-200',
+  EXPIRED: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+  CANCELLED: 'bg-gray-200 text-gray-700 ring-1 ring-gray-300',
+  REPORTED: 'bg-red-100 text-red-800 ring-1 ring-red-200',
+}
+
+// Active = listing is still in the live pipeline (visible to claimants or
+// in-progress). History = terminal states.
+export const ACTIVE_LISTING_STATUSES: readonly ListingStatus[] = [
+  'DRAFT',
+  'AVAILABLE',
+  'CLAIM_REQUESTED',
+  'CLAIMED',
+]
+export const HISTORY_LISTING_STATUSES: readonly ListingStatus[] = [
+  'PICKED_UP',
+  'EXPIRED',
+  'CANCELLED',
+  'REPORTED',
+]
+
+// A restaurant may edit only while no claimant action has happened yet.
+export const EDITABLE_LISTING_STATUSES: readonly ListingStatus[] = [
+  'DRAFT',
+  'AVAILABLE',
+]
+
+// A restaurant may cancel only while no claimant has locked it.
+// (Once CLAIM_REQUESTED/CLAIMED a claimant has skin in the game; cancellation
+// requires a separate "withdraw" flow handled in the claim system.)
+export const CANCELABLE_LISTING_STATUSES: readonly ListingStatus[] = [
+  'DRAFT',
+  'AVAILABLE',
+]
+
+export function isListingEditable(status: string | null | undefined): boolean {
+  return (EDITABLE_LISTING_STATUSES as readonly string[]).includes(status ?? '')
+}
+
+export function isListingCancelable(status: string | null | undefined): boolean {
+  return (CANCELABLE_LISTING_STATUSES as readonly string[]).includes(
+    status ?? '',
+  )
+}
+
+export const FOOD_CATEGORIES = ['HUMAN_SAFE', 'ANIMAL_SAFE'] as const
+export type FoodCategory = (typeof FOOD_CATEGORIES)[number]
+
+export const FOOD_CATEGORY_LABELS: Record<FoodCategory, string> = {
+  HUMAN_SAFE: 'Human-safe',
+  ANIMAL_SAFE: 'Animal-safe',
+}
+
+export const FOOD_TYPES = [
+  'COOKED',
+  'BAKERY',
+  'PACKAGED',
+  'RAW',
+  'OTHER',
+] as const
+export type FoodType = (typeof FOOD_TYPES)[number]
+
+export const FOOD_TYPE_LABELS: Record<FoodType, string> = {
+  COOKED: 'Cooked meal',
+  BAKERY: 'Bakery',
+  PACKAGED: 'Packaged',
+  RAW: 'Raw / produce',
+  OTHER: 'Other',
+}
+
+export const QUANTITY_UNITS = [
+  'kg',
+  'plates',
+  'meals',
+  'liters',
+  'units',
+  'packets',
+  'boxes',
+] as const
+export type QuantityUnit = (typeof QUANTITY_UNITS)[number]
 
 // Restrict post-login `?redirect=` to internal paths to prevent open-redirect.
 // Accepted: starts with a single "/" and contains no scheme or protocol-relative prefix.

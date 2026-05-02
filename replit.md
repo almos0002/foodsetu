@@ -140,6 +140,45 @@ Verification has four states (`VERIFICATION_STATUSES`):
 
 `canCreateFoodListing(user, org)`, `canClaimHumanFood(user, org)`, `canClaimAnimalFood(user, org)` all require `org.verificationStatus === 'VERIFIED'` for non-admins. `ADMIN` bypasses the org+verification requirement entirely (and never goes through onboarding).
 
+### Restaurant food listings
+
+Routes (under `src/routes/_authed/restaurant/`):
+
+| Route | Purpose |
+|-------|---------|
+| `/restaurant/dashboard` | Stats cards (active/history counts) + quick actions + recent active listings |
+| `/restaurant/listings` | Active/history tabbed table |
+| `/restaurant/listings/new` | Create form (verification gate inside page) |
+| `/restaurant/listings/$id` | Detail view + Cancel button + Edit link |
+| `/restaurant/listings/$id/edit` | Edit form (locked when status not editable) |
+
+All routes use a plain role check (`RESTAURANT|ADMIN`) in `beforeLoad`. The verification gate is checked inside the page render (via `canCreateFoodListing`) — same pattern as the dashboard, to avoid redirect loops.
+
+Server fns live in `src/lib/listing-server.ts`:
+
+| Function | Auth | Purpose |
+|----------|------|---------|
+| `listMyListingsFn({scope})` | session | `scope` = `active`/`history`/`all`; returns `[]` for non-restaurant or no-org users |
+| `getMyListingFn({id})` | session, must own | throws `NOT_FOUND` if not owned (route catches and shows 404) |
+| `createListingFn(data)` | verified RESTAURANT | sets `status=AVAILABLE`, inherits `cityId` from org, `restaurantId=org.id` |
+| `updateListingFn({id, data})` | verified RESTAURANT, must own | atomic UPDATE WHERE `status IN (DRAFT, AVAILABLE)` AND ownership; disambiguates "not found" vs "wrong status" on no-row |
+| `cancelListingFn({id})` | verified RESTAURANT, must own | atomic UPDATE → `CANCELLED` WHERE `status IN (DRAFT, AVAILABLE)` AND ownership |
+
+Validation lives in the same file:
+- `pickupEndTime > pickupStartTime` and `expiryTime > pickupStartTime` (mirrored client-side in `ListingForm` for fast feedback; server is the source of truth)
+- `quantity > 0`, lat/lng range checks, optional `imageUrl` accepts only `http(s)`
+- enum coercion against `FOOD_CATEGORIES`, `FOOD_TYPES`, `QUANTITY_UNITS` (defined in `src/lib/permissions.ts`)
+
+`requireVerifiedRestaurantOrg`: ADMIN bypasses the verification check but still needs to own a RESTAURANT org (no magic restaurantId for admins).
+
+The shared form component is `src/components/ListingForm.tsx`. It bridges the browser's zoneless `datetime-local` value to ISO via `localInputToIso` / `isoToLocalInput` helpers.
+
+Editable / cancelable status sets live in `src/lib/permissions.ts`:
+- `EDITABLE_LISTING_STATUSES = ['DRAFT', 'AVAILABLE']`
+- `CANCELABLE_LISTING_STATUSES = ['DRAFT', 'AVAILABLE']`
+- `ACTIVE_LISTING_STATUSES = ['DRAFT', 'AVAILABLE', 'CLAIM_REQUESTED', 'CLAIMED']`
+- `HISTORY_LISTING_STATUSES = ['PICKED_UP', 'EXPIRED', 'CANCELLED', 'REPORTED']`
+
 ### Org server functions (`src/lib/org-server.ts`)
 
 | Function | Auth | Purpose |

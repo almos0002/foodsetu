@@ -20,6 +20,10 @@ import { Route as AuthedNgoDashboardRouteImport } from './routes/_authed/ngo/das
 import { Route as AuthedAnimalDashboardRouteImport } from './routes/_authed/animal/dashboard'
 import { Route as AuthedAdminOrganizationsRouteImport } from './routes/_authed/admin/organizations'
 import { Route as AuthedAdminDashboardRouteImport } from './routes/_authed/admin/dashboard'
+import { Route as AuthedRestaurantListingsIndexRouteImport } from './routes/_authed/restaurant/listings/index'
+import { Route as AuthedRestaurantListingsNewRouteImport } from './routes/_authed/restaurant/listings/new'
+import { Route as AuthedRestaurantListingsIdIndexRouteImport } from './routes/_authed/restaurant/listings/$id/index'
+import { Route as AuthedRestaurantListingsIdEditRouteImport } from './routes/_authed/restaurant/listings/$id/edit'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -78,6 +82,30 @@ const AuthedAdminDashboardRoute = AuthedAdminDashboardRouteImport.update({
   path: '/admin/dashboard',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedRestaurantListingsIndexRoute =
+  AuthedRestaurantListingsIndexRouteImport.update({
+    id: '/restaurant/listings/',
+    path: '/restaurant/listings/',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedRestaurantListingsNewRoute =
+  AuthedRestaurantListingsNewRouteImport.update({
+    id: '/restaurant/listings/new',
+    path: '/restaurant/listings/new',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedRestaurantListingsIdIndexRoute =
+  AuthedRestaurantListingsIdIndexRouteImport.update({
+    id: '/restaurant/listings/$id/',
+    path: '/restaurant/listings/$id/',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedRestaurantListingsIdEditRoute =
+  AuthedRestaurantListingsIdEditRouteImport.update({
+    id: '/restaurant/listings/$id/edit',
+    path: '/restaurant/listings/$id/edit',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -90,6 +118,10 @@ export interface FileRoutesByFullPath {
   '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/restaurant/listings/new': typeof AuthedRestaurantListingsNewRoute
+  '/restaurant/listings/': typeof AuthedRestaurantListingsIndexRoute
+  '/restaurant/listings/$id/edit': typeof AuthedRestaurantListingsIdEditRoute
+  '/restaurant/listings/$id/': typeof AuthedRestaurantListingsIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -102,6 +134,10 @@ export interface FileRoutesByTo {
   '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/restaurant/listings/new': typeof AuthedRestaurantListingsNewRoute
+  '/restaurant/listings': typeof AuthedRestaurantListingsIndexRoute
+  '/restaurant/listings/$id/edit': typeof AuthedRestaurantListingsIdEditRoute
+  '/restaurant/listings/$id': typeof AuthedRestaurantListingsIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,6 +152,10 @@ export interface FileRoutesById {
   '/_authed/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/_authed/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_authed/restaurant/listings/new': typeof AuthedRestaurantListingsNewRoute
+  '/_authed/restaurant/listings/': typeof AuthedRestaurantListingsIndexRoute
+  '/_authed/restaurant/listings/$id/edit': typeof AuthedRestaurantListingsIdEditRoute
+  '/_authed/restaurant/listings/$id/': typeof AuthedRestaurantListingsIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -130,6 +170,10 @@ export interface FileRouteTypes {
     | '/onboarding/organization'
     | '/restaurant/dashboard'
     | '/api/auth/$'
+    | '/restaurant/listings/new'
+    | '/restaurant/listings/'
+    | '/restaurant/listings/$id/edit'
+    | '/restaurant/listings/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -142,6 +186,10 @@ export interface FileRouteTypes {
     | '/onboarding/organization'
     | '/restaurant/dashboard'
     | '/api/auth/$'
+    | '/restaurant/listings/new'
+    | '/restaurant/listings'
+    | '/restaurant/listings/$id/edit'
+    | '/restaurant/listings/$id'
   id:
     | '__root__'
     | '/'
@@ -155,6 +203,10 @@ export interface FileRouteTypes {
     | '/_authed/onboarding/organization'
     | '/_authed/restaurant/dashboard'
     | '/api/auth/$'
+    | '/_authed/restaurant/listings/new'
+    | '/_authed/restaurant/listings/'
+    | '/_authed/restaurant/listings/$id/edit'
+    | '/_authed/restaurant/listings/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -244,6 +296,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAdminDashboardRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/restaurant/listings/': {
+      id: '/_authed/restaurant/listings/'
+      path: '/restaurant/listings'
+      fullPath: '/restaurant/listings/'
+      preLoaderRoute: typeof AuthedRestaurantListingsIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/restaurant/listings/new': {
+      id: '/_authed/restaurant/listings/new'
+      path: '/restaurant/listings/new'
+      fullPath: '/restaurant/listings/new'
+      preLoaderRoute: typeof AuthedRestaurantListingsNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/restaurant/listings/$id/': {
+      id: '/_authed/restaurant/listings/$id/'
+      path: '/restaurant/listings/$id'
+      fullPath: '/restaurant/listings/$id/'
+      preLoaderRoute: typeof AuthedRestaurantListingsIdIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/restaurant/listings/$id/edit': {
+      id: '/_authed/restaurant/listings/$id/edit'
+      path: '/restaurant/listings/$id/edit'
+      fullPath: '/restaurant/listings/$id/edit'
+      preLoaderRoute: typeof AuthedRestaurantListingsIdEditRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
@@ -254,6 +334,10 @@ interface AuthedRouteChildren {
   AuthedNgoDashboardRoute: typeof AuthedNgoDashboardRoute
   AuthedOnboardingOrganizationRoute: typeof AuthedOnboardingOrganizationRoute
   AuthedRestaurantDashboardRoute: typeof AuthedRestaurantDashboardRoute
+  AuthedRestaurantListingsNewRoute: typeof AuthedRestaurantListingsNewRoute
+  AuthedRestaurantListingsIndexRoute: typeof AuthedRestaurantListingsIndexRoute
+  AuthedRestaurantListingsIdEditRoute: typeof AuthedRestaurantListingsIdEditRoute
+  AuthedRestaurantListingsIdIndexRoute: typeof AuthedRestaurantListingsIdIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -263,6 +347,10 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedNgoDashboardRoute: AuthedNgoDashboardRoute,
   AuthedOnboardingOrganizationRoute: AuthedOnboardingOrganizationRoute,
   AuthedRestaurantDashboardRoute: AuthedRestaurantDashboardRoute,
+  AuthedRestaurantListingsNewRoute: AuthedRestaurantListingsNewRoute,
+  AuthedRestaurantListingsIndexRoute: AuthedRestaurantListingsIndexRoute,
+  AuthedRestaurantListingsIdEditRoute: AuthedRestaurantListingsIdEditRoute,
+  AuthedRestaurantListingsIdIndexRoute: AuthedRestaurantListingsIdIndexRoute,
 }
 
 const AuthedRouteWithChildren =
