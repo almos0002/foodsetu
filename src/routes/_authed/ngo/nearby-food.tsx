@@ -5,8 +5,10 @@ import {
   useRouter,
 } from '@tanstack/react-router'
 import { useState } from 'react'
-import { MapPin, ShoppingBag, Utensils } from 'lucide-react'
+import { LayoutGrid, Map as MapIcon, MapPin, ShoppingBag, Utensils } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
+import { ListingsMap } from '../../../components/map/ListingsMap'
+import type { ListingsMapMarker } from '../../../components/map/ListingsMap'
 import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
 import { EmptyState } from '../../../components/ui/EmptyState'
@@ -34,6 +36,8 @@ export const Route = createFileRoute('/_authed/ngo/nearby-food')({
   component: NearbyFoodPage,
 })
 
+type View = 'list' | 'map'
+
 function NearbyFoodPage() {
   const router = useRouter()
   const { listings } = Route.useLoaderData()
@@ -44,6 +48,7 @@ function NearbyFoodPage() {
 
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [view, setView] = useState<View>('list')
 
   async function handleClaim(listingId: string) {
     setError(null)
@@ -58,6 +63,17 @@ function NearbyFoodPage() {
       setBusyId(null)
     }
   }
+
+  const markers: ListingsMapMarker[] = listings.map((l) => ({
+    id: l.id,
+    title: l.title,
+    latitude: l.latitude,
+    longitude: l.longitude,
+    distanceKm: l.distanceKm,
+    expiryTime: l.expiryTime,
+    pickupStartTime: l.pickupStartTime,
+    pickupEndTime: l.pickupEndTime,
+  }))
 
   return (
     <DashboardShell
@@ -95,26 +111,69 @@ function NearbyFoodPage() {
         <div className="space-y-4">
           {!hasOrgLocation ? (
             <Alert tone="warning" title="Location missing">
-              Add a location to your organization profile to see nearby
-              listings. We match within 10 km of your location.
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span>
+                  Set your location to see nearby food. We match within 10 km of
+                  your organization.
+                </span>
+                <Link to="/settings/organization">
+                  <Button
+                    size="sm"
+                    leftIcon={<MapPin className="h-4 w-4" />}
+                  >
+                    Set your location
+                  </Button>
+                </Link>
+              </div>
             </Alert>
           ) : null}
 
           {error ? <Alert tone="error">{error}</Alert> : null}
 
-          {listings.length === 0 ? (
+          {hasOrgLocation ? (
+            <div className="inline-flex rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] p-1">
+              <ToggleBtn
+                active={view === 'list'}
+                onClick={() => setView('list')}
+                icon={<LayoutGrid className="h-4 w-4" />}
+                label="List"
+              />
+              <ToggleBtn
+                active={view === 'map'}
+                onClick={() => setView('map')}
+                icon={<MapIcon className="h-4 w-4" />}
+                label="Map"
+              />
+            </div>
+          ) : null}
+
+          {!hasOrgLocation ? (
             <EmptyState
               icon={Utensils}
-              title={
-                hasOrgLocation
-                  ? 'No human-safe food nearby right now'
-                  : 'Set your organization location'
+              title="Set your organization location"
+              description="We need your location to surface listings within 10 km."
+              action={
+                <Link to="/settings/organization">
+                  <Button leftIcon={<MapPin className="h-4 w-4" />}>
+                    Set your location
+                  </Button>
+                </Link>
               }
-              description={
-                hasOrgLocation
-                  ? 'Restaurants post throughout the day — check back in a bit.'
-                  : 'We need your location to surface listings within 10 km.'
-              }
+            />
+          ) : view === 'map' ? (
+            <ListingsMap
+              origin={{
+                latitude: organization!.latitude as number,
+                longitude: organization!.longitude as number,
+              }}
+              markers={markers}
+              radiusKm={10}
+            />
+          ) : listings.length === 0 ? (
+            <EmptyState
+              icon={Utensils}
+              title="No human-safe food nearby right now"
+              description="Restaurants post throughout the day — check back in a bit."
               action={
                 <Link to="/ngo/dashboard">
                   <Button
@@ -146,5 +205,32 @@ function NearbyFoodPage() {
         </div>
       )}
     </DashboardShell>
+  )
+}
+
+function ToggleBtn({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean
+  onClick: () => void
+  icon: React.ReactNode
+  label: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
+        active
+          ? 'bg-[var(--color-canvas-3)] text-[var(--color-ink)]'
+          : 'text-[var(--color-ink-2)] hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)]'
+      }`}
+    >
+      {icon}
+      {label}
+    </button>
   )
 }

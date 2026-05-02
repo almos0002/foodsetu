@@ -16,6 +16,7 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedReportsIndexRouteImport } from './routes/_authed/reports/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AuthedSettingsOrganizationRouteImport } from './routes/_authed/settings/organization'
 import { Route as AuthedRestaurantDashboardRouteImport } from './routes/_authed/restaurant/dashboard'
 import { Route as AuthedReportsNewRouteImport } from './routes/_authed/reports/new'
 import { Route as AuthedOnboardingOrganizationRouteImport } from './routes/_authed/onboarding/organization'
@@ -73,6 +74,12 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedSettingsOrganizationRoute =
+  AuthedSettingsOrganizationRouteImport.update({
+    id: '/settings/organization',
+    path: '/settings/organization',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 const AuthedRestaurantDashboardRoute =
   AuthedRestaurantDashboardRouteImport.update({
     id: '/restaurant/dashboard',
@@ -214,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/reports/new': typeof AuthedReportsNewRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
+  '/settings/organization': typeof AuthedSettingsOrganizationRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/reports/': typeof AuthedReportsIndexRoute
   '/restaurant/claims/$id': typeof AuthedRestaurantClaimsIdRoute
@@ -244,6 +252,7 @@ export interface FileRoutesByTo {
   '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/reports/new': typeof AuthedReportsNewRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
+  '/settings/organization': typeof AuthedSettingsOrganizationRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/reports': typeof AuthedReportsIndexRoute
   '/restaurant/claims/$id': typeof AuthedRestaurantClaimsIdRoute
@@ -276,6 +285,7 @@ export interface FileRoutesById {
   '/_authed/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/_authed/reports/new': typeof AuthedReportsNewRoute
   '/_authed/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
+  '/_authed/settings/organization': typeof AuthedSettingsOrganizationRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authed/reports/': typeof AuthedReportsIndexRoute
   '/_authed/restaurant/claims/$id': typeof AuthedRestaurantClaimsIdRoute
@@ -308,6 +318,7 @@ export interface FileRouteTypes {
     | '/onboarding/organization'
     | '/reports/new'
     | '/restaurant/dashboard'
+    | '/settings/organization'
     | '/api/auth/$'
     | '/reports/'
     | '/restaurant/claims/$id'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/onboarding/organization'
     | '/reports/new'
     | '/restaurant/dashboard'
+    | '/settings/organization'
     | '/api/auth/$'
     | '/reports'
     | '/restaurant/claims/$id'
@@ -369,6 +381,7 @@ export interface FileRouteTypes {
     | '/_authed/onboarding/organization'
     | '/_authed/reports/new'
     | '/_authed/restaurant/dashboard'
+    | '/_authed/settings/organization'
     | '/api/auth/$'
     | '/_authed/reports/'
     | '/_authed/restaurant/claims/$id'
@@ -438,6 +451,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authed/settings/organization': {
+      id: '/_authed/settings/organization'
+      path: '/settings/organization'
+      fullPath: '/settings/organization'
+      preLoaderRoute: typeof AuthedSettingsOrganizationRouteImport
+      parentRoute: typeof AuthedRoute
     }
     '/_authed/restaurant/dashboard': {
       id: '/_authed/restaurant/dashboard'
@@ -613,6 +633,7 @@ interface AuthedRouteChildren {
   AuthedOnboardingOrganizationRoute: typeof AuthedOnboardingOrganizationRoute
   AuthedReportsNewRoute: typeof AuthedReportsNewRoute
   AuthedRestaurantDashboardRoute: typeof AuthedRestaurantDashboardRoute
+  AuthedSettingsOrganizationRoute: typeof AuthedSettingsOrganizationRoute
   AuthedReportsIndexRoute: typeof AuthedReportsIndexRoute
   AuthedRestaurantClaimsIdRoute: typeof AuthedRestaurantClaimsIdRoute
   AuthedRestaurantListingsNewRoute: typeof AuthedRestaurantListingsNewRoute
@@ -639,6 +660,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedOnboardingOrganizationRoute: AuthedOnboardingOrganizationRoute,
   AuthedReportsNewRoute: AuthedReportsNewRoute,
   AuthedRestaurantDashboardRoute: AuthedRestaurantDashboardRoute,
+  AuthedSettingsOrganizationRoute: AuthedSettingsOrganizationRoute,
   AuthedReportsIndexRoute: AuthedReportsIndexRoute,
   AuthedRestaurantClaimsIdRoute: AuthedRestaurantClaimsIdRoute,
   AuthedRestaurantListingsNewRoute: AuthedRestaurantListingsNewRoute,

@@ -12,6 +12,7 @@ import {
   MapPin,
   Menu,
   PawPrint,
+  Settings,
   ShoppingBag,
   Users,
   X,
@@ -69,7 +70,10 @@ const RESTAURANT_NAV: NavSection[] = [
   },
   {
     label: 'Account',
-    items: [{ to: '/reports', label: 'Reports', icon: Flag }],
+    items: [
+      { to: '/settings/organization', label: 'Settings', icon: Settings },
+      { to: '/reports', label: 'Reports', icon: Flag },
+    ],
   },
 ]
 
@@ -84,7 +88,10 @@ const NGO_NAV: NavSection[] = [
   },
   {
     label: 'Account',
-    items: [{ to: '/reports', label: 'Reports', icon: Flag }],
+    items: [
+      { to: '/settings/organization', label: 'Settings', icon: Settings },
+      { to: '/reports', label: 'Reports', icon: Flag },
+    ],
   },
 ]
 
@@ -99,7 +106,10 @@ const ANIMAL_NAV: NavSection[] = [
   },
   {
     label: 'Account',
-    items: [{ to: '/reports', label: 'Reports', icon: Flag }],
+    items: [
+      { to: '/settings/organization', label: 'Settings', icon: Settings },
+      { to: '/reports', label: 'Reports', icon: Flag },
+    ],
   },
 ]
 

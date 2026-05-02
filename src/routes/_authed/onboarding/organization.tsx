@@ -2,6 +2,7 @@ import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { Building2, LogOut } from 'lucide-react'
 import { signOut } from '../../../lib/auth-client'
+import { LocationPicker } from '../../../components/map/LocationPicker'
 import {
   createMyOrganizationFn,
   expectedOrgTypeForRole,
@@ -32,8 +33,8 @@ function OnboardingOrganization() {
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [cityId, setCityId] = useState('')
-  const [latitude, setLatitude] = useState('')
-  const [longitude, setLongitude] = useState('')
+  const [latitude, setLatitude] = useState<number | null>(null)
+  const [longitude, setLongitude] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -41,9 +42,21 @@ function OnboardingOrganization() {
     if (cities.length > 0 && !cityId) setCityId(cities[0].id)
   }, [cities, cityId])
 
+  function isInNepalBounds(lat: number, lng: number): boolean {
+    return lat >= 26 && lat <= 31 && lng >= 80 && lng <= 89
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    if (latitude == null || longitude == null) {
+      setError('Please pick your location on the map')
+      return
+    }
+    if (!isInNepalBounds(latitude, longitude)) {
+      setError('Please pick a location inside Nepal on the map')
+      return
+    }
     setSubmitting(true)
     try {
       await createMyOrganizationFn({
@@ -53,8 +66,8 @@ function OnboardingOrganization() {
           phone: phone || undefined,
           address: address || undefined,
           cityId: cityId || null,
-          latitude: latitude ? Number(latitude) : null,
-          longitude: longitude ? Number(longitude) : null,
+          latitude,
+          longitude,
         },
       })
       router.invalidate()
@@ -199,32 +212,19 @@ function OnboardingOrganization() {
               />
             </Field>
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="Latitude">
-                <input
-                  type="number"
-                  step="any"
-                  min={-90}
-                  max={90}
-                  value={latitude}
-                  onChange={(e) => setLatitude(e.target.value)}
-                  className={inputCls}
-                  placeholder="12.9716"
-                />
-              </Field>
-              <Field label="Longitude">
-                <input
-                  type="number"
-                  step="any"
-                  min={-180}
-                  max={180}
-                  value={longitude}
-                  onChange={(e) => setLongitude(e.target.value)}
-                  className={inputCls}
-                  placeholder="77.5946"
-                />
-              </Field>
-            </div>
+            <Field label="Pickup location" required>
+              <LocationPicker
+                initialLat={latitude}
+                initialLng={longitude}
+                onChange={(lat, lng, suggestedAddress) => {
+                  setLatitude(lat)
+                  setLongitude(lng)
+                  if (suggestedAddress && !address.trim()) {
+                    setAddress(suggestedAddress)
+                  }
+                }}
+              />
+            </Field>
 
             {error ? <Alert tone="error">{error}</Alert> : null}
 

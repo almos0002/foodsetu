@@ -219,6 +219,52 @@ export const createMyOrganizationFn = createServerFn({ method: 'POST' })
     return fetchOrgForUser(user.id)
   })
 
+function validateUpdateMyOrgInput(value: unknown): CreateOrgInput {
+  // Same shape as create — name + optional fields. Owner-only update endpoint
+  // does not change verificationStatus or org type.
+  return validateCreateInput(value)
+}
+
+export const updateMyOrganizationFn = createServerFn({ method: 'POST' })
+  .inputValidator(validateUpdateMyOrgInput)
+  .handler(async ({ data }) => {
+    const user = await requireUser()
+    const existing = await fetchOrgForUser(user.id)
+    if (!existing) throw new Error('You do not have an organization to update')
+
+    if (data.cityId) {
+      const c = await pool.query('SELECT id FROM cities WHERE id = $1', [
+        data.cityId,
+      ])
+      if (c.rowCount === 0) throw new Error('Invalid city selected')
+    }
+
+    const result = await pool.query(
+      `UPDATE "organization"
+          SET name = $1,
+              description = $2,
+              phone = $3,
+              address = $4,
+              "cityId" = $5,
+              latitude = $6,
+              longitude = $7
+        WHERE id = $8
+        RETURNING *`,
+      [
+        data.name,
+        data.description ?? null,
+        data.phone ?? null,
+        data.address ?? null,
+        data.cityId ?? null,
+        data.latitude,
+        data.longitude,
+        existing.id,
+      ],
+    )
+    if (result.rowCount === 0) throw new Error('Organization not found')
+    return result.rows[0] as OrganizationRow
+  })
+
 export const listOrganizationsForAdminFn = createServerFn({
   method: 'GET',
 }).handler(async () => {

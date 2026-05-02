@@ -6,12 +6,14 @@ import {
   History,
   Inbox,
   ListChecks,
+  MapPin,
   Plus,
   ShoppingBag,
   Utensils,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
+import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
 import { ListingStatusBadge } from '../../../components/ui/ClaimStatusBadge'
 import { DashboardListingCard } from '../../../components/ui/DashboardListingCard'
@@ -92,6 +94,22 @@ function RestaurantDashboard() {
           ) : null
         }
       />
+
+      {organization && (organization.latitude == null || organization.longitude == null) ? (
+        <Alert tone="warning" title="Set your pickup location" className="mt-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span>
+              Without a location, partners nearby won&apos;t see your listings.
+              Set it once in settings.
+            </span>
+            <Link to="/settings/organization">
+              <Button size="sm" leftIcon={<MapPin className="h-4 w-4" />}>
+                Set your location
+              </Button>
+            </Link>
+          </div>
+        </Alert>
+      ) : null}
 
       <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <DashboardStatsCard

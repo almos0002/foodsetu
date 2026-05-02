@@ -9,6 +9,7 @@ import {
 } from '../lib/permissions'
 import type { FoodCategory, FoodType, QuantityUnit } from '../lib/permissions'
 import type { ListingInput } from '../lib/listing-server'
+import { LocationPicker } from './map/LocationPicker'
 import { Alert } from './ui/Alert'
 import { Button } from './ui/Button'
 
@@ -84,19 +85,19 @@ export function ListingForm({
     isoToLocalInput(initial?.pickupEndTime),
   )
   const [expiry, setExpiry] = useState(isoToLocalInput(initial?.expiryTime))
-  const [latitude, setLatitude] = useState(
+  const [latitude, setLatitude] = useState<number | null>(
     initial?.latitude != null
-      ? String(initial.latitude)
+      ? Number(initial.latitude)
       : defaultLatitude != null
-        ? String(defaultLatitude)
-        : '',
+        ? Number(defaultLatitude)
+        : null,
   )
-  const [longitude, setLongitude] = useState(
+  const [longitude, setLongitude] = useState<number | null>(
     initial?.longitude != null
-      ? String(initial.longitude)
+      ? Number(initial.longitude)
       : defaultLongitude != null
-        ? String(defaultLongitude)
-        : '',
+        ? Number(defaultLongitude)
+        : null,
   )
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? '')
   const [error, setError] = useState<string | null>(null)
@@ -118,6 +119,10 @@ export function ListingForm({
       setError('Expiry time must be after pickup start time')
       return
     }
+    if (latitude == null || longitude == null) {
+      setError('Please pick a pickup location on the map')
+      return
+    }
 
     setSubmitting(true)
     try {
@@ -131,8 +136,8 @@ export function ListingForm({
         pickupStartTime: localInputToIso(pickupStart),
         pickupEndTime: localInputToIso(pickupEnd),
         expiryTime: localInputToIso(expiry),
-        latitude: Number(latitude),
-        longitude: Number(longitude),
+        latitude: latitude as number,
+        longitude: longitude as number,
         imageUrl: imageUrl.trim() || null,
       })
     } catch (err) {
@@ -251,34 +256,16 @@ export function ListingForm({
         </Field>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Latitude" required>
-          <input
-            required
-            type="number"
-            step="any"
-            min={-90}
-            max={90}
-            value={latitude}
-            onChange={(e) => setLatitude(e.target.value)}
-            className={inputCls}
-            placeholder="12.9716"
-          />
-        </Field>
-        <Field label="Longitude" required>
-          <input
-            required
-            type="number"
-            step="any"
-            min={-180}
-            max={180}
-            value={longitude}
-            onChange={(e) => setLongitude(e.target.value)}
-            className={inputCls}
-            placeholder="77.5946"
-          />
-        </Field>
-      </div>
+      <Field label="Pickup location" required>
+        <LocationPicker
+          initialLat={latitude}
+          initialLng={longitude}
+          onChange={(lat, lng) => {
+            setLatitude(lat)
+            setLongitude(lng)
+          }}
+        />
+      </Field>
 
       <Field label="Image URL">
         <input

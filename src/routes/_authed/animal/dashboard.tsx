@@ -114,6 +114,22 @@ function AnimalDashboard() {
         />
       </div>
 
+      {organization && (organization.latitude == null || organization.longitude == null) ? (
+        <Alert tone="warning" title="Set your pickup location" className="mt-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span>
+              We need your location to surface listings within 10 km of your
+              organization.
+            </span>
+            <Link to="/settings/organization">
+              <Button size="sm" leftIcon={<MapPin className="h-4 w-4" />}>
+                Set your location
+              </Button>
+            </Link>
+          </div>
+        </Alert>
+      ) : null}
+
       {!canClaim ? (
         <Alert
           tone="warning"
