@@ -14,16 +14,15 @@ type Tone =
 
 const TONES: Record<Tone, string> = {
   default: 'bg-gray-100 text-gray-700',
-  orange: 'bg-orange-50 text-orange-600',
-  green: 'bg-emerald-50 text-emerald-600',
-  blue: 'bg-blue-50 text-blue-600',
-  amber: 'bg-amber-50 text-amber-600',
-  red: 'bg-red-50 text-red-600',
-  purple: 'bg-purple-50 text-purple-600',
+  orange: 'bg-orange-100 text-orange-600',
+  green: 'bg-emerald-100 text-emerald-600',
+  blue: 'bg-blue-100 text-blue-600',
+  amber: 'bg-amber-100 text-amber-600',
+  red: 'bg-red-100 text-red-600',
+  purple: 'bg-purple-100 text-purple-600',
 }
 
 type Trend = {
-  /** Positive number = up, negative = down, 0 = flat. */
   direction: 'up' | 'down' | 'flat'
   label: string
 }
@@ -41,9 +40,9 @@ type Props = {
 }
 
 const TREND_TONE: Record<Trend['direction'], string> = {
-  up: 'text-emerald-600',
-  down: 'text-red-600',
-  flat: 'text-gray-500',
+  up: 'bg-emerald-50 text-emerald-700',
+  down: 'bg-red-50 text-red-700',
+  flat: 'bg-gray-100 text-gray-600',
 }
 const TREND_ICON: Record<Trend['direction'], typeof ArrowUpRight> = {
   up: ArrowUpRight,
@@ -66,45 +65,42 @@ export function DashboardStatsCard({
   const inner = (
     <div className="flex h-full flex-col">
       <div className="flex items-start justify-between gap-3">
-        <div className="text-[11px] font-medium uppercase tracking-wider text-gray-500">
-          {label}
-        </div>
         {Icon ? (
           <div
             className={cn(
-              'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md',
+              'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl',
               TONES[tone],
             )}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="h-5 w-5" />
           </div>
         ) : null}
-      </div>
-      <div className="mt-3 flex items-baseline gap-2">
-        <div className="font-semibold text-gray-900 text-[28px] leading-none tabular-nums">
-          {value}
-        </div>
         {trend && TrendIcon ? (
-          <div
+          <span
             className={cn(
-              'inline-flex items-center gap-0.5 text-xs font-medium',
+              'inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums',
               TREND_TONE[trend.direction],
             )}
           >
-            <TrendIcon className="h-3.5 w-3.5" />
+            <TrendIcon className="h-3 w-3" />
             {trend.label}
-          </div>
+          </span>
         ) : null}
       </div>
+      <div className="mt-5 text-[32px] font-semibold leading-none tracking-tight text-gray-900 tabular-nums">
+        {value}
+      </div>
+      <div className="mt-2 text-sm font-medium text-gray-700">{label}</div>
       {hint ? (
-        <div className="mt-2 text-xs text-gray-500">{hint}</div>
+        <div className="mt-1 text-xs text-gray-500">{hint}</div>
       ) : null}
       {trailing ? <div className="mt-3">{trailing}</div> : null}
     </div>
   )
   const cls = cn(
-    'block rounded-lg border border-gray-200 bg-white p-5 transition-colors',
-    to && 'hover:border-gray-300',
+    'block rounded-2xl border border-gray-200 bg-white p-5 transition-all',
+    to &&
+      'hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2',
     className,
   )
   if (to) {

@@ -1,7 +1,8 @@
 import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import {
   ArrowRight,
-  ChevronRight,
+  Calendar,
+  ListChecks,
   MapPin,
   PawPrint,
   ShoppingBag,
@@ -11,10 +12,11 @@ import { DashboardShell } from '../../../components/DashboardShell'
 import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
 import { ClaimStatusBadge } from '../../../components/ui/ClaimStatusBadge'
+import { DashboardListingCard } from '../../../components/ui/DashboardListingCard'
 import { DashboardStatsCard } from '../../../components/ui/DashboardStatsCard'
+import { DashboardWelcomeBanner } from '../../../components/ui/DashboardWelcomeBanner'
 import { EmptyState } from '../../../components/ui/EmptyState'
 import { formatDistanceLong } from '../../../components/ui/FoodListingCard'
-import { PageHeader } from '../../../components/ui/PageHeader'
 import {
   listMyAnimalClaimsFn,
   listNearbyAnimalFoodFn,
@@ -27,6 +29,9 @@ import {
   roleToDashboard,
   type ClaimStatus,
 } from '../../../lib/permissions'
+
+const BANNER_IMG =
+  'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=900&auto=format&fit=crop&q=80'
 
 export const Route = createFileRoute('/_authed/animal/dashboard')({
   beforeLoad: ({ context }) => {
@@ -45,6 +50,14 @@ export const Route = createFileRoute('/_authed/animal/dashboard')({
   component: AnimalDashboard,
 })
 
+function todayLabel(): string {
+  return new Date().toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
 function AnimalDashboard() {
   const { nearby, myClaims } = Route.useLoaderData()
   const { user, organization } = Route.useRouteContext() as {
@@ -53,7 +66,14 @@ function AnimalDashboard() {
   }
   const canClaim = canManageAnimalClaims(user, organization)
   const activeClaims = myClaims.filter((c) => isClaimActive(c.status))
-  const recentNearby = nearby.slice(0, 5)
+  const recentNearby = nearby.slice(0, 4)
+  const orgName = organization?.name ?? user.name ?? 'there'
+  const greeting = (() => {
+    const h = new Date().getHours()
+    if (h < 12) return 'Good morning'
+    if (h < 18) return 'Good afternoon'
+    return 'Good evening'
+  })()
 
   return (
     <DashboardShell
@@ -62,24 +82,37 @@ function AnimalDashboard() {
       user={user}
       organization={organization}
     >
-      <PageHeader
-        eyebrow={
-          organization?.name ? `Welcome back, ${organization.name}` : 'Workspace'
-        }
-        title="Overview"
-        description="Pick up animal-safe surplus near you."
+      <DashboardWelcomeBanner
+        tone="emerald"
+        eyebrow="Animal rescue workspace"
+        title={`${greeting}, ${orgName}`}
+        description="Pick up animal-safe surplus near you and reduce feed costs while diverting waste from landfill."
+        image={BANNER_IMG}
+        chips={[
+          { label: todayLabel(), icon: <Calendar className="h-3.5 w-3.5" /> },
+        ]}
         actions={
           canClaim ? (
-            <Link to="/animal/nearby-food">
-              <Button leftIcon={<MapPin className="h-4 w-4" />}>
-                Browse nearby food
-              </Button>
-            </Link>
+            <>
+              <Link to="/animal/nearby-food">
+                <Button leftIcon={<MapPin className="h-4 w-4" />}>
+                  Browse nearby food
+                </Button>
+              </Link>
+              <Link to="/animal/my-claims">
+                <Button
+                  variant="outline"
+                  leftIcon={<ShoppingBag className="h-4 w-4" />}
+                >
+                  My claims
+                </Button>
+              </Link>
+            </>
           ) : null
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <DashboardStatsCard
           label="Nearby available"
           value={canClaim ? nearby.length : '—'}
@@ -98,8 +131,8 @@ function AnimalDashboard() {
         <DashboardStatsCard
           label="Total claims"
           value={canClaim ? myClaims.length : '—'}
-          icon={ShoppingBag}
-          tone="default"
+          icon={ListChecks}
+          tone="orange"
           hint="Lifetime"
           to={canClaim ? '/animal/my-claims' : undefined}
         />
@@ -122,103 +155,85 @@ function AnimalDashboard() {
       ) : null}
 
       {canClaim ? (
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
-          <div className="rounded-lg border border-gray-200 bg-white lg:col-span-2">
-            <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-5 py-3.5">
+        <div className="mt-6 grid gap-5 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <div className="flex items-end justify-between gap-3">
               <div>
-                <h2 className="text-sm font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold tracking-tight text-gray-900">
                   Nearby right now
                 </h2>
-                <p className="text-xs text-gray-500">
+                <p className="mt-0.5 text-sm text-gray-500">
                   Animal-safe listings sorted by distance
                 </p>
               </div>
               <Link
                 to="/animal/nearby-food"
-                className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-gray-900 underline-offset-4 hover:underline"
               >
                 View all
-                <ChevronRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
             {recentNearby.length === 0 ? (
-              <EmptyState
-                bare
-                icon={Utensils}
-                title="No nearby food right now"
-                description="Check back soon — restaurants post throughout the day."
-              />
+              <div className="mt-4 rounded-2xl border border-dashed border-gray-300 bg-gray-50">
+                <EmptyState
+                  bare
+                  icon={Utensils}
+                  title="No nearby food right now"
+                  description="Check back soon — restaurants post throughout the day."
+                />
+              </div>
             ) : (
-              <ul className="divide-y divide-gray-100">
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 {recentNearby.map((listing) => (
-                  <li
+                  <DashboardListingCard
                     key={listing.id}
-                    className="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-medium text-gray-900">
-                        {listing.title}
-                      </div>
-                      <div className="truncate text-xs text-gray-500">
-                        <span className="tabular-nums">
-                          {listing.quantity} {listing.quantityUnit}
-                        </span>
-                        {listing.restaurantName
-                          ? ` · ${listing.restaurantName}`
-                          : ''}
-                        {listing.distanceKm != null
-                          ? ` · ${formatDistanceLong(listing.distanceKm)}`
-                          : ''}
-                      </div>
-                    </div>
-                    <Link
-                      to="/animal/nearby-food"
-                      className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700"
-                    >
-                      Open
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </li>
+                    to="/animal/nearby-food"
+                    imageUrl={listing.imageUrl}
+                    title={listing.title}
+                    primaryMeta={`${listing.quantity} ${listing.quantityUnit}`}
+                    pickupAt={listing.pickupStartTime}
+                    location={
+                      listing.distanceKm != null
+                        ? formatDistanceLong(listing.distanceKm)
+                        : (listing.restaurantName ?? null)
+                    }
+                  />
                 ))}
-              </ul>
+              </div>
             )}
           </div>
 
-          <div className="space-y-3">
-            <div className="rounded-lg border border-gray-200 bg-white p-5">
-              <div className="text-[11px] font-medium uppercase tracking-wider text-gray-500">
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-gray-200 bg-white p-5">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                 Quick actions
               </div>
-              <div className="mt-3 space-y-2">
-                <Link to="/animal/nearby-food" className="block">
-                  <Button
-                    fullWidth
-                    leftIcon={<MapPin className="h-4 w-4" />}
-                  >
-                    Browse nearby food
-                  </Button>
-                </Link>
-                <Link to="/animal/my-claims" className="block">
-                  <Button
-                    fullWidth
-                    variant="outline"
-                    leftIcon={<ShoppingBag className="h-4 w-4" />}
-                  >
-                    My claims
-                  </Button>
-                </Link>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <ActionTile
+                  to="/animal/nearby-food"
+                  icon={MapPin}
+                  label="Nearby food"
+                  tone="bg-orange-50 text-orange-700"
+                />
+                <ActionTile
+                  to="/animal/my-claims"
+                  icon={ShoppingBag}
+                  label="My claims"
+                  tone="bg-blue-50 text-blue-700"
+                />
               </div>
             </div>
 
             {activeClaims.length > 0 ? (
-              <div className="rounded-lg border border-gray-200 bg-white">
+              <div className="rounded-2xl border border-gray-200 bg-white">
                 <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-5 py-3.5">
                   <h3 className="text-sm font-semibold text-gray-900">
                     Active claims
                   </h3>
                   <Link
                     to="/animal/my-claims"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-gray-900 underline-offset-4 hover:underline"
                   >
                     All
                     <ArrowRight className="h-3 w-3" />
@@ -248,5 +263,31 @@ function AnimalDashboard() {
         </div>
       ) : null}
     </DashboardShell>
+  )
+}
+
+function ActionTile({
+  to,
+  icon: Icon,
+  label,
+  tone,
+}: {
+  to: string
+  icon: typeof MapPin
+  label: string
+  tone: string
+}) {
+  return (
+    <Link
+      to={to}
+      className="group flex flex-col items-start gap-2 rounded-xl border border-gray-200 bg-white p-3 transition-all hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+    >
+      <div
+        className={`flex h-9 w-9 items-center justify-center rounded-lg ${tone}`}
+      >
+        <Icon className="h-4 w-4" />
+      </div>
+      <span className="text-xs font-medium text-gray-900">{label}</span>
+    </Link>
   )
 }
