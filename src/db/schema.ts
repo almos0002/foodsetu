@@ -67,6 +67,7 @@ export const verificationStatusEnum = pgEnum('verification_status', [
   'PENDING',
   'VERIFIED',
   'REJECTED',
+  'SUSPENDED',
 ])
 
 export const reportReasonEnum = pgEnum('report_reason', [

@@ -1,16 +1,33 @@
 import { Link, useRouter } from '@tanstack/react-router'
-import { LogOut, Utensils } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Clock, LogOut, Utensils, XCircle } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { signOut } from '../lib/auth-client'
+import {
+  VERIFICATION_BADGE_CLASSES,
+  VERIFICATION_LABELS,
+  type VerificationStatus,
+} from '../lib/permissions'
+
+type Org = {
+  name?: string | null
+  verificationStatus?: string | null
+} | null
 
 type Props = {
   title: string
   roleLabel: string
   user: { name?: string | null; email?: string | null }
+  organization?: Org
   children: ReactNode
 }
 
-export function DashboardShell({ title, roleLabel, user, children }: Props) {
+export function DashboardShell({
+  title,
+  roleLabel,
+  user,
+  organization,
+  children,
+}: Props) {
   const router = useRouter()
 
   async function handleSignOut() {
@@ -18,6 +35,8 @@ export function DashboardShell({ title, roleLabel, user, children }: Props) {
     router.invalidate()
     await router.navigate({ to: '/login' })
   }
+
+  const status = (organization?.verificationStatus ?? null) as VerificationStatus | null
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -29,7 +48,9 @@ export function DashboardShell({ title, roleLabel, user, children }: Props) {
           </Link>
           <div className="flex items-center gap-4">
             <div className="hidden text-right sm:block">
-              <div className="text-sm font-medium text-gray-900">{user.name ?? user.email}</div>
+              <div className="text-sm font-medium text-gray-900">
+                {user.name ?? user.email}
+              </div>
               <div className="text-xs text-gray-500">{roleLabel}</div>
             </div>
             <button
@@ -45,10 +66,85 @@ export function DashboardShell({ title, roleLabel, user, children }: Props) {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-8">
-        <h1 className="mb-1 text-2xl font-semibold text-gray-900">{title}</h1>
-        <p className="mb-6 text-sm text-gray-600">{roleLabel} workspace</p>
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
+            <p className="text-sm text-gray-600">
+              {organization?.name ? (
+                <>
+                  <span className="font-medium text-gray-800">{organization.name}</span>{' '}
+                  · {roleLabel}
+                </>
+              ) : (
+                <>{roleLabel} workspace</>
+              )}
+            </p>
+          </div>
+          {status ? (
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
+                VERIFICATION_BADGE_CLASSES[status] ?? ''
+              }`}
+            >
+              <StatusIcon status={status} />
+              {VERIFICATION_LABELS[status] ?? status}
+            </span>
+          ) : null}
+        </div>
+
+        {status && status !== 'VERIFIED' ? (
+          <VerificationBanner status={status} />
+        ) : null}
+
         {children}
       </main>
+    </div>
+  )
+}
+
+function StatusIcon({ status }: { status: VerificationStatus }) {
+  switch (status) {
+    case 'VERIFIED':
+      return <CheckCircle2 className="h-3.5 w-3.5" />
+    case 'REJECTED':
+      return <XCircle className="h-3.5 w-3.5" />
+    case 'SUSPENDED':
+      return <AlertTriangle className="h-3.5 w-3.5" />
+    case 'PENDING':
+    default:
+      return <Clock className="h-3.5 w-3.5" />
+  }
+}
+
+function VerificationBanner({ status }: { status: VerificationStatus }) {
+  const config: Record<
+    VerificationStatus,
+    { wrapper: string; title: string; body: string }
+  > = {
+    PENDING: {
+      wrapper: 'bg-amber-50 ring-amber-200 text-amber-900',
+      title: 'Awaiting verification',
+      body:
+        "Your organization is waiting for an admin to review it. You can't post listings or claim food yet.",
+    },
+    REJECTED: {
+      wrapper: 'bg-red-50 ring-red-200 text-red-900',
+      title: 'Verification rejected',
+      body:
+        'An admin rejected your organization profile. Please contact support to resolve the issue.',
+    },
+    SUSPENDED: {
+      wrapper: 'bg-gray-100 ring-gray-300 text-gray-800',
+      title: 'Account suspended',
+      body: 'Your organization has been suspended. Contact support if you believe this is in error.',
+    },
+    VERIFIED: { wrapper: '', title: '', body: '' },
+  }
+  const c = config[status]
+  return (
+    <div className={`mb-6 rounded-xl px-4 py-3 text-sm ring-1 ${c.wrapper}`}>
+      <div className="font-semibold">{c.title}</div>
+      <div className="mt-0.5">{c.body}</div>
     </div>
   )
 }

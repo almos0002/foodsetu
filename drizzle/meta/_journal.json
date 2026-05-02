@@ -15,6 +15,13 @@
       "when": 1777727043036,
       "tag": "0001_add_lock_audit_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777728076368,
+      "tag": "0002_add_suspended_status",
+      "breakpoints": true
     }
   ]
 }

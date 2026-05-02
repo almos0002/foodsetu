@@ -100,6 +100,26 @@ export const auth = betterAuth({
           delete body.role
         }
       }
+      // Defense in depth: app code creates orgs via our server fn
+      // (org-server.ts) which enforces role/type matching, single-org,
+      // and PENDING verification. Block Better Auth's direct
+      // /organization/create endpoint so attackers can't bypass those rules
+      // (e.g. forge the type, create multiple orgs, set verificationStatus).
+      if (path.startsWith('/organization/create')) {
+        throw new Error(
+          'Organization creation must go through the onboarding flow',
+        )
+      }
+      // Block direct updates to organization profile fields too — verification
+      // status is admin-managed via our server fn.
+      if (path.startsWith('/organization/update')) {
+        const body = ctx.body as Record<string, unknown> | undefined
+        if (body) {
+          if ('verificationStatus' in body) delete body.verificationStatus
+          if ('verifiedAt' in body) delete body.verifiedAt
+          if ('type' in body) delete body.type
+        }
+      }
     }),
   },
   plugins: [
@@ -115,6 +135,7 @@ export const auth = betterAuth({
             cityId: { type: 'string', required: false },
             phone: { type: 'string', required: false },
             address: { type: 'string', required: false },
+            description: { type: 'string', required: false },
             latitude: { type: 'number', required: false },
             longitude: { type: 'number', required: false },
             verificationStatus: {

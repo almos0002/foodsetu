@@ -15,8 +15,10 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthedRestaurantDashboardRouteImport } from './routes/_authed/restaurant/dashboard'
+import { Route as AuthedOnboardingOrganizationRouteImport } from './routes/_authed/onboarding/organization'
 import { Route as AuthedNgoDashboardRouteImport } from './routes/_authed/ngo/dashboard'
 import { Route as AuthedAnimalDashboardRouteImport } from './routes/_authed/animal/dashboard'
+import { Route as AuthedAdminOrganizationsRouteImport } from './routes/_authed/admin/organizations'
 import { Route as AuthedAdminDashboardRouteImport } from './routes/_authed/admin/dashboard'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -49,6 +51,12 @@ const AuthedRestaurantDashboardRoute =
     path: '/restaurant/dashboard',
     getParentRoute: () => AuthedRoute,
   } as any)
+const AuthedOnboardingOrganizationRoute =
+  AuthedOnboardingOrganizationRouteImport.update({
+    id: '/onboarding/organization',
+    path: '/onboarding/organization',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 const AuthedNgoDashboardRoute = AuthedNgoDashboardRouteImport.update({
   id: '/ngo/dashboard',
   path: '/ngo/dashboard',
@@ -59,6 +67,12 @@ const AuthedAnimalDashboardRoute = AuthedAnimalDashboardRouteImport.update({
   path: '/animal/dashboard',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedAdminOrganizationsRoute =
+  AuthedAdminOrganizationsRouteImport.update({
+    id: '/admin/organizations',
+    path: '/admin/organizations',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 const AuthedAdminDashboardRoute = AuthedAdminDashboardRouteImport.update({
   id: '/admin/dashboard',
   path: '/admin/dashboard',
@@ -70,8 +84,10 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/admin/dashboard': typeof AuthedAdminDashboardRoute
+  '/admin/organizations': typeof AuthedAdminOrganizationsRoute
   '/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/ngo/dashboard': typeof AuthedNgoDashboardRoute
+  '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -80,8 +96,10 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/admin/dashboard': typeof AuthedAdminDashboardRoute
+  '/admin/organizations': typeof AuthedAdminOrganizationsRoute
   '/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/ngo/dashboard': typeof AuthedNgoDashboardRoute
+  '/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -92,8 +110,10 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_authed/admin/dashboard': typeof AuthedAdminDashboardRoute
+  '/_authed/admin/organizations': typeof AuthedAdminOrganizationsRoute
   '/_authed/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/_authed/ngo/dashboard': typeof AuthedNgoDashboardRoute
+  '/_authed/onboarding/organization': typeof AuthedOnboardingOrganizationRoute
   '/_authed/restaurant/dashboard': typeof AuthedRestaurantDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -104,8 +124,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/admin/dashboard'
+    | '/admin/organizations'
     | '/animal/dashboard'
     | '/ngo/dashboard'
+    | '/onboarding/organization'
     | '/restaurant/dashboard'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
@@ -114,8 +136,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/admin/dashboard'
+    | '/admin/organizations'
     | '/animal/dashboard'
     | '/ngo/dashboard'
+    | '/onboarding/organization'
     | '/restaurant/dashboard'
     | '/api/auth/$'
   id:
@@ -125,8 +149,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/_authed/admin/dashboard'
+    | '/_authed/admin/organizations'
     | '/_authed/animal/dashboard'
     | '/_authed/ngo/dashboard'
+    | '/_authed/onboarding/organization'
     | '/_authed/restaurant/dashboard'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -183,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRestaurantDashboardRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/onboarding/organization': {
+      id: '/_authed/onboarding/organization'
+      path: '/onboarding/organization'
+      fullPath: '/onboarding/organization'
+      preLoaderRoute: typeof AuthedOnboardingOrganizationRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/ngo/dashboard': {
       id: '/_authed/ngo/dashboard'
       path: '/ngo/dashboard'
@@ -197,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAnimalDashboardRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/admin/organizations': {
+      id: '/_authed/admin/organizations'
+      path: '/admin/organizations'
+      fullPath: '/admin/organizations'
+      preLoaderRoute: typeof AuthedAdminOrganizationsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/admin/dashboard': {
       id: '/_authed/admin/dashboard'
       path: '/admin/dashboard'
@@ -209,15 +249,19 @@ declare module '@tanstack/react-router' {
 
 interface AuthedRouteChildren {
   AuthedAdminDashboardRoute: typeof AuthedAdminDashboardRoute
+  AuthedAdminOrganizationsRoute: typeof AuthedAdminOrganizationsRoute
   AuthedAnimalDashboardRoute: typeof AuthedAnimalDashboardRoute
   AuthedNgoDashboardRoute: typeof AuthedNgoDashboardRoute
+  AuthedOnboardingOrganizationRoute: typeof AuthedOnboardingOrganizationRoute
   AuthedRestaurantDashboardRoute: typeof AuthedRestaurantDashboardRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedAdminDashboardRoute: AuthedAdminDashboardRoute,
+  AuthedAdminOrganizationsRoute: AuthedAdminOrganizationsRoute,
   AuthedAnimalDashboardRoute: AuthedAnimalDashboardRoute,
   AuthedNgoDashboardRoute: AuthedNgoDashboardRoute,
+  AuthedOnboardingOrganizationRoute: AuthedOnboardingOrganizationRoute,
   AuthedRestaurantDashboardRoute: AuthedRestaurantDashboardRoute,
 }
 

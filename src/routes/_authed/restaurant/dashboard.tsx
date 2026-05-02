@@ -1,19 +1,17 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { DashboardShell } from '../../../components/DashboardShell'
+import type { OrganizationRow } from '../../../lib/org-server'
 import {
   ROLE_LABELS,
   canCreateFoodListing,
+  isOrgVerified,
   roleToDashboard,
 } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/restaurant/dashboard')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
-    // Admins can also access this view, but they should default to their own dashboard.
     if (user.role !== 'RESTAURANT' && user.role !== 'ADMIN') {
-      throw redirect({ to: roleToDashboard(user.role) as string })
-    }
-    if (!canCreateFoodListing(user)) {
       throw redirect({ to: roleToDashboard(user.role) as string })
     }
   },
@@ -21,17 +19,25 @@ export const Route = createFileRoute('/_authed/restaurant/dashboard')({
 })
 
 function RestaurantDashboard() {
-  const { user } = Route.useRouteContext() as {
+  const { user, organization } = Route.useRouteContext() as {
     user: { name?: string | null; email?: string | null; role?: string | null }
+    organization: OrganizationRow | null
   }
+  const verified = isOrgVerified(organization)
+  const canPost = canCreateFoodListing(user, organization)
   return (
     <DashboardShell
       title="Restaurant dashboard"
       roleLabel={ROLE_LABELS.RESTAURANT}
       user={user}
+      organization={organization}
     >
       <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-sm text-gray-600">
-        You'll be able to post surplus food listings here.
+        {canPost
+          ? "You'll be able to post surplus food listings here."
+          : verified
+            ? 'Listings will appear here once you publish them.'
+            : 'Posting listings is locked until your organization is verified.'}
       </div>
     </DashboardShell>
   )

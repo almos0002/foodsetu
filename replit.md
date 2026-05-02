@@ -59,7 +59,7 @@ Domain tables reference `user.id` / `organization.id` as **soft text references*
 | `food_category` | HUMAN_SAFE, ANIMAL_SAFE, COMPOST_ONLY |
 | `food_listing_status` | DRAFT, AVAILABLE, CLAIM_REQUESTED, CLAIMED, PICKED_UP, EXPIRED, CANCELLED, REPORTED |
 | `claim_status` | PENDING, ACCEPTED, REJECTED, CANCELLED, PICKED_UP, COMPLETED |
-| `verification_status` | PENDING, VERIFIED, REJECTED |
+| `verification_status` | PENDING, VERIFIED, REJECTED, SUSPENDED |
 | `report_reason` | SPOILED, MISLABELED, NO_SHOW, INAPPROPRIATE, OTHER |
 | `report_status` | OPEN, REVIEWING, RESOLVED, DISMISSED |
 | `sms_purpose` | OTP, NEW_LISTING_ALERT, CLAIM_ACCEPTED, PICKUP_REMINDER, GENERIC |
@@ -68,7 +68,7 @@ Domain tables reference `user.id` / `organization.id` as **soft text references*
 ### Custom auth fields (managed by Better Auth)
 
 - **`user.role`** (text, default `RESTAURANT`, `input: false` so clients can't self-elevate). Allowed values mirror `user_role` enum.
-- **`organization`** extended fields: `type` (default `RESTAURANT`), `cityId`, `phone`, `address`, `latitude`, `longitude`, `verificationStatus` (default `PENDING`), `verifiedAt`.
+- **`organization`** extended fields: `type` (default `RESTAURANT`), `cityId`, `phone`, `address`, `description`, `latitude`, `longitude`, `verificationStatus` (default `PENDING`, one of `PENDING|VERIFIED|REJECTED|SUSPENDED`), `verifiedAt`.
 
 ### Running migrations
 
@@ -106,16 +106,74 @@ Public routes (under `src/routes/`):
 
 Protected routes live under the pathless layout `src/routes/_authed.tsx`. Its `beforeLoad` calls a server function (`getServerSession` in `src/lib/auth-server.ts`) which reads the cookie via `auth.api.getSession({ headers })`. If no session, it redirects to `/login?redirect=<original-href>` and the login page honors that on success. On success it returns `{ user, sessionId }` into route context.
 
-Each dashboard route adds its own `beforeLoad` calling the matching `canX(user)` helper from `src/lib/permissions.ts` and redirecting to `roleToDashboard(user.role)` on mismatch:
+Each dashboard route adds its own `beforeLoad` doing a plain role check (NOT the verification-aware `canX` helpers, which gate _actions_ not _navigation_) and redirecting to `roleToDashboard(user.role)` on mismatch:
 
-| Route | Allowed roles |
-|-------|---------------|
-| `/admin/dashboard` | `canAccessAdmin` → ADMIN only |
-| `/restaurant/dashboard` | `canCreateFoodListing` → RESTAURANT, ADMIN |
-| `/ngo/dashboard` | `canClaimHumanFood` → NGO, ADMIN |
-| `/animal/dashboard` | `canClaimAnimalFood` → ANIMAL_RESCUE, ADMIN |
+| Route | Allowed roles | Notes |
+|-------|---------------|-------|
+| `/admin/dashboard` | ADMIN | links to `/admin/organizations` |
+| `/admin/organizations` | ADMIN | review table; verify / reject / suspend / reset |
+| `/restaurant/dashboard` | RESTAURANT, ADMIN | gated by org verification for actions |
+| `/ngo/dashboard` | NGO, ADMIN | gated by org verification for actions |
+| `/animal/dashboard` | ANIMAL_RESCUE, ADMIN | gated by org verification for actions |
+| `/onboarding/organization` | non-ADMIN without an org | one-time profile setup |
 
 After `signIn.email`, the login page navigates to `roleToDashboard(user.role)`. Same after `signUp.email` (auto-sign-in is enabled).
+
+### Organization onboarding & verification
+
+Non-admin users (RESTAURANT, NGO, ANIMAL_RESCUE) **must** create an organization profile before they can act. Flow lives in `src/routes/_authed.tsx` → it fetches the user's org via `getMyOrganizationFn` (`src/lib/org-server.ts`) and:
+
+- if no org and not on `/onboarding/organization` → 307 to `/onboarding/organization`
+- if has org and on `/onboarding/organization` → 307 to their dashboard
+- if ADMIN and on `/onboarding/organization` → 307 to `/admin/dashboard`
+
+The org `type` is auto-derived from the user's role and shown read-only on the form (so RESTAURANT users can only ever create RESTAURANT orgs, etc.). Cities are fetched from the `cities` table (5 are seeded: Bengaluru, Mumbai, Delhi, Chennai, Hyderabad).
+
+Verification has four states (`VERIFICATION_STATUSES`):
+
+| Status | Banner shown to user | Actions allowed |
+|--------|---------------------|-----------------|
+| `PENDING` | "Awaiting verification" (amber) | none |
+| `VERIFIED` | none (green badge in header) | role's full action set |
+| `REJECTED` | "Verification rejected" (red) | none |
+| `SUSPENDED` | "Account suspended" (gray) | none |
+
+`canCreateFoodListing(user, org)`, `canClaimHumanFood(user, org)`, `canClaimAnimalFood(user, org)` all require `org.verificationStatus === 'VERIFIED'` for non-admins. `ADMIN` bypasses the org+verification requirement entirely (and never goes through onboarding).
+
+### Org server functions (`src/lib/org-server.ts`)
+
+| Function | Auth | Purpose |
+|----------|------|---------|
+| `getMyOrganizationFn()` | session | returns the caller's org (joined via `member`) or `null` |
+| `createMyOrganizationFn(data)` | session, non-admin | validates input, enforces type matches role, single-org-per-user, optional cityId FK check; raw INSERT into `organization` + `member` (role=`owner`) inside a tx; always sets `verificationStatus='PENDING'` |
+| `listOrganizationsForAdminFn()` | ADMIN | lateral join to first owner; for `/admin/organizations` |
+| `setOrganizationVerificationFn({organizationId, status})` | ADMIN | UPDATE `verificationStatus` + `verifiedAt` (set to NOW only on VERIFIED) |
+| `listCitiesFn()` | session | active cities for the onboarding select |
+
+### Single-org-per-user invariant (DB level)
+
+To prevent a race condition where two concurrent onboarding submissions could both pass the app-level "do you already have an org?" pre-check and create two orgs, there is a unique partial index:
+
+```sql
+CREATE UNIQUE INDEX member_one_owner_per_user_uq
+  ON "member" ("userId") WHERE role = 'owner';
+```
+
+The `member` INSERT inside `createMyOrganizationFn`'s transaction is the race guard: the second concurrent attempt hits a unique-violation (`23505`), the tx rolls back (no orphan org), and the user sees `Error: You already have an organization`. The index is partial on `role='owner'` so future Better Auth invitation flows can still add the user as a non-owner `member` to other orgs.
+
+### Defense-in-depth at the auth layer (`src/lib/auth.ts` `hooks.before`)
+
+Better Auth additionalFields with `input: true` are tamper-prone, so the request-level middleware enforces server-managed fields independently of `databaseHooks` (which doesn't fire for additionalFields on `update-user`):
+
+- `/sign-up/email` → coerce `role` to `RESTAURANT` if not in `SIGNUP_ROLES`
+- `/update-user` → strip `role` from body
+- `/organization/create` → **rejected entirely** (org creation must go through `createMyOrganizationFn`)
+- `/organization/update` → strip `verificationStatus`, `verifiedAt`, `type` (so existing org owners can't self-verify or re-type)
+
+Admin promotion remains SQL-only:
+```sql
+UPDATE "user" SET role='ADMIN' WHERE email='you@example.com';
+```
 
 ### Self-signup role coercion
 

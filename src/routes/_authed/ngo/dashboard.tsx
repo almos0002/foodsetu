@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { DashboardShell } from '../../../components/DashboardShell'
+import type { OrganizationRow } from '../../../lib/org-server'
 import {
   ROLE_LABELS,
   canClaimHumanFood,
@@ -9,7 +10,7 @@ import {
 export const Route = createFileRoute('/_authed/ngo/dashboard')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
-    if (!canClaimHumanFood(user)) {
+    if (user.role !== 'NGO' && user.role !== 'ADMIN') {
       throw redirect({ to: roleToDashboard(user.role) as string })
     }
   },
@@ -17,13 +18,22 @@ export const Route = createFileRoute('/_authed/ngo/dashboard')({
 })
 
 function NgoDashboard() {
-  const { user } = Route.useRouteContext() as {
+  const { user, organization } = Route.useRouteContext() as {
     user: { name?: string | null; email?: string | null; role?: string | null }
+    organization: OrganizationRow | null
   }
+  const canClaim = canClaimHumanFood(user, organization)
   return (
-    <DashboardShell title="NGO dashboard" roleLabel={ROLE_LABELS.NGO} user={user}>
+    <DashboardShell
+      title="NGO dashboard"
+      roleLabel={ROLE_LABELS.NGO}
+      user={user}
+      organization={organization}
+    >
       <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-sm text-gray-600">
-        You'll see nearby human-safe surplus food here.
+        {canClaim
+          ? "You'll see nearby human-safe surplus food here."
+          : 'Claiming food is locked until your organization is verified.'}
       </div>
     </DashboardShell>
   )
