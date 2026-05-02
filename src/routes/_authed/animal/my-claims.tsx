@@ -4,40 +4,40 @@ import { ArrowLeft, History, ListChecks, Utensils } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
 import { MyClaimCard } from '../../../components/food/MyClaimCard'
 import { TabBtn } from '../../../components/food/ClaimDashboardWidgets'
-import { listMyClaimsFn } from '../../../lib/claim-server'
+import { listMyAnimalClaimsFn } from '../../../lib/claim-server'
 import type { OrganizationRow } from '../../../lib/org-server'
 import {
   ACTIVE_CLAIM_STATUSES,
   ROLE_LABELS,
-  canManageNgoClaims,
+  canManageAnimalClaims,
   roleToDashboard,
 } from '../../../lib/permissions'
 
 type Tab = 'active' | 'history'
 
-export const Route = createFileRoute('/_authed/ngo/my-claims')({
+export const Route = createFileRoute('/_authed/animal/my-claims')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
-    if (user.role !== 'NGO' && user.role !== 'ADMIN') {
+    if (user.role !== 'ANIMAL_RESCUE' && user.role !== 'ADMIN') {
       throw redirect({ to: roleToDashboard(user.role) as string })
     }
   },
   loader: async () => {
-    const claims = await listMyClaimsFn().catch(() => [])
+    const claims = await listMyAnimalClaimsFn().catch(() => [])
     return { claims }
   },
-  component: MyClaimsPage,
+  component: MyAnimalClaimsPage,
 })
 
 const ACTIVE_SET = new Set<string>(ACTIVE_CLAIM_STATUSES)
 
-function MyClaimsPage() {
+function MyAnimalClaimsPage() {
   const { claims } = Route.useLoaderData()
   const { user, organization } = Route.useRouteContext() as {
     user: { name?: string | null; email?: string | null; role?: string | null }
     organization: OrganizationRow | null
   }
-  const canClaim = canManageNgoClaims(user, organization)
+  const canClaim = canManageAnimalClaims(user, organization)
   const [tab, setTab] = useState<Tab>('active')
 
   const active = claims.filter((c) => ACTIVE_SET.has(c.status))
@@ -47,13 +47,13 @@ function MyClaimsPage() {
   return (
     <DashboardShell
       title="My claims"
-      roleLabel={ROLE_LABELS.NGO}
+      roleLabel={ROLE_LABELS.ANIMAL_RESCUE}
       user={user}
       organization={organization}
     >
       <div className="mb-4 flex items-center justify-between">
         <Link
-          to="/ngo/dashboard"
+          to="/animal/dashboard"
           className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -61,7 +61,7 @@ function MyClaimsPage() {
         </Link>
         {canClaim ? (
           <Link
-            to="/ngo/nearby-food"
+            to="/animal/nearby-food"
             className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700"
           >
             <Utensils className="h-4 w-4" />

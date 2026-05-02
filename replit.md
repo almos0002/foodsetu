@@ -179,27 +179,47 @@ Editable / cancelable status sets live in `src/lib/permissions.ts`:
 - `ACTIVE_LISTING_STATUSES = ['DRAFT', 'AVAILABLE', 'CLAIM_REQUESTED', 'CLAIMED']`
 - `HISTORY_LISTING_STATUSES = ['PICKED_UP', 'EXPIRED', 'CANCELLED', 'REPORTED']`
 
-### NGO claiming
+### Claimant flows (NGO + Animal Rescue)
 
-Routes (under `src/routes/_authed/ngo/`):
+The NGO and Animal Rescue claim flows are structurally identical — same UI,
+same atomic-transaction logic, same race guards. Only the org type and food
+category differ. They are encoded as a `ClaimantKind` inside
+`src/lib/claim-server.ts`:
+
+| Kind | Org type | Food category | Routes |
+|------|----------|---------------|--------|
+| `NGO_KIND` | `NGO` | `HUMAN_SAFE` | `/ngo/dashboard`, `/ngo/nearby-food`, `/ngo/my-claims` |
+| `ANIMAL_KIND` | `ANIMAL_RESCUE` | `ANIMAL_SAFE` | `/animal/dashboard`, `/animal/nearby-food`, `/animal/my-claims` |
+
+Routes (under `src/routes/_authed/{ngo,animal}/`):
 
 | Route | Purpose |
 |-------|---------|
-| `/ngo/dashboard` | Stat cards (nearby/active/total claims) + quick actions + previews of nearby food and active claims |
-| `/ngo/nearby-food` | Card grid of HUMAN_SAFE + AVAILABLE listings with distance/pickup/expiry; Claim button per card |
-| `/ngo/my-claims` | Active/history tabbed cards; restaurant phone revealed only after claim is `ACCEPTED` or `PICKED_UP` |
+| `…/dashboard` | Stat cards (nearby/active/total claims) + quick actions + previews of nearby food and active claims |
+| `…/nearby-food` | Card grid of category-matched + AVAILABLE listings with distance/pickup/expiry; Claim button per card |
+| `…/my-claims` | Active/history tabbed cards; restaurant phone revealed only after claim is `ACCEPTED` or `PICKED_UP` |
 
-All NGO routes use a plain role check (`NGO|ADMIN`) in `beforeLoad`. The verification gate is checked inside the page render (via `canManageNgoClaims`) — same pattern as restaurant routes, to avoid redirect loops.
+All claim routes use a plain role check (`NGO|ADMIN` or `ANIMAL_RESCUE|ADMIN`) in `beforeLoad`. The verification gate is checked inside the page render (via `canManageNgoClaims` / `canManageAnimalClaims`) — same pattern as restaurant routes, to avoid redirect loops.
 
-Server fns live in `src/lib/claim-server.ts`:
+**Shared UI components** (`src/components/food/`):
+
+| Component | Used by | Purpose |
+|-----------|---------|---------|
+| `NearbyFoodCard` | `…/nearby-food` (both flows) | Renders one listing card with title/quantity/type/pickup/expires/distance/area + Claim button. Exports `formatTime`, `formatDistance`, `formatDistanceLong` helpers. |
+| `MyClaimCard` | `…/my-claims` (both flows) | Renders one claim card with status badge, listing details, and a `tel:` link when `restaurantPhone` is non-null (i.e. server says claim is ACCEPTED/PICKED_UP). |
+| `StatCard`, `TabBtn` | `…/dashboard`, `…/my-claims` (both flows) | Reusable stat card and active/history tab pill. |
+
+Server fns live in `src/lib/claim-server.ts`. Internal helpers
+(`listNearbyFoodForKind`, `listMyClaimsForKind`, `createClaimForKind`) take a
+`ClaimantKind` so logic is written once. Six exported server fns wrap them:
 
 | Function | Auth | Purpose |
 |----------|------|---------|
-| `listNearbyHumanFoodFn()` | session | Returns `[]` for non-NGO or non-verified callers. SQL filters `food_category='HUMAN_SAFE' AND status='AVAILABLE' AND expiry_time > NOW() AND pickup_end_time > NOW()` (LIMIT 200). **Restaurant phone is intentionally NOT selected — contact info is gated behind an accepted claim.** Distance is computed in TS via `haversineKm`. Sorted by distance asc (nulls last) then `expiryTime` asc; returns top 100. |
-| `listMyClaimsFn()` | session | NGO's own claims (newest first), with denormalized listing + restaurant info; returns `[]` for non-NGO callers. **`restaurantPhone` is server-side redacted to `null` unless claim status is `ACCEPTED` or `PICKED_UP`** — the value never reaches the client before then, regardless of UI logic. |
-| `createClaimFn({id})` | verified NGO | Atomic Drizzle `db.transaction`: (1) `UPDATE food_listings SET status='CLAIM_REQUESTED' WHERE id=? AND status='AVAILABLE' AND food_category='HUMAN_SAFE' AND pickup_end_time > NOW() AND expiry_time > NOW()` returning row — primary race guard + temporal guard for stale-but-still-AVAILABLE rows; (2) `INSERT INTO claims (..., status='PENDING')` — secondary guard via partial unique index `claims_listing_active_uq`. Throws user-friendly errors (`Listing not found` / `Only human-safe food can be claimed by NGOs` / `This listing has expired` / `This listing is no longer available to claim`). |
+| `listNearbyHumanFoodFn()` / `listNearbyAnimalFoodFn()` | session | Returns `[]` for callers without a verified org of the matching type. SQL filters `food_category=$1 AND status='AVAILABLE' AND expiry_time > NOW() AND pickup_end_time > NOW()` (LIMIT 200). **Restaurant phone is intentionally NOT selected — contact info is gated behind an accepted claim.** Distance is computed in TS via `haversineKm`. Sorted by distance asc (nulls last) then `expiryTime` asc; returns top 100. |
+| `listMyClaimsFn()` / `listMyAnimalClaimsFn()` | session | The org's own claims (newest first), with denormalized listing + restaurant info; returns `[]` for callers of the wrong org type. **`restaurantPhone` is server-side redacted to `null` unless claim status is `ACCEPTED` or `PICKED_UP`** — the value never reaches the client before then, regardless of UI logic. |
+| `createClaimFn({id})` / `createAnimalClaimFn({id})` | verified org of matching type | Atomic Drizzle `db.transaction`: (1) `UPDATE food_listings SET status='CLAIM_REQUESTED' WHERE id=? AND status='AVAILABLE' AND food_category=<kind> AND pickup_end_time > NOW() AND expiry_time > NOW()` returning row — primary race guard + temporal guard for stale-but-still-AVAILABLE rows; (2) `INSERT INTO claims (..., status='PENDING')` — secondary guard via partial unique index `claims_listing_active_uq`. Throws user-friendly errors (`Listing not found` / `Only <category> food can be claimed by <org type>s` / `This listing has expired` / `This listing is no longer available to claim`). |
 
-`requireVerifiedNgoOrg`: ADMIN bypasses the verification check but still needs to own an NGO org (mirrors restaurant pattern — no magic claimantOrgId for admins).
+`requireVerifiedClaimantOrg(user, kind)`: generic gate. ADMIN bypasses the verification check but still needs to own an org of the expected type (no magic `claimantOrgId` for admins).
 
 `haversineKm(lat1, lng1, lat2, lng2)`: great-circle distance in km, exported from `claim-server.ts`. Pure TS — no PostGIS dependency.
 
@@ -209,7 +229,7 @@ Claim status sets live in `src/lib/permissions.ts`:
 - `CANCELABLE_CLAIM_STATUSES = ['PENDING', 'ACCEPTED']`
 - `CLAIM_STATUS_LABELS` / `CLAIM_STATUS_BADGE_CLASSES` for UI rendering
 
-`canManageNgoClaims(user, org)`: stricter than `canClaimHumanFood` — caller must actually own an NGO org (admins included). Mirrors `requireVerifiedNgoOrg` server-side so the claim UI never appears for an admin who has no NGO org to act on.
+`canManageNgoClaims(user, org)` / `canManageAnimalClaims(user, org)`: stricter than `canClaim*Food` — caller must actually own an org of the matching type (admins included). Mirrors the server-side `requireVerifiedClaimantOrg` so the claim UI never appears for an admin who has no matching org to act on.
 
 `fetchOrgForUser` (in `src/lib/org-server.ts`) is scoped to `member.role = 'owner'` so the route context's organization is always the user's owned org. This keeps UI gates and server-side `requireVerified*Org` mutation gates aligned even if a future invitation flow introduces non-owner memberships.
 

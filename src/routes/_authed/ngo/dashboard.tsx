@@ -1,6 +1,8 @@
 import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import { ChevronRight, MapPin, ShoppingBag, Utensils } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
+import { StatCard } from '../../../components/food/ClaimDashboardWidgets'
+import { formatDistanceLong } from '../../../components/food/NearbyFoodCard'
 import {
   listMyClaimsFn,
   listNearbyHumanFoodFn,
@@ -126,7 +128,7 @@ function NgoDashboard() {
                           ? ` · ${listing.restaurantName}`
                           : ''}
                         {listing.distanceKm != null
-                          ? ` · ${formatDistance(listing.distanceKm)}`
+                          ? ` · ${formatDistanceLong(listing.distanceKm)}`
                           : ''}
                       </div>
                     </div>
@@ -189,34 +191,4 @@ function NgoDashboard() {
       ) : null}
     </DashboardShell>
   )
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-  accent,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: number | string
-  accent: string
-}) {
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-      <div
-        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ${accent}`}
-      >
-        {icon}
-        {label}
-      </div>
-      <div className="mt-2 text-2xl font-semibold text-gray-900">{value}</div>
-    </div>
-  )
-}
-
-function formatDistance(km: number): string {
-  if (km < 1) return `${Math.round(km * 1000)} m away`
-  if (km < 10) return `${km.toFixed(1)} km away`
-  return `${Math.round(km)} km away`
 }

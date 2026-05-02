@@ -54,18 +54,52 @@ async function fetchOwnerOrgForUser(
   }
 }
 
+// ---------------------------------------------------------------------------
+// Claimant kinds
+//
+// The NGO and Animal Rescue claim flows are structurally identical: the only
+// differences are the org type the caller must own and the food category they
+// can see/claim. Encoding both as a `ClaimantKind` keeps a single source of
+// truth for the SQL query, the race-guard, and error messages.
+// ---------------------------------------------------------------------------
+
+type ClaimantKind = {
+  orgType: 'NGO' | 'ANIMAL_RESCUE'
+  foodCategory: 'HUMAN_SAFE' | 'ANIMAL_SAFE'
+  /** Singular, lowercase noun used in error messages (e.g. "NGO"). */
+  orgLabel: string
+  /** Lowercase adjective used in error messages (e.g. "human-safe"). */
+  categoryLabel: string
+}
+
+const NGO_KIND: ClaimantKind = {
+  orgType: 'NGO',
+  foodCategory: 'HUMAN_SAFE',
+  orgLabel: 'NGO',
+  categoryLabel: 'human-safe',
+}
+
+const ANIMAL_KIND: ClaimantKind = {
+  orgType: 'ANIMAL_RESCUE',
+  foodCategory: 'ANIMAL_SAFE',
+  orgLabel: 'animal rescue',
+  categoryLabel: 'animal-safe',
+}
+
 /**
- * Returns the verified NGO org owned by the caller, or throws a user-facing
- * error. ADMIN bypasses the verification gate but still needs to own an NGO
- * org (admins act on behalf of a specific NGO — no magic claimantOrgId).
+ * Returns the verified org of the expected type owned by the caller, or
+ * throws a user-facing error. ADMIN bypasses the verification gate but still
+ * needs to own an org of the right type (admins act on behalf of a specific
+ * claimant — no magic claimantOrgId).
  */
-async function requireVerifiedNgoOrg(
+async function requireVerifiedClaimantOrg(
   user: SessionUser,
+  kind: ClaimantKind,
 ): Promise<OwnerOrgRow> {
   const org = await fetchOwnerOrgForUser(user.id)
   if (!org) throw new Error('You must set up your organization first')
-  if (org.type !== 'NGO') {
-    throw new Error('Only NGOs can claim human-safe food')
+  if (org.type !== kind.orgType) {
+    throw new Error(`Only ${kind.orgLabel}s can claim ${kind.categoryLabel} food`)
   }
   if (user.role !== 'ADMIN' && org.verificationStatus !== 'VERIFIED') {
     throw new Error('Your organization must be verified before claiming food')
@@ -103,7 +137,7 @@ export function haversineKm(
 }
 
 // ---------------------------------------------------------------------------
-// Public types
+// Public types (shared between NGO and Animal Rescue flows)
 // ---------------------------------------------------------------------------
 
 export type NearbyListing = {
@@ -127,9 +161,10 @@ export type NearbyListing = {
   restaurantAddress: string | null
   // restaurantPhone deliberately omitted: it must not be exposed before the
   // restaurant has accepted a claim. Pickup contact is revealed via
-  // `listMyClaimsFn` after status transitions to ACCEPTED/PICKED_UP.
+  // `listMyClaimsFn` / `listMyAnimalClaimsFn` after status transitions to
+  // ACCEPTED/PICKED_UP.
   cityName: string | null
-  // null if the NGO has no location set.
+  // null if the claimant org has no location set.
   distanceKm: number | null
 }
 
@@ -180,166 +215,170 @@ function validateIdInput(value: unknown): { id: string } {
 }
 
 // ---------------------------------------------------------------------------
-// Server functions
+// Internal generic implementations
 // ---------------------------------------------------------------------------
 
 /**
- * Returns AVAILABLE + HUMAN_SAFE listings whose pickup window and expiry are
- * still in the future, enriched with restaurant info and the great-circle
- * distance from the NGO's organization location. Sorted by distance ascending
- * (nulls last) then expiry ascending. Caller must own a verified NGO org.
+ * Returns AVAILABLE listings of the given kind whose pickup window and
+ * expiry are still in the future, enriched with restaurant info and the
+ * great-circle distance from the claimant org's location. Sorted by
+ * distance ascending (nulls last) then expiry ascending. Caller must own a
+ * verified org of the expected type.
  */
-export const listNearbyHumanFoodFn = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const user = await requireSessionUser()
-    const org = await fetchOwnerOrgForUser(user.id)
-    // Hide the feed entirely for non-NGO callers (mirrors the role gate in
-    // routes). Avoids accidental data exposure if the route guard is bypassed.
-    if (!org || org.type !== 'NGO') return [] as NearbyListing[]
-    if (user.role !== 'ADMIN' && org.verificationStatus !== 'VERIFIED') {
-      return [] as NearbyListing[]
-    }
+async function listNearbyFoodForKind(
+  user: SessionUser,
+  kind: ClaimantKind,
+): Promise<NearbyListing[]> {
+  const org = await fetchOwnerOrgForUser(user.id)
+  // Hide the feed entirely for callers without an org of the right type
+  // (mirrors the role gate in routes). Avoids accidental data exposure if
+  // the route guard is bypassed.
+  if (!org || org.type !== kind.orgType) return []
+  if (user.role !== 'ADMIN' && org.verificationStatus !== 'VERIFIED') {
+    return []
+  }
 
-    // NOTE: `o.phone` is intentionally NOT selected — restaurant contact is
-    // gated behind an accepted claim (see `listMyClaimsFn`).
-    const { rows } = await pool.query(
-      `SELECT fl.id, fl.title, fl.description, fl.quantity, fl.quantity_unit,
-              fl.food_category, fl.food_type,
-              fl.pickup_start_time, fl.pickup_end_time, fl.expiry_time,
-              fl.latitude, fl.longitude, fl.image_url, fl.status, fl.created_at,
-              fl.restaurant_id,
-              o.name AS restaurant_name,
-              o.address AS restaurant_address,
-              c.name AS city_name
-         FROM food_listings fl
-         LEFT JOIN "organization" o ON o.id = fl.restaurant_id
-         LEFT JOIN cities c ON c.id = fl.city_id
-        WHERE fl.food_category = 'HUMAN_SAFE'
-          AND fl.status = 'AVAILABLE'
-          AND fl.expiry_time > NOW()
-          AND fl.pickup_end_time > NOW()
-        LIMIT 200`,
-    )
+  // NOTE: `o.phone` is intentionally NOT selected — restaurant contact is
+  // gated behind an accepted claim (see `listMyClaimsForKind`).
+  const { rows } = await pool.query(
+    `SELECT fl.id, fl.title, fl.description, fl.quantity, fl.quantity_unit,
+            fl.food_category, fl.food_type,
+            fl.pickup_start_time, fl.pickup_end_time, fl.expiry_time,
+            fl.latitude, fl.longitude, fl.image_url, fl.status, fl.created_at,
+            fl.restaurant_id,
+            o.name AS restaurant_name,
+            o.address AS restaurant_address,
+            c.name AS city_name
+       FROM food_listings fl
+       LEFT JOIN "organization" o ON o.id = fl.restaurant_id
+       LEFT JOIN cities c ON c.id = fl.city_id
+      WHERE fl.food_category = $1
+        AND fl.status = 'AVAILABLE'
+        AND fl.expiry_time > NOW()
+        AND fl.pickup_end_time > NOW()
+      LIMIT 200`,
+    [kind.foodCategory],
+  )
 
-    const ngoLat = org.latitude
-    const ngoLng = org.longitude
+  const orgLat = org.latitude
+  const orgLng = org.longitude
 
-    const enriched: NearbyListing[] = rows.map((r) => {
-      const lat = Number(r.latitude)
-      const lng = Number(r.longitude)
-      const distanceKm =
-        ngoLat != null && ngoLng != null
-          ? haversineKm(ngoLat, ngoLng, lat, lng)
-          : null
-      return {
-        id: r.id,
-        title: r.title,
-        description: r.description,
-        quantity: Number(r.quantity),
-        quantityUnit: r.quantity_unit,
-        foodCategory: r.food_category,
-        foodType: r.food_type,
-        pickupStartTime: new Date(r.pickup_start_time).toISOString(),
-        pickupEndTime: new Date(r.pickup_end_time).toISOString(),
-        expiryTime: new Date(r.expiry_time).toISOString(),
-        latitude: lat,
-        longitude: lng,
-        imageUrl: r.image_url,
-        status: r.status,
-        createdAt: new Date(r.created_at).toISOString(),
-        restaurantId: r.restaurant_id,
-        restaurantName: r.restaurant_name,
-        restaurantAddress: r.restaurant_address,
-        cityName: r.city_name,
-        distanceKm,
-      }
-    })
-
-    enriched.sort((a, b) => {
-      const da = a.distanceKm ?? Number.POSITIVE_INFINITY
-      const db = b.distanceKm ?? Number.POSITIVE_INFINITY
-      if (da !== db) return da - db
-      return (
-        new Date(a.expiryTime).getTime() - new Date(b.expiryTime).getTime()
-      )
-    })
-
-    return enriched.slice(0, 100)
-  },
-)
-
-/** Lists the NGO's own claims (newest first), with denormalized listing info. */
-export const listMyClaimsFn = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const user = await requireSessionUser()
-    const org = await fetchOwnerOrgForUser(user.id)
-    if (!org || org.type !== 'NGO') return [] as MyClaim[]
-
-    const { rows } = await pool.query(
-      `SELECT cl.id, cl.status, cl.created_at, cl.updated_at,
-              cl.pickup_time, cl.notes,
-              fl.id AS listing_id, fl.title, fl.quantity, fl.quantity_unit,
-              fl.food_type, fl.food_category,
-              fl.pickup_start_time, fl.pickup_end_time, fl.expiry_time,
-              fl.latitude, fl.longitude, fl.status AS listing_status,
-              fl.image_url,
-              o.name AS restaurant_name,
-              o.address AS restaurant_address,
-              o.phone AS restaurant_phone,
-              c.name AS city_name
-         FROM claims cl
-         JOIN food_listings fl ON fl.id = cl.food_listing_id
-         LEFT JOIN "organization" o ON o.id = fl.restaurant_id
-         LEFT JOIN cities c ON c.id = fl.city_id
-        WHERE cl.claimant_org_id = $1
-        ORDER BY cl.created_at DESC
-        LIMIT 200`,
-      [org.id],
-    )
-
-    return rows.map((r) => ({
+  const enriched: NearbyListing[] = rows.map((r) => {
+    const lat = Number(r.latitude)
+    const lng = Number(r.longitude)
+    const distanceKm =
+      orgLat != null && orgLng != null
+        ? haversineKm(orgLat, orgLng, lat, lng)
+        : null
+    return {
       id: r.id,
+      title: r.title,
+      description: r.description,
+      quantity: Number(r.quantity),
+      quantityUnit: r.quantity_unit,
+      foodCategory: r.food_category,
+      foodType: r.food_type,
+      pickupStartTime: new Date(r.pickup_start_time).toISOString(),
+      pickupEndTime: new Date(r.pickup_end_time).toISOString(),
+      expiryTime: new Date(r.expiry_time).toISOString(),
+      latitude: lat,
+      longitude: lng,
+      imageUrl: r.image_url,
       status: r.status,
       createdAt: new Date(r.created_at).toISOString(),
-      updatedAt: new Date(r.updated_at).toISOString(),
-      pickupTime: r.pickup_time ? new Date(r.pickup_time).toISOString() : null,
-      notes: r.notes,
-      listing: {
-        id: r.listing_id,
-        title: r.title,
-        quantity: Number(r.quantity),
-        quantityUnit: r.quantity_unit,
-        foodType: r.food_type,
-        foodCategory: r.food_category,
-        pickupStartTime: new Date(r.pickup_start_time).toISOString(),
-        pickupEndTime: new Date(r.pickup_end_time).toISOString(),
-        expiryTime: new Date(r.expiry_time).toISOString(),
-        latitude: Number(r.latitude),
-        longitude: Number(r.longitude),
-        status: r.listing_status,
-        imageUrl: r.image_url,
-        restaurantName: r.restaurant_name,
-        restaurantAddress: r.restaurant_address,
-        // Server-side redaction: phone is only sent down once the restaurant
-        // has accepted the claim (or the claimant is in the pickup phase).
-        // The UI cannot leak this because the value never reaches the client
-        // before then.
-        restaurantPhone: PHONE_VISIBLE_CLAIM_STATUSES.has(r.status)
-          ? r.restaurant_phone
-          : null,
-        cityName: r.city_name,
-      },
-    })) as MyClaim[]
-  },
-)
+      restaurantId: r.restaurant_id,
+      restaurantName: r.restaurant_name,
+      restaurantAddress: r.restaurant_address,
+      cityName: r.city_name,
+      distanceKm,
+    }
+  })
+
+  enriched.sort((a, b) => {
+    const da = a.distanceKm ?? Number.POSITIVE_INFINITY
+    const db = b.distanceKm ?? Number.POSITIVE_INFINITY
+    if (da !== db) return da - db
+    return (
+      new Date(a.expiryTime).getTime() - new Date(b.expiryTime).getTime()
+    )
+  })
+
+  return enriched.slice(0, 100)
+}
+
+/** Lists the caller's own claims (newest first), with denormalized listing info. */
+async function listMyClaimsForKind(
+  user: SessionUser,
+  kind: ClaimantKind,
+): Promise<MyClaim[]> {
+  const org = await fetchOwnerOrgForUser(user.id)
+  if (!org || org.type !== kind.orgType) return []
+
+  const { rows } = await pool.query(
+    `SELECT cl.id, cl.status, cl.created_at, cl.updated_at,
+            cl.pickup_time, cl.notes,
+            fl.id AS listing_id, fl.title, fl.quantity, fl.quantity_unit,
+            fl.food_type, fl.food_category,
+            fl.pickup_start_time, fl.pickup_end_time, fl.expiry_time,
+            fl.latitude, fl.longitude, fl.status AS listing_status,
+            fl.image_url,
+            o.name AS restaurant_name,
+            o.address AS restaurant_address,
+            o.phone AS restaurant_phone,
+            c.name AS city_name
+       FROM claims cl
+       JOIN food_listings fl ON fl.id = cl.food_listing_id
+       LEFT JOIN "organization" o ON o.id = fl.restaurant_id
+       LEFT JOIN cities c ON c.id = fl.city_id
+      WHERE cl.claimant_org_id = $1
+      ORDER BY cl.created_at DESC
+      LIMIT 200`,
+    [org.id],
+  )
+
+  return rows.map((r) => ({
+    id: r.id,
+    status: r.status,
+    createdAt: new Date(r.created_at).toISOString(),
+    updatedAt: new Date(r.updated_at).toISOString(),
+    pickupTime: r.pickup_time ? new Date(r.pickup_time).toISOString() : null,
+    notes: r.notes,
+    listing: {
+      id: r.listing_id,
+      title: r.title,
+      quantity: Number(r.quantity),
+      quantityUnit: r.quantity_unit,
+      foodType: r.food_type,
+      foodCategory: r.food_category,
+      pickupStartTime: new Date(r.pickup_start_time).toISOString(),
+      pickupEndTime: new Date(r.pickup_end_time).toISOString(),
+      expiryTime: new Date(r.expiry_time).toISOString(),
+      latitude: Number(r.latitude),
+      longitude: Number(r.longitude),
+      status: r.listing_status,
+      imageUrl: r.image_url,
+      restaurantName: r.restaurant_name,
+      restaurantAddress: r.restaurant_address,
+      // Server-side redaction: phone is only sent down once the restaurant
+      // has accepted the claim (or the claimant is in the pickup phase).
+      // The UI cannot leak this because the value never reaches the client
+      // before then.
+      restaurantPhone: PHONE_VISIBLE_CLAIM_STATUSES.has(r.status)
+        ? r.restaurant_phone
+        : null,
+      cityName: r.city_name,
+    },
+  })) as MyClaim[]
+}
 
 /**
- * NGO claims a listing.
+ * Atomic claim creation for the given kind.
  *
  * Atomicity (single transaction):
- * 1. Update the listing AVAILABLE → CLAIM_REQUESTED, gated on category=HUMAN_SAFE
- *    and status=AVAILABLE. If no row matches, the listing is already taken,
- *    cancelled, expired, or doesn't exist. The status check + UPDATE in one
+ * 1. Update the listing AVAILABLE → CLAIM_REQUESTED, gated on
+ *    food_category=<kind> and status=AVAILABLE plus temporal guards. If no
+ *    row matches, the listing is already taken, cancelled, expired, of the
+ *    wrong category, or doesn't exist. The status check + UPDATE in one
  *    statement is the race guard.
  * 2. Insert a PENDING claim. The partial unique index
  *    `claims_listing_active_uq` on (food_listing_id) WHERE status IN
@@ -348,78 +387,131 @@ export const listMyClaimsFn = createServerFn({ method: 'GET' }).handler(
  *
  * If anything throws, the transaction rolls back and the listing reverts.
  */
+async function createClaimForKind(
+  user: SessionUser,
+  data: { id: string },
+  kind: ClaimantKind,
+): Promise<Claim> {
+  const org = await requireVerifiedClaimantOrg(user, kind)
+
+  return await db.transaction(async (tx) => {
+    // Temporal guards (`pickup_end_time > NOW()`, `expiry_time > NOW()`)
+    // protect against claiming stale-but-still-AVAILABLE rows if the
+    // background EXPIRED sweep is delayed or hasn't been built yet.
+    const [listing] = await tx
+      .update(foodListings)
+      .set({ status: 'CLAIM_REQUESTED' })
+      .where(
+        and(
+          eq(foodListings.id, data.id),
+          eq(foodListings.status, 'AVAILABLE'),
+          eq(foodListings.foodCategory, kind.foodCategory),
+          sql`${foodListings.pickupEndTime} > NOW()`,
+          sql`${foodListings.expiryTime} > NOW()`,
+        ),
+      )
+      .returning()
+
+    if (!listing) {
+      // Disambiguate so the user gets a useful message.
+      const [existing] = await tx
+        .select({
+          status: foodListings.status,
+          foodCategory: foodListings.foodCategory,
+          pickupEndTime: foodListings.pickupEndTime,
+          expiryTime: foodListings.expiryTime,
+        })
+        .from(foodListings)
+        .where(eq(foodListings.id, data.id))
+        .limit(1)
+      if (!existing) throw new Error('Listing not found')
+      if (existing.foodCategory !== kind.foodCategory) {
+        throw new Error(
+          `Only ${kind.categoryLabel} food can be claimed by ${kind.orgLabel}s`,
+        )
+      }
+      const now = Date.now()
+      if (
+        existing.pickupEndTime.getTime() <= now ||
+        existing.expiryTime.getTime() <= now
+      ) {
+        throw new Error('This listing has expired')
+      }
+      throw new Error('This listing is no longer available to claim')
+    }
+
+    try {
+      const [claim] = await tx
+        .insert(claims)
+        .values({
+          foodListingId: listing.id,
+          claimantOrgId: org.id,
+          claimantUserId: user.id,
+          status: 'PENDING',
+        })
+        .returning()
+      return claim as Claim
+    } catch (e) {
+      // Unique-violation on claims_listing_active_uq = a concurrent claim won.
+      // The transaction will roll back the listing status change.
+      if (
+        e &&
+        typeof e === 'object' &&
+        (e as { code?: string }).code === '23505'
+      ) {
+        throw new Error('This listing is no longer available to claim')
+      }
+      throw e
+    }
+  })
+}
+
+// ---------------------------------------------------------------------------
+// NGO server functions (HUMAN_SAFE)
+// ---------------------------------------------------------------------------
+
+export const listNearbyHumanFoodFn = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const user = await requireSessionUser()
+    return listNearbyFoodForKind(user, NGO_KIND)
+  },
+)
+
+export const listMyClaimsFn = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const user = await requireSessionUser()
+    return listMyClaimsForKind(user, NGO_KIND)
+  },
+)
+
 export const createClaimFn = createServerFn({ method: 'POST' })
   .inputValidator(validateIdInput)
   .handler(async ({ data }) => {
     const user = await requireSessionUser()
-    const org = await requireVerifiedNgoOrg(user)
+    return createClaimForKind(user, data, NGO_KIND)
+  })
 
-    return await db.transaction(async (tx) => {
-      // Temporal guards (`pickup_end_time > NOW()`, `expiry_time > NOW()`)
-      // protect against claiming stale-but-still-AVAILABLE rows if the
-      // background EXPIRED sweep is delayed or hasn't been built yet.
-      const [listing] = await tx
-        .update(foodListings)
-        .set({ status: 'CLAIM_REQUESTED' })
-        .where(
-          and(
-            eq(foodListings.id, data.id),
-            eq(foodListings.status, 'AVAILABLE'),
-            eq(foodListings.foodCategory, 'HUMAN_SAFE'),
-            sql`${foodListings.pickupEndTime} > NOW()`,
-            sql`${foodListings.expiryTime} > NOW()`,
-          ),
-        )
-        .returning()
+// ---------------------------------------------------------------------------
+// Animal Rescue server functions (ANIMAL_SAFE)
+// ---------------------------------------------------------------------------
 
-      if (!listing) {
-        // Disambiguate so the user gets a useful message.
-        const [existing] = await tx
-          .select({
-            status: foodListings.status,
-            foodCategory: foodListings.foodCategory,
-            pickupEndTime: foodListings.pickupEndTime,
-            expiryTime: foodListings.expiryTime,
-          })
-          .from(foodListings)
-          .where(eq(foodListings.id, data.id))
-          .limit(1)
-        if (!existing) throw new Error('Listing not found')
-        if (existing.foodCategory !== 'HUMAN_SAFE') {
-          throw new Error('Only human-safe food can be claimed by NGOs')
-        }
-        const now = Date.now()
-        if (
-          existing.pickupEndTime.getTime() <= now ||
-          existing.expiryTime.getTime() <= now
-        ) {
-          throw new Error('This listing has expired')
-        }
-        throw new Error('This listing is no longer available to claim')
-      }
+export const listNearbyAnimalFoodFn = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const user = await requireSessionUser()
+    return listNearbyFoodForKind(user, ANIMAL_KIND)
+  },
+)
 
-      try {
-        const [claim] = await tx
-          .insert(claims)
-          .values({
-            foodListingId: listing.id,
-            claimantOrgId: org.id,
-            claimantUserId: user.id,
-            status: 'PENDING',
-          })
-          .returning()
-        return claim as Claim
-      } catch (e) {
-        // Unique-violation on claims_listing_active_uq = a concurrent claim won.
-        // The transaction will roll back the listing status change.
-        if (
-          e &&
-          typeof e === 'object' &&
-          (e as { code?: string }).code === '23505'
-        ) {
-          throw new Error('This listing is no longer available to claim')
-        }
-        throw e
-      }
-    })
+export const listMyAnimalClaimsFn = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const user = await requireSessionUser()
+    return listMyClaimsForKind(user, ANIMAL_KIND)
+  },
+)
+
+export const createAnimalClaimFn = createServerFn({ method: 'POST' })
+  .inputValidator(validateIdInput)
+  .handler(async ({ data }) => {
+    const user = await requireSessionUser()
+    return createClaimForKind(user, data, ANIMAL_KIND)
   })

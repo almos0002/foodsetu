@@ -4,39 +4,39 @@ import { ArrowLeft, ShoppingBag } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
 import { NearbyFoodCard } from '../../../components/food/NearbyFoodCard'
 import {
-  createClaimFn,
-  listNearbyHumanFoodFn,
+  createAnimalClaimFn,
+  listNearbyAnimalFoodFn,
 } from '../../../lib/claim-server'
 import type { OrganizationRow } from '../../../lib/org-server'
 import {
   ROLE_LABELS,
-  canManageNgoClaims,
+  canManageAnimalClaims,
   isOrgVerified,
   roleToDashboard,
 } from '../../../lib/permissions'
 
-export const Route = createFileRoute('/_authed/ngo/nearby-food')({
+export const Route = createFileRoute('/_authed/animal/nearby-food')({
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
-    if (user.role !== 'NGO' && user.role !== 'ADMIN') {
+    if (user.role !== 'ANIMAL_RESCUE' && user.role !== 'ADMIN') {
       throw redirect({ to: roleToDashboard(user.role) as string })
     }
   },
   loader: async () => {
-    const listings = await listNearbyHumanFoodFn().catch(() => [])
+    const listings = await listNearbyAnimalFoodFn().catch(() => [])
     return { listings }
   },
-  component: NearbyFoodPage,
+  component: NearbyAnimalFoodPage,
 })
 
-function NearbyFoodPage() {
+function NearbyAnimalFoodPage() {
   const router = useRouter()
   const { listings } = Route.useLoaderData()
   const { user, organization } = Route.useRouteContext() as {
     user: { name?: string | null; email?: string | null; role?: string | null }
     organization: OrganizationRow | null
   }
-  const canClaim = canManageNgoClaims(user, organization)
+  const canClaim = canManageAnimalClaims(user, organization)
   const hasOrgLocation =
     organization?.latitude != null && organization?.longitude != null
 
@@ -47,9 +47,9 @@ function NearbyFoodPage() {
     setError(null)
     setBusyId(listingId)
     try {
-      await createClaimFn({ data: { id: listingId } })
+      await createAnimalClaimFn({ data: { id: listingId } })
       router.invalidate()
-      await router.navigate({ to: '/ngo/my-claims' })
+      await router.navigate({ to: '/animal/my-claims' })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to claim listing')
     } finally {
@@ -59,21 +59,21 @@ function NearbyFoodPage() {
 
   return (
     <DashboardShell
-      title="Nearby human-safe food"
-      roleLabel={ROLE_LABELS.NGO}
+      title="Nearby animal-safe food"
+      roleLabel={ROLE_LABELS.ANIMAL_RESCUE}
       user={user}
       organization={organization}
     >
       <div className="mb-4 flex items-center justify-between">
         <Link
-          to="/ngo/dashboard"
+          to="/animal/dashboard"
           className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to dashboard
         </Link>
         <Link
-          to="/ngo/my-claims"
+          to="/animal/my-claims"
           className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           <ShoppingBag className="h-4 w-4" />
@@ -83,10 +83,10 @@ function NearbyFoodPage() {
 
       {!canClaim ? (
         <div className="rounded-xl border border-gray-200 bg-white p-8 text-sm text-gray-700 shadow-sm">
-          {!organization || organization.type !== 'NGO'
-            ? 'You need to own an NGO organization to claim human-safe food.'
+          {!organization || organization.type !== 'ANIMAL_RESCUE'
+            ? 'You need to own an animal-rescue organization to claim animal-safe food.'
             : isOrgVerified(organization)
-              ? 'Only NGO accounts can claim human-safe food.'
+              ? 'Only animal-rescue accounts can claim animal-safe food.'
               : 'Your organization must be verified before you can claim food. An admin will review your profile shortly.'}
         </div>
       ) : (
@@ -106,7 +106,7 @@ function NearbyFoodPage() {
 
           {listings.length === 0 ? (
             <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center text-sm text-gray-500">
-              No human-safe food available nearby right now.
+              No animal-safe food available nearby right now.
               <div className="mt-1 text-xs">
                 Check back in a little while — restaurants post throughout the day.
               </div>

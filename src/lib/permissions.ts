@@ -84,8 +84,9 @@ export function canClaimAnimalFood(u: AuthUser, org?: AuthOrganization): boolean
 }
 
 // Stricter than canClaimHumanFood: caller must actually own an NGO org
-// (admins included). Mirrors `requireVerifiedNgoOrg` server-side, so the claim
-// UI never appears for an admin who has no NGO org to act on.
+// (admins included). Mirrors `requireVerifiedClaimantOrg(user, NGO_KIND)`
+// server-side, so the claim UI never appears for an admin who has no NGO
+// org to act on.
 export function canManageNgoClaims(
   u: AuthUser,
   org?: AuthOrganization,
@@ -95,6 +96,22 @@ export function canManageNgoClaims(
   if (!org || org.type !== 'NGO') return false
   if (r === 'ADMIN') return true
   if (r !== 'NGO') return false
+  return isOrgVerified(org)
+}
+
+// Stricter than canClaimAnimalFood: caller must actually own an
+// ANIMAL_RESCUE org (admins included). Mirrors
+// `requireVerifiedClaimantOrg(user, ANIMAL_KIND)` server-side, so the claim
+// UI never appears for an admin who has no animal-rescue org to act on.
+export function canManageAnimalClaims(
+  u: AuthUser,
+  org?: AuthOrganization,
+): boolean {
+  const r = roleOf(u)
+  if (!r) return false
+  if (!org || org.type !== 'ANIMAL_RESCUE') return false
+  if (r === 'ADMIN') return true
+  if (r !== 'ANIMAL_RESCUE') return false
   return isOrgVerified(org)
 }
 
