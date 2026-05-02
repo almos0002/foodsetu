@@ -1,13 +1,13 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { randomUUID } from 'node:crypto'
 import { auth, pool } from './auth'
 import {
   REPORT_REASONS,
   isValidReportReason,
   reportStatusFromDb,
+  type ReportReason,
+  type ReportStatus,
 } from './permissions'
-import type { ReportReason, ReportStatus } from './permissions'
 
 // ---------------------------------------------------------------------------
 // Auth helper
@@ -55,7 +55,7 @@ function validateCreateReportInput(value: unknown): CreateReportInput {
   if (!isValidReportReason(v.reason)) {
     throw new Error('Pick a reason for the report.')
   }
-  const reason = v.reason
+  const reason = v.reason as ReportReason
 
   let description: string | null = null
   if (typeof v.description === 'string' && v.description.trim()) {
@@ -70,7 +70,8 @@ function validateCreateReportInput(value: unknown): CreateReportInput {
     typeof v.foodListingId === 'string' && v.foodListingId
       ? v.foodListingId
       : null
-  const claimId = typeof v.claimId === 'string' && v.claimId ? v.claimId : null
+  const claimId =
+    typeof v.claimId === 'string' && v.claimId ? v.claimId : null
 
   return { reason, description, foodListingId, claimId }
 }
@@ -127,18 +128,13 @@ export const createReportFn = createServerFn({ method: 'POST' })
       }
     }
 
-    // Generate the id explicitly: the schema helper's `$defaultFn` only fires
-    // when inserts go through the Drizzle ORM, but this path uses raw
-    // `pool.query`, so Postgres would otherwise see a null id and reject.
-    const reportId = randomUUID()
     const { rows } = await pool.query(
       `INSERT INTO reports
-         (id, food_listing_id, claim_id, reporter_id, reporter_org_id,
+         (food_listing_id, claim_id, reporter_id, reporter_org_id,
           reason, description, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'OPEN')
+       VALUES ($1, $2, $3, $4, $5, $6, 'OPEN')
        RETURNING id`,
       [
-        reportId,
         listingIdToInsert,
         data.claimId,
         user.id,
@@ -175,7 +171,10 @@ export type VisibleReport = {
   claimId: string | null
   // Why the caller can see this report — drives the small "context" pill
   // in the UI.
-  visibility: 'FILED_BY_ME' | 'ABOUT_MY_LISTING' | 'ABOUT_MY_CLAIM'
+  visibility:
+    | 'FILED_BY_ME'
+    | 'ABOUT_MY_LISTING'
+    | 'ABOUT_MY_CLAIM'
 }
 
 export const listMyVisibleReportsFn = createServerFn({ method: 'GET' }).handler(

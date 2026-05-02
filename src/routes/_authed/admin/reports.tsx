@@ -1,37 +1,29 @@
-import {
-  Link,
-  createFileRoute,
-  redirect,
-  useRouter,
-} from '@tanstack/react-router'
+import { Link, createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ExternalLink } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
-import { AdminTable } from '../../../components/admin/AdminTable'
-import type { Column } from '../../../components/admin/AdminTable'
+import { AdminTable, type Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
-import { Alert } from '../../../components/ui/Alert'
 import {
   listReportsForAdminFn,
   setReportStatusFn,
+  type AdminReportRow,
 } from '../../../lib/admin-server'
-import type { AdminReportRow } from '../../../lib/admin-server'
 import {
   REPORT_REASON_LABELS,
   REPORT_STATUSES,
-  REPORT_STATUS_BADGE_TONES,
+  REPORT_STATUS_BADGE_CLASSES,
   REPORT_STATUS_LABELS,
   canAccessAdmin,
   roleToDashboard,
+  type ReportStatus,
 } from '../../../lib/permissions'
-import type { ReportStatus } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/reports')({
-  head: () => ({ meta: [{ title: 'Reports · Admin | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {
-      throw redirect({ to: roleToDashboard(user.role) })
+      throw redirect({ to: roleToDashboard(user.role) as string })
     }
   },
   loader: async () => ({ reports: await listReportsForAdminFn() }),
@@ -43,7 +35,9 @@ type StatusFilter = 'ALL' | ReportStatus
 function AdminReports() {
   const router = useRouter()
   const { reports } = Route.useLoaderData()
-  const { user } = Route.useRouteContext()
+  const { user } = Route.useRouteContext() as {
+    user: { name?: string | null; email?: string | null; role?: string | null }
+  }
   const [filter, setFilter] = useState<StatusFilter>('ALL')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -62,7 +56,7 @@ function AdminReports() {
   const filters = [
     { value: 'ALL' as StatusFilter, label: 'All', count: reports.length },
     ...REPORT_STATUSES.map((s) => ({
-      value: s,
+      value: s as StatusFilter,
       label: REPORT_STATUS_LABELS[s],
       count: counts[s],
     })),
@@ -139,7 +133,7 @@ function AdminReports() {
       render: (r) => (
         <StatusPill
           label={REPORT_STATUS_LABELS[r.status]}
-          tone={REPORT_STATUS_BADGE_TONES[r.status]}
+          className={REPORT_STATUS_BADGE_CLASSES[r.status]}
         />
       ),
     },
@@ -196,9 +190,9 @@ function AdminReports() {
   return (
     <AdminShell title="Reports" user={user}>
       {error ? (
-        <Alert tone="error" className="mb-4">
+        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
           {error}
-        </Alert>
+        </div>
       ) : null}
       <AdminTable
         rows={filtered}

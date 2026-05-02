@@ -441,6 +441,95 @@ export function isValidReportStatus(v: unknown): v is ReportStatus {
   )
 }
 
+// ---------------------------------------------------------------------------
+// Reports
+// ---------------------------------------------------------------------------
+
+// DB enum has 5 values today (see `report_reason` in src/db/schema.ts).
+// User-facing labels follow the FoodSetu spec; the mapping is intentional:
+//   SPOILED       → "Unsafe food"
+//   MISLABELED    → "Wrong quantity"   (listing labelled with wrong info)
+//   NO_SHOW       → "Pickup no-show"
+//   INAPPROPRIATE → "Fake organization" (catch-all for bad-actor orgs)
+//   OTHER         → "Other issue"
+export const REPORT_REASONS = [
+  'SPOILED',
+  'MISLABELED',
+  'NO_SHOW',
+  'INAPPROPRIATE',
+  'OTHER',
+] as const
+export type ReportReason = (typeof REPORT_REASONS)[number]
+
+export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
+  SPOILED: 'Unsafe food',
+  MISLABELED: 'Wrong quantity',
+  NO_SHOW: 'Pickup no-show',
+  INAPPROPRIATE: 'Fake organization',
+  OTHER: 'Other issue',
+}
+
+export const REPORT_REASON_HINTS: Record<ReportReason, string> = {
+  SPOILED: 'The food was spoiled, contaminated, or otherwise unsafe to consume.',
+  MISLABELED: 'The actual quantity, food type, or category did not match the listing.',
+  NO_SHOW: 'The other party did not show up at the pickup window.',
+  INAPPROPRIATE: 'The organization appears fake, fraudulent, or otherwise inappropriate.',
+  OTHER: 'Anything else that warrants admin attention.',
+}
+
+// The DB enum carries a 4th value `DISMISSED` (kept for backward-compat
+// with rows already in the DB). The active workflow uses 3 statuses:
+// OPEN → REVIEWED → RESOLVED. `setReportStatusFn` only accepts these 3.
+export const REPORT_STATUSES = ['OPEN', 'REVIEWED', 'RESOLVED'] as const
+export type ReportStatus = (typeof REPORT_STATUSES)[number]
+
+// Internal mapping: REVIEWED is the user-facing label; the DB enum value
+// is `REVIEWING`. Anything that touches the DB must translate via
+// {@link reportStatusToDb} / {@link reportStatusFromDb}.
+const REPORT_STATUS_DB: Record<ReportStatus, string> = {
+  OPEN: 'OPEN',
+  REVIEWED: 'REVIEWING',
+  RESOLVED: 'RESOLVED',
+}
+
+export function reportStatusToDb(s: ReportStatus): string {
+  return REPORT_STATUS_DB[s]
+}
+
+export function reportStatusFromDb(s: string | null | undefined): ReportStatus {
+  if (s === 'OPEN') return 'OPEN'
+  if (s === 'REVIEWING') return 'REVIEWED'
+  if (s === 'RESOLVED') return 'RESOLVED'
+  // Legacy DISMISSED rows surface as RESOLVED in the UI — they're terminal
+  // either way and the spec doesn't expose Dismiss as a separate state.
+  if (s === 'DISMISSED') return 'RESOLVED'
+  return 'OPEN'
+}
+
+export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
+  OPEN: 'Open',
+  REVIEWED: 'Reviewed',
+  RESOLVED: 'Resolved',
+}
+
+export const REPORT_STATUS_BADGE_CLASSES: Record<ReportStatus, string> = {
+  OPEN: 'bg-red-100 text-red-800 ring-1 ring-red-200',
+  REVIEWED: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+  RESOLVED: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
+}
+
+export function isValidReportReason(v: unknown): v is ReportReason {
+  return (
+    typeof v === 'string' && (REPORT_REASONS as readonly string[]).includes(v)
+  )
+}
+
+export function isValidReportStatus(v: unknown): v is ReportStatus {
+  return (
+    typeof v === 'string' && (REPORT_STATUSES as readonly string[]).includes(v)
+  )
+}
+
 // Restrict post-login `?redirect=` to internal paths to prevent open-redirect.
 // Accepted: starts with a single "/" and contains no scheme or protocol-relative prefix.
 export function safeRedirectPath(

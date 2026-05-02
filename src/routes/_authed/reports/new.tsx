@@ -5,10 +5,9 @@ import {
   useSearch,
 } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ArrowLeft, CheckCircle2, Flag } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, CheckCircle2, Flag } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
-import { Alert } from '../../../components/ui/Alert'
-import { Button } from '../../../components/ui/Button'
+import type { OrganizationRow } from '../../../lib/org-server'
 import { createReportFn } from '../../../lib/report-server'
 import {
   REPORT_REASONS,
@@ -16,8 +15,9 @@ import {
   REPORT_REASON_LABELS,
   ROLE_LABELS,
   isValidReportReason,
+  type ReportReason,
+  type Role,
 } from '../../../lib/permissions'
-import type { ReportReason, Role } from '../../../lib/permissions'
 
 type SearchSchema = {
   listingId?: string
@@ -26,7 +26,6 @@ type SearchSchema = {
 }
 
 export const Route = createFileRoute('/_authed/reports/new')({
-  head: () => ({ meta: [{ title: 'File a report | FoodSetu' }] }),
   validateSearch: (raw: Record<string, unknown>): SearchSchema => {
     const out: SearchSchema = {}
     if (typeof raw.listingId === 'string' && raw.listingId) {
@@ -46,7 +45,10 @@ export const Route = createFileRoute('/_authed/reports/new')({
 function NewReportPage() {
   const router = useRouter()
   const search = useSearch({ from: '/_authed/reports/new' })
-  const { user, organization } = Route.useRouteContext()
+  const { user, organization } = Route.useRouteContext() as {
+    user: { name?: string | null; email?: string | null; role?: string | null }
+    organization: OrganizationRow | null
+  }
 
   const [reason, setReason] = useState<ReportReason>(
     (search.reason as ReportReason) ?? 'SPOILED',
@@ -78,7 +80,8 @@ function NewReportPage() {
     }
   }
 
-  const roleLabel = (user.role && ROLE_LABELS[user.role as Role]) ?? 'Member'
+  const roleLabel =
+    (user.role && ROLE_LABELS[user.role as Role]) ?? 'Member'
 
   if (submittedId) {
     return (
@@ -89,33 +92,38 @@ function NewReportPage() {
         organization={organization}
       >
         <div className="mx-auto max-w-2xl">
-          <Alert
-            tone="success"
-            title={
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4" />
-                Thanks — your report was filed
-              </span>
-            }
-          >
-            An admin will review it shortly. You can track its status on your
-            reports page.
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Link to="/reports">
-                <Button size="sm">View my reports</Button>
-              </Link>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setSubmittedId(null)
-                  setDescription('')
-                }}
-              >
-                File another report
-              </Button>
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="mt-0.5 h-6 w-6 text-emerald-600" />
+              <div className="flex-1">
+                <h2 className="text-base font-semibold text-emerald-900">
+                  Thanks — your report was filed.
+                </h2>
+                <p className="mt-1 text-sm text-emerald-800">
+                  An admin will review it shortly. You can track its status
+                  on your reports page.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Link
+                    to="/reports"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                  >
+                    View my reports
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSubmittedId(null)
+                      setDescription('')
+                    }}
+                    className="rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-50"
+                  >
+                    File another report
+                  </button>
+                </div>
+              </div>
             </div>
-          </Alert>
+          </div>
         </div>
       </DashboardShell>
     )
@@ -132,37 +140,32 @@ function NewReportPage() {
         <button
           type="button"
           onClick={() => router.history.back()}
-          className="mb-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-ink-2)] hover:text-[var(--color-ink)]"
+          className="mb-4 inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
         </button>
 
-        <div className="rounded-2xl border border-[var(--color-line)] bg-white p-6 sm:p-8">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border border-[var(--color-line-strong)] bg-[var(--color-coral)] text-white">
-              <Flag className="h-4 w-4" />
-            </div>
+            <Flag className="mt-0.5 h-5 w-5 text-red-600" />
             <div>
-              <div className="tiny-cap text-[var(--color-coral)]">
-                File a report
-              </div>
-              <h2 className="font-display mt-1.5 text-2xl font-semibold tracking-tight text-[var(--color-ink)]">
+              <h2 className="text-base font-semibold text-gray-900">
                 Tell us what went wrong
               </h2>
-              <p className="mt-2 text-sm text-[var(--color-ink-2)]">
-                Reports are reviewed by FoodSetu admins. Please be specific so
-                they can act quickly.
+              <p className="mt-1 text-sm text-gray-600">
+                Reports are reviewed by FoodSetu admins. Please be specific
+                so they can act quickly.
               </p>
             </div>
           </div>
 
           {search.listingId || search.claimId ? (
-            <div className="mt-5 rounded-2xl border border-[var(--color-line)] bg-[var(--color-cream)] px-4 py-3 text-xs text-[var(--color-ink-2)]">
-              <div className="tiny-cap text-[var(--color-ink-3)]">
+            <div className="mt-4 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600">
+              <div className="font-medium uppercase tracking-wide text-gray-500">
                 Linked context
               </div>
-              <div className="mt-2 space-y-0.5 font-mono text-[11px] text-[var(--color-ink)]">
+              <div className="mt-1 space-y-0.5 font-mono text-[11px] text-gray-700">
                 {search.listingId ? (
                   <div>Listing · {search.listingId}</div>
                 ) : null}
@@ -173,17 +176,17 @@ function NewReportPage() {
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             <fieldset>
-              <legend className="text-sm font-semibold text-[var(--color-ink)]">
+              <legend className="text-sm font-semibold text-gray-900">
                 Reason
               </legend>
-              <div className="mt-3 space-y-2">
+              <div className="mt-2 space-y-2">
                 {REPORT_REASONS.map((r) => (
                   <label
                     key={r}
-                    className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 transition-colors ${
+                    className={`flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2 transition ${
                       reason === r
-                        ? 'border-[var(--color-coral)] bg-[var(--color-coral-soft)]'
-                        : 'border-[var(--color-line)] bg-white hover:border-[var(--color-line-strong)]'
+                        ? 'border-orange-300 bg-orange-50 ring-1 ring-orange-200'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
                     }`}
                   >
                     <input
@@ -192,13 +195,13 @@ function NewReportPage() {
                       value={r}
                       checked={reason === r}
                       onChange={() => setReason(r)}
-                      className="mt-0.5 h-4 w-4 accent-[var(--color-coral)]"
+                      className="mt-0.5 h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
                     />
                     <div className="flex-1">
-                      <div className="text-sm font-bold text-[var(--color-ink)]">
+                      <div className="text-sm font-medium text-gray-900">
                         {REPORT_REASON_LABELS[r]}
                       </div>
-                      <div className="mt-0.5 text-xs text-[var(--color-ink-2)]">
+                      <div className="mt-0.5 text-xs text-gray-600">
                         {REPORT_REASON_HINTS[r]}
                       </div>
                     </div>
@@ -210,10 +213,10 @@ function NewReportPage() {
             <div>
               <label
                 htmlFor="description"
-                className="block text-sm font-semibold text-[var(--color-ink)]"
+                className="block text-sm font-semibold text-gray-900"
               >
                 Description{' '}
-                <span className="font-normal text-[var(--color-ink-3)]">
+                <span className="font-normal text-gray-500">
                   ({reason === 'OTHER' ? 'required' : 'optional'})
                 </span>
               </label>
@@ -225,32 +228,37 @@ function NewReportPage() {
                 placeholder="Add any details that will help an admin investigate."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="mt-1.5 w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
               />
-              <div className="mt-1.5 flex items-center justify-between text-[11px] text-[var(--color-ink-3)]">
+              <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500">
                 <span>{description.length} / 2000</span>
               </div>
             </div>
 
-            {error ? <Alert tone="error">{error}</Alert> : null}
+            {error ? (
+              <div className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
+                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            ) : null}
 
             <div className="flex items-center justify-end gap-2">
-              <Button
+              <button
                 type="button"
-                variant="outline"
                 onClick={() => router.history.back()}
                 disabled={busy}
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
                 Cancel
-              </Button>
-              <Button
+              </button>
+              <button
                 type="submit"
-                variant="destructive"
                 disabled={busy}
-                leftIcon={<Flag className="h-4 w-4" />}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:bg-gray-400"
               >
+                <Flag className="h-4 w-4" />
                 {busy ? 'Filing…' : 'File report'}
-              </Button>
+              </button>
             </div>
           </form>
         </div>

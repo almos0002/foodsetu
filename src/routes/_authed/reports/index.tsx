@@ -1,21 +1,19 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft, Flag } from 'lucide-react'
 import { DashboardShell } from '../../../components/DashboardShell'
-import { Button } from '../../../components/ui/Button'
-import { EmptyState } from '../../../components/ui/EmptyState'
-import { listMyVisibleReportsFn } from '../../../lib/report-server'
-import type { VisibleReport } from '../../../lib/report-server'
+import type { OrganizationRow } from '../../../lib/org-server'
+import {
+  listMyVisibleReportsFn,
+  type VisibleReport,
+} from '../../../lib/report-server'
 import {
   REPORT_REASON_LABELS,
-  REPORT_STATUS_BADGE_TONES,
+  REPORT_STATUS_BADGE_CLASSES,
   REPORT_STATUS_LABELS,
   ROLE_LABELS,
   roleToDashboard,
+  type Role,
 } from '../../../lib/permissions'
-import type { Role } from '../../../lib/permissions'
-import { StatusBadge } from '../../../components/ui/StatusBadge'
-import type { BadgeTone } from '../../../components/ui/StatusBadge'
-import { fullDateTime } from '../../../lib/time'
 
 const VISIBILITY_LABEL: Record<VisibleReport['visibility'], string> = {
   FILED_BY_ME: 'Filed by you',
@@ -23,26 +21,33 @@ const VISIBILITY_LABEL: Record<VisibleReport['visibility'], string> = {
   ABOUT_MY_CLAIM: 'About your claim',
 }
 
-const VISIBILITY_TONE: Record<VisibleReport['visibility'], BadgeTone> = {
-  FILED_BY_ME: 'blue',
-  ABOUT_MY_LISTING: 'red',
-  ABOUT_MY_CLAIM: 'purple',
+const VISIBILITY_BADGE: Record<VisibleReport['visibility'], string> = {
+  FILED_BY_ME: 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
+  ABOUT_MY_LISTING: 'bg-orange-100 text-orange-800 ring-1 ring-orange-200',
+  ABOUT_MY_CLAIM: 'bg-purple-100 text-purple-800 ring-1 ring-purple-200',
 }
 
 export const Route = createFileRoute('/_authed/reports/')({
-  head: () => ({ meta: [{ title: 'Reports | FoodSetu' }] }),
   loader: async () => ({
-    reports: await listMyVisibleReportsFn().catch((): VisibleReport[] => []),
+    reports: await listMyVisibleReportsFn().catch(
+      (): VisibleReport[] => [],
+    ),
   }),
   component: MyReportsPage,
 })
 
 function MyReportsPage() {
   const { reports } = Route.useLoaderData()
-  const { user, organization } = Route.useRouteContext()
+  const { user, organization } = Route.useRouteContext() as {
+    user: { name?: string | null; email?: string | null; role?: string | null }
+    organization: OrganizationRow | null
+  }
 
+  // Admin gets a one-line shortcut to /admin/reports because that view is
+  // the source of truth for them; the rest of the page still works.
   const isAdmin = user.role === 'ADMIN'
-  const roleLabel = (user.role && ROLE_LABELS[user.role as Role]) ?? 'Member'
+  const roleLabel =
+    (user.role && ROLE_LABELS[user.role as Role]) ?? 'Member'
   const dashboardPath = roleToDashboard(user.role)
 
   return (
@@ -52,64 +57,55 @@ function MyReportsPage() {
       user={user}
       organization={organization}
     >
-      <div className="mb-5 flex items-center justify-between gap-3">
+      <div className="mb-4 flex items-center justify-between">
         <Link
           to={dashboardPath as '/admin/dashboard'}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-ink-2)] hover:text-[var(--color-ink)]"
+          className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to dashboard
         </Link>
         {isAdmin ? (
-          <Link to="/admin/reports">
-            <Button size="sm" leftIcon={<Flag className="h-4 w-4" />}>
-              Open admin queue
-            </Button>
+          <Link
+            to="/admin/reports"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700"
+          >
+            <Flag className="h-4 w-4" />
+            Open admin queue
           </Link>
         ) : null}
       </div>
 
-      <div className="mb-6">
-        <div className="tiny-cap text-[var(--color-coral)]">Reports</div>
-        <h1 className="font-display mt-2 text-2xl font-semibold tracking-tight text-[var(--color-ink)]">
-          What admins are looking into
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-[var(--color-ink-2)]">
-          Reports you&apos;ve filed, plus reports about your listings or claims
-          so you always know what an admin is reviewing.
-        </p>
-      </div>
+      <p className="mb-4 text-sm text-gray-600">
+        Reports you&apos;ve filed, plus reports about your listings or
+        claims so you know what an admin is looking into.
+      </p>
 
       {reports.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[var(--color-line-strong)] bg-[var(--color-cream)]">
-          <EmptyState
-            bare
-            icon={Flag}
-            title="No reports to show"
-            description="If something went wrong with a pickup or a listing, file a report from the relevant card."
-          />
+        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center text-sm text-gray-500">
+          No reports to show. If something went wrong with a pickup or a
+          listing, file a report from the relevant card.
         </div>
       ) : (
         <ul className="grid gap-3">
           {reports.map((r) => (
             <li
               key={r.id}
-              className="rounded-[24px] border border-[var(--color-line)] bg-white p-5"
+              className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-display text-base font-bold text-[var(--color-ink)]">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-gray-900">
                       {REPORT_REASON_LABELS[r.reason] ?? r.reason}
                     </span>
-                    <StatusBadge
-                      tone={VISIBILITY_TONE[r.visibility]}
-                      size="sm"
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${VISIBILITY_BADGE[r.visibility]}`}
                     >
                       {VISIBILITY_LABEL[r.visibility]}
-                    </StatusBadge>
+                    </span>
                   </div>
-                  <div className="mt-1 text-xs text-[var(--color-ink-3)]">
+                  <div className="mt-0.5 text-xs text-gray-500">
                     {r.listingTitle ? (
                       <>
                         Listing · {r.listingTitle}
@@ -119,27 +115,29 @@ function MyReportsPage() {
                       <span className="italic">No linked listing</span>
                     )}
                     {' · filed '}
-                    {fullDateTime(r.createdAt)}
+                    {new Date(r.createdAt).toLocaleString()}
                   </div>
                 </div>
-                <StatusBadge tone={REPORT_STATUS_BADGE_TONES[r.status]}>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${REPORT_STATUS_BADGE_CLASSES[r.status]}`}
+                >
                   {REPORT_STATUS_LABELS[r.status]}
-                </StatusBadge>
+                </span>
               </div>
               {r.description ? (
-                <p className="mt-3 whitespace-pre-line text-sm text-[var(--color-ink-2)]">
+                <p className="mt-2 whitespace-pre-line text-sm text-gray-700">
                   {r.description}
                 </p>
               ) : null}
               {r.visibility !== 'FILED_BY_ME' ? (
-                <div className="mt-2 text-[11px] text-[var(--color-ink-3)]">
+                <div className="mt-2 text-[11px] text-gray-500">
                   Reporter: {r.reporterName ?? 'Unknown'}
                   {r.reporterOrgName ? ` (${r.reporterOrgName})` : ''}
                 </div>
               ) : null}
               {r.resolvedAt ? (
-                <div className="mt-1.5 text-[11px] font-semibold text-[var(--color-mint-ink)]">
-                  Closed {fullDateTime(r.resolvedAt)}
+                <div className="mt-1 text-[11px] text-emerald-700">
+                  Closed {new Date(r.resolvedAt).toLocaleString()}
                 </div>
               ) : null}
             </li>

@@ -2,32 +2,29 @@ import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Ban, Flag } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
-import { AdminTable } from '../../../components/admin/AdminTable'
-import type { Column } from '../../../components/admin/AdminTable'
+import { AdminTable, type Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
-import { Alert } from '../../../components/ui/Alert'
-import { ConfirmDialog } from '../../../components/ui/ConfirmDialog'
 import {
   adminCancelListingFn,
   listListingsForAdminFn,
+  type AdminListingRow,
 } from '../../../lib/admin-server'
-import type { AdminListingRow } from '../../../lib/admin-server'
 import {
   FOOD_CATEGORY_LABELS,
   LISTING_STATUSES,
-  LISTING_STATUS_BADGE_TONES,
+  LISTING_STATUS_BADGE_CLASSES,
   LISTING_STATUS_LABELS,
   canAccessAdmin,
   roleToDashboard,
+  type FoodCategory,
+  type ListingStatus,
 } from '../../../lib/permissions'
-import type { FoodCategory, ListingStatus } from '../../../lib/permissions'
 
 export const Route = createFileRoute('/_authed/admin/listings')({
-  head: () => ({ meta: [{ title: 'Listings · Admin | FoodSetu' }] }),
   beforeLoad: ({ context }) => {
     const user = (context as { user: { role?: string } }).user
     if (!canAccessAdmin(user)) {
-      throw redirect({ to: roleToDashboard(user.role) })
+      throw redirect({ to: roleToDashboard(user.role) as string })
     }
   },
   loader: async () => ({ listings: await listListingsForAdminFn() }),
@@ -45,14 +42,17 @@ type StatusFilter = 'ALL' | ListingStatus
 function AdminListings() {
   const router = useRouter()
   const { listings } = Route.useLoaderData()
-  const { user } = Route.useRouteContext()
+  const { user } = Route.useRouteContext() as {
+    user: { name?: string | null; email?: string | null; role?: string | null }
+  }
   const [filter, setFilter] = useState<StatusFilter>('ALL')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [confirmRow, setConfirmRow] = useState<AdminListingRow | null>(null)
 
   const filtered =
-    filter === 'ALL' ? listings : listings.filter((l) => l.status === filter)
+    filter === 'ALL'
+      ? listings
+      : listings.filter((l) => l.status === filter)
 
   const counts = LISTING_STATUSES.reduce(
     (acc, s) => {
@@ -65,13 +65,20 @@ function AdminListings() {
   const filters = [
     { value: 'ALL' as StatusFilter, label: 'All', count: listings.length },
     ...LISTING_STATUSES.map((s) => ({
-      value: s,
+      value: s as StatusFilter,
       label: LISTING_STATUS_LABELS[s],
       count: counts[s],
     })),
   ]
 
   async function handleCancel(row: AdminListingRow) {
+    if (
+      !confirm(
+        `Cancel "${row.title}"? Any active claim on this listing will also be cancelled.`,
+      )
+    ) {
+      return
+    }
     setError(null)
     setBusyId(row.id)
     try {
@@ -81,7 +88,6 @@ function AdminListings() {
       setError(err instanceof Error ? err.message : 'Failed to cancel listing')
     } finally {
       setBusyId(null)
-      setConfirmRow(null)
     }
   }
 
@@ -95,15 +101,11 @@ function AdminListings() {
             <span className="font-medium text-gray-900">{l.title}</span>
             {l.reportCount > 0 ? (
               <span
-                className="inline-flex items-center gap-1 rounded-md border border-[var(--color-line)] bg-[var(--color-canvas)] px-1.5 py-px text-[10.5px] font-medium leading-[16px] text-[var(--color-ink)]"
+                className="inline-flex items-center gap-0.5 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-800 ring-1 ring-red-200"
                 title={`${l.reportCount} report(s) filed against this listing`}
               >
-                <span
-                  aria-hidden="true"
-                  className="inline-block h-1.5 w-1.5 rounded-full"
-                  style={{ backgroundColor: 'var(--color-danger)' }}
-                />
-                Reported · {l.reportCount}
+                <Flag className="h-3 w-3" />
+                REPORTED ({l.reportCount})
               </span>
             ) : null}
           </div>
@@ -133,8 +135,10 @@ function AdminListings() {
       header: 'Status',
       render: (l) => (
         <StatusPill
-          label={LISTING_STATUS_LABELS[l.status as ListingStatus] ?? l.status}
-          tone={LISTING_STATUS_BADGE_TONES[l.status as ListingStatus]}
+          label={
+            LISTING_STATUS_LABELS[l.status as ListingStatus] ?? l.status
+          }
+          className={LISTING_STATUS_BADGE_CLASSES[l.status as ListingStatus]}
         />
       ),
     },
@@ -175,7 +179,7 @@ function AdminListings() {
         return (
           <button
             type="button"
-            onClick={() => setConfirmRow(l)}
+            onClick={() => handleCancel(l)}
             disabled={blocked || busyId === l.id}
             className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
             title={
@@ -195,9 +199,9 @@ function AdminListings() {
   return (
     <AdminShell title="Food listings" user={user}>
       {error ? (
-        <Alert tone="error" className="mb-4">
+        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
           {error}
-        </Alert>
+        </div>
       ) : null}
       <AdminTable
         rows={filtered}
@@ -209,21 +213,6 @@ function AdminListings() {
         filterValue={filter}
         onFilterChange={setFilter}
         emptyLabel="No listings yet."
-      />
-      <ConfirmDialog
-        open={confirmRow != null}
-        title="Cancel this listing?"
-        description={
-          confirmRow
-            ? `Cancel "${confirmRow.title}"? Any active claim on this listing will also be cancelled.`
-            : ''
-        }
-        confirmLabel="Cancel listing"
-        cancelLabel="Keep active"
-        destructive
-        busy={confirmRow != null && busyId === confirmRow.id}
-        onConfirm={() => confirmRow && handleCancel(confirmRow)}
-        onCancel={() => setConfirmRow(null)}
       />
     </AdminShell>
   )
