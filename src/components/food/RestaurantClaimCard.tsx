@@ -2,10 +2,12 @@ import {
   Building2,
   CalendarClock,
   Check,
+  CheckCircle2,
   ChevronRight,
   KeyRound,
   MapPin,
   Phone,
+  ShieldCheck,
   Utensils,
   X,
 } from 'lucide-react'
@@ -141,12 +143,18 @@ export function RestaurantClaimCard({
       {claim.otpIssued && status === 'ACCEPTED' ? (
         <div className="border-t border-gray-100 bg-blue-50/50 px-4 py-2 text-xs text-blue-900">
           <KeyRound className="mr-1 inline h-3.5 w-3.5" />
-          OTP issued — the claimant will show their 6-digit code at pickup.
+          OTP issued — open this claim to enter the 6-digit code at pickup.
         </div>
       ) : null}
       {status === 'PICKED_UP' ? (
         <div className="border-t border-gray-100 bg-emerald-50/50 px-4 py-2 text-xs text-emerald-900">
           Pickup confirmed.
+        </div>
+      ) : null}
+      {status === 'COMPLETED' ? (
+        <div className="border-t border-gray-100 bg-emerald-50/50 px-4 py-2 text-xs text-emerald-900">
+          <CheckCircle2 className="mr-1 inline h-3.5 w-3.5" />
+          Pickup verified — handoff complete.
         </div>
       ) : null}
 
@@ -160,6 +168,16 @@ export function RestaurantClaimCard({
             View details
             <ChevronRight className="h-3.5 w-3.5" />
           </Link>
+          {status === 'ACCEPTED' ? (
+            <Link
+              to="/restaurant/claims/$id"
+              params={{ id: claim.id }}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-orange-700"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Verify pickup
+            </Link>
+          ) : null}
           {isPending && onReject ? (
             <button
               type="button"

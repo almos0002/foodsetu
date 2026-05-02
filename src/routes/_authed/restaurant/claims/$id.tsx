@@ -11,10 +11,12 @@ import {
   Building2,
   CalendarClock,
   Check,
+  CheckCircle2,
   Clock,
   KeyRound,
   MapPin,
   Phone,
+  ShieldCheck,
   Utensils,
   X,
 } from 'lucide-react'
@@ -23,6 +25,7 @@ import {
   acceptClaimFn,
   getClaimForRestaurantFn,
   rejectClaimFn,
+  verifyPickupFn,
 } from '../../../../lib/claim-server'
 import type { OrganizationRow } from '../../../../lib/org-server'
 import {
@@ -91,14 +94,18 @@ function RestaurantClaimDetail() {
 
   const status = claim.status as ClaimStatus
   const isPending = status === 'PENDING'
+  const isAccepted = status === 'ACCEPTED'
+  const isCompleted = status === 'COMPLETED'
   const verified = isOrgVerified(organization)
   const isRestaurantOrg =
     !!organization && organization.type === 'RESTAURANT'
   const canManage =
     user.role === 'ADMIN' || (isRestaurantOrg && verified)
 
-  const [busy, setBusy] = useState<'accept' | 'reject' | null>(null)
+  const [busy, setBusy] = useState<'accept' | 'reject' | 'verify' | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [otpInput, setOtpInput] = useState('')
 
   async function handle(action: 'accept' | 'reject') {
     if (
@@ -108,16 +115,41 @@ function RestaurantClaimDetail() {
       return
     }
     setError(null)
+    setSuccess(null)
     setBusy(action)
     try {
       if (action === 'accept') {
         await acceptClaimFn({ data: { id: claim.id } })
+        setSuccess('Claim accepted. A 6-digit pickup OTP was issued to the claimant.')
       } else {
         await rejectClaimFn({ data: { id: claim.id } })
+        setSuccess('Claim rejected. The listing is available again.')
       }
       router.invalidate()
     } catch (err) {
       setError(err instanceof Error ? err.message : `Failed to ${action} claim`)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  async function handleVerify(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError(null)
+    setSuccess(null)
+    const otp = otpInput.replace(/\D/g, '')
+    if (otp.length !== 6) {
+      setError('Enter the 6-digit OTP shown by the claimant.')
+      return
+    }
+    setBusy('verify')
+    try {
+      await verifyPickupFn({ data: { id: claim.id, otp } })
+      setSuccess('Pickup verified. The handoff is complete — thank you!')
+      setOtpInput('')
+      router.invalidate()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to verify pickup')
     } finally {
       setBusy(null)
     }
@@ -151,6 +183,12 @@ function RestaurantClaimDetail() {
       {error ? (
         <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
           {error}
+        </div>
+      ) : null}
+      {success ? (
+        <div className="mb-4 flex items-start gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 ring-1 ring-emerald-200">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <span>{success}</span>
         </div>
       ) : null}
 
@@ -259,52 +297,135 @@ function RestaurantClaimDetail() {
             ) : null}
           </div>
 
-          {claim.otpIssued && (status === 'ACCEPTED' || status === 'PICKED_UP') ? (
+          {claim.otpIssued && isAccepted ? (
             <div className="rounded-xl border border-blue-200 bg-blue-50 p-5 text-sm text-blue-900">
               <div className="flex items-center gap-2 font-medium">
                 <KeyRound className="h-4 w-4" />
                 Pickup OTP issued
               </div>
               <p className="mt-1 text-xs text-blue-800">
-                The claimant has a 6-digit code. Ask them for it at handoff —
-                you&apos;ll enter it to confirm the pickup. (For security, the
-                code is never shown here.)
+                The claimant has a 6-digit code. Ask them for it at handoff
+                and enter it on the right to confirm the pickup. (For
+                security, the code is never shown to you here.)
+              </p>
+            </div>
+          ) : null}
+
+          {isCompleted ? (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+              <div className="flex items-center gap-2 font-medium">
+                <CheckCircle2 className="h-4 w-4" />
+                Pickup verified
+              </div>
+              <p className="mt-1 text-xs text-emerald-800">
+                You confirmed the OTP and the food has been handed off. The
+                listing is now marked as picked up.
               </p>
             </div>
           ) : null}
         </div>
 
         <aside className="space-y-3">
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-900">Decision</h3>
-            <p className="mt-1 text-xs text-gray-500">
-              {!canManage
-                ? 'Your organization must be verified to act on claims.'
-                : isPending
-                  ? 'Accept to lock the listing for this claimant and issue a pickup OTP. Reject to release the listing back to AVAILABLE.'
-                  : `This claim is ${(CLAIM_STATUS_LABELS[status] ?? status).toLowerCase()} and can no longer be changed.`}
-            </p>
-            <div className="mt-4 space-y-2">
-              <button
-                type="button"
-                onClick={() => handle('accept')}
-                disabled={!canManage || !isPending || busy != null}
-                className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-              >
-                <Check className="h-4 w-4" />
-                {busy === 'accept' ? 'Accepting…' : 'Accept claim'}
-              </button>
-              <button
-                type="button"
-                onClick={() => handle('reject')}
-                disabled={!canManage || !isPending || busy != null}
-                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
-              >
-                <X className="h-4 w-4" />
-                {busy === 'reject' ? 'Rejecting…' : 'Reject claim'}
-              </button>
+          {isPending || (!isAccepted && !isCompleted) ? (
+            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+              <h3 className="text-sm font-semibold text-gray-900">Decision</h3>
+              <p className="mt-1 text-xs text-gray-500">
+                {!canManage
+                  ? 'Your organization must be verified to act on claims.'
+                  : isPending
+                    ? 'Accept to lock the listing for this claimant and issue a pickup OTP. Reject to release the listing back to AVAILABLE.'
+                    : `This claim is ${(CLAIM_STATUS_LABELS[status] ?? status).toLowerCase()} and can no longer be changed.`}
+              </p>
+              <div className="mt-4 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => handle('accept')}
+                  disabled={!canManage || !isPending || busy != null}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                >
+                  <Check className="h-4 w-4" />
+                  {busy === 'accept' ? 'Accepting…' : 'Accept claim'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handle('reject')}
+                  disabled={!canManage || !isPending || busy != null}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
+                >
+                  <X className="h-4 w-4" />
+                  {busy === 'reject' ? 'Rejecting…' : 'Reject claim'}
+                </button>
+              </div>
             </div>
-          </div>
+          ) : null}
+
+          {isAccepted ? (
+            <form
+              onSubmit={handleVerify}
+              className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
+            >
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-orange-600" />
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Verify pickup
+                </h3>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Ask the claimant for their 6-digit pickup OTP and enter it
+                here. On a successful match, the listing is marked as picked
+                up and this claim is completed.
+              </p>
+              <label
+                htmlFor="otp"
+                className="mt-3 block text-[10px] font-medium uppercase tracking-wide text-gray-500"
+              >
+                Pickup OTP
+              </label>
+              <input
+                id="otp"
+                name="otp"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={7}
+                placeholder="000000"
+                value={otpInput}
+                onChange={(e) =>
+                  setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))
+                }
+                disabled={!canManage || busy != null}
+                className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-center font-mono text-lg tracking-[0.4em] text-gray-900 placeholder:text-gray-300 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200 disabled:cursor-not-allowed disabled:bg-gray-50"
+              />
+              <button
+                type="submit"
+                disabled={
+                  !canManage || busy != null || otpInput.length !== 6
+                }
+                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                {busy === 'verify' ? 'Verifying…' : 'Verify pickup'}
+              </button>
+              {!canManage ? (
+                <p className="mt-2 text-[11px] text-gray-500">
+                  Your organization must be verified before you can confirm
+                  pickups.
+                </p>
+              ) : null}
+            </form>
+          ) : null}
+
+          {isCompleted ? (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+              <div className="flex items-center gap-2 text-sm font-semibold text-emerald-900">
+                <CheckCircle2 className="h-4 w-4" />
+                Pickup complete
+              </div>
+              <p className="mt-1 text-xs text-emerald-800">
+                This claim has been verified and closed out.
+              </p>
+            </div>
+          ) : null}
 
           <div className="rounded-xl border border-gray-200 bg-white p-5 text-xs text-gray-500 shadow-sm">
             <div className="font-mono">{claim.id}</div>

@@ -1,5 +1,6 @@
 import {
   CalendarClock,
+  CheckCircle2,
   KeyRound,
   MapPin,
   Phone,
@@ -120,6 +121,20 @@ export function MyClaimCard({ claim }: { claim: MyClaim }) {
           <KeyRound className="mr-1 inline h-3.5 w-3.5" />
           Pickup confirmed (OTP{' '}
           <span className="font-mono font-semibold">{claim.otpCode}</span>).
+        </div>
+      ) : null}
+      {status === 'COMPLETED' ? (
+        <div className="border-t border-gray-100 bg-emerald-50/50 px-4 py-3 text-xs text-emerald-900">
+          <div className="flex items-center gap-1.5 font-medium">
+            <CheckCircle2 className="h-4 w-4" />
+            Pickup verified — thank you for collecting this donation.
+          </div>
+          {claim.otpCode ? (
+            <div className="mt-1 text-emerald-800/80">
+              OTP used:{' '}
+              <span className="font-mono font-semibold">{claim.otpCode}</span>
+            </div>
+          ) : null}
         </div>
       ) : null}
       {status === 'REJECTED' ? (

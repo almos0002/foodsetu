@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
+import { timingSafeEqual } from 'node:crypto'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { auth, pool } from './auth'
 import { db } from '../db'
@@ -246,7 +247,13 @@ export type RestaurantClaim = {
   }
 }
 
-const PHONE_VISIBLE_CLAIM_STATUSES = new Set(['ACCEPTED', 'PICKED_UP'])
+const PHONE_VISIBLE_CLAIM_STATUSES = new Set([
+  'ACCEPTED',
+  'PICKED_UP',
+  'COMPLETED',
+])
+// COMPLETED is included so the receiver still sees the OTP as a "receipt" of
+// the verified pickup. The donor never sees the value at all (separate type).
 const OTP_VISIBLE_CLAIM_STATUSES = PHONE_VISIBLE_CLAIM_STATUSES
 
 // ---------------------------------------------------------------------------
@@ -921,6 +928,145 @@ export const rejectClaimFn = createServerFn({ method: 'POST' })
               eq(foodListings.status, 'CLAIM_REQUESTED'),
             ),
           )
+      }
+
+      return claimRow as Claim
+    })
+  })
+
+// ---------------------------------------------------------------------------
+// Verify pickup (OTP)
+// ---------------------------------------------------------------------------
+
+function validateVerifyPickupInput(value: unknown): {
+  id: string
+  otp: string
+} {
+  if (!value || typeof value !== 'object') throw new Error('Invalid input')
+  const v = value as Record<string, unknown>
+  if (typeof v.id !== 'string' || v.id.length === 0) {
+    throw new Error('Claim id is required')
+  }
+  if (typeof v.otp !== 'string') {
+    throw new Error('OTP is required')
+  }
+  // Strip whitespace and any non-digit characters the user may have pasted.
+  const otp = v.otp.replace(/\D/g, '')
+  if (otp.length !== 6) {
+    throw new Error('Enter the 6-digit OTP')
+  }
+  return { id: v.id, otp }
+}
+
+/** Constant-time compare for two equal-length 6-digit OTP strings. */
+function otpEquals(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  try {
+    return timingSafeEqual(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8'))
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Verifies a pickup OTP entered by the restaurant (donor) at handoff.
+ *
+ *   - claim.status     ACCEPTED → COMPLETED + otp_verified_at + otp_verified_by
+ *   - listing.status   CLAIMED  → PICKED_UP + delivered_at
+ *
+ * Atomicity: a single transaction with status-gated UPDATEs. Ownership
+ * (`restaurant_id`) is verified inside the listing UPDATE so a non-owner
+ * cannot verify a claim even if they know its id and somehow guess the OTP.
+ *
+ * Security:
+ *   - Only the verified RESTAURANT org that owns the listing may verify
+ *     (re-checked from the joined `food_listings.restaurant_id`).
+ *   - Only claims in `ACCEPTED` are eligible (`COMPLETED` / `REJECTED` /
+ *     `CANCELLED` / `PENDING` all rejected with a clear message).
+ *   - OTP is compared with `crypto.timingSafeEqual` to avoid timing leaks.
+ *   - The OTP value itself is never returned to the donor (the response is
+ *     just the updated claim row, with `otp_code` consumed by future
+ *     server-side redaction on subsequent fetches).
+ */
+export const verifyPickupFn = createServerFn({ method: 'POST' })
+  .inputValidator(validateVerifyPickupInput)
+  .handler(async ({ data }) => {
+    const user = await requireSessionUser()
+    const org = await requireVerifiedRestaurantOrg(user)
+
+    return await db.transaction(async (tx) => {
+      // 1. Look up the claim + listing, verify ownership, status, and OTP.
+      const [row] = await tx
+        .select({
+          claimStatus: claims.status,
+          otpCode: claims.otpCode,
+          listingId: foodListings.id,
+          listingStatus: foodListings.status,
+          restaurantId: foodListings.restaurantId,
+        })
+        .from(claims)
+        .innerJoin(foodListings, eq(foodListings.id, claims.foodListingId))
+        .where(eq(claims.id, data.id))
+        .limit(1)
+
+      if (!row) throw new Error('Claim not found')
+      if (row.restaurantId !== org.id) {
+        // Don't leak existence; mirror "not found" for non-owners.
+        throw new Error('Claim not found')
+      }
+      if (row.claimStatus === 'COMPLETED') {
+        throw new Error('This claim has already been verified')
+      }
+      if (row.claimStatus !== 'ACCEPTED') {
+        throw new Error(
+          `This claim is ${(row.claimStatus as string).toLowerCase()} and can no longer be verified`,
+        )
+      }
+      if (row.listingStatus !== 'CLAIMED') {
+        throw new Error(
+          `Listing is ${(row.listingStatus as string).toLowerCase()} and cannot be marked as picked up`,
+        )
+      }
+      if (!row.otpCode) {
+        // Should be impossible (OTP is set on accept) but guard anyway.
+        throw new Error('No OTP was issued for this claim')
+      }
+      if (!otpEquals(data.otp, row.otpCode)) {
+        throw new Error('Incorrect OTP — please try again')
+      }
+
+      // 2. Move claim ACCEPTED → COMPLETED, status-gated.
+      const now = new Date()
+      const [claimRow] = await tx
+        .update(claims)
+        .set({
+          status: 'COMPLETED',
+          otpVerifiedAt: now,
+          otpVerifiedBy: user.id,
+        })
+        .where(and(eq(claims.id, data.id), eq(claims.status, 'ACCEPTED')))
+        .returning()
+      if (!claimRow) {
+        // Concurrent verify or cancel between SELECT and UPDATE.
+        throw new Error('This claim was just modified — please refresh')
+      }
+
+      // 3. Move listing CLAIMED → PICKED_UP + set delivered_at, status-gated
+      //    and ownership-gated.
+      const [listingRow] = await tx
+        .update(foodListings)
+        .set({ status: 'PICKED_UP', deliveredAt: now })
+        .where(
+          and(
+            eq(foodListings.id, row.listingId),
+            eq(foodListings.restaurantId, org.id),
+            eq(foodListings.status, 'CLAIMED'),
+          ),
+        )
+        .returning({ id: foodListings.id })
+      if (!listingRow) {
+        // Force rollback so claim doesn't move to COMPLETED without listing.
+        throw new Error('Listing is no longer in the claimed state')
       }
 
       return claimRow as Claim
