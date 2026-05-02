@@ -4,6 +4,8 @@
 
 A TanStack Start (React + Vite + Nitro SSR) web application with file-based routing, Tailwind CSS v4, and TypeScript.
 
+FoodSetu connects restaurants/hotels/bakeries that have surplus food with verified NGOs, shelters, and animal rescue groups. See **[WORKFLOW.md](./WORKFLOW.md)** for the full end-to-end product flow.
+
 ## Architecture
 
 - **Framework**: TanStack Start (SSR React framework built on Vite + Nitro)
