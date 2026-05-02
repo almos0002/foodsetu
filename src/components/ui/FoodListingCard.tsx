@@ -201,14 +201,17 @@ function Field({
   )
 }
 
+// Fixed timezone so SSR (server TZ) and client (browser TZ) render identical
+// strings — otherwise React 19 throws a hydration mismatch.
 export function formatTime(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleString(undefined, {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-  })
+  }).format(d)
 }
 
 export function formatDistance(km: number): string {

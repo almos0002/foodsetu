@@ -61,6 +61,32 @@ Hybrid approach: **Airbnb-style consumer landing** + **Linear/Stripe-style enter
 - **Language**: TypeScript
 - **Package Manager**: npm
 
+### Hydration / client-bundle hygiene (gotcha)
+
+`vite.config.ts` ships a custom `stubServerOnlyForClient()` plugin that
+intercepts client-side imports of `pg`, `src/db/index.ts`, and
+`src/lib/auth.ts` and resolves them to virtual stub modules. SSR
+(`opts.ssr === true`) is left untouched so the real implementations run
+server-side. Without this, Vite's dep scanner walks every static `import { db }
+from '../db'` in our `src/lib/*-server.ts` files (transitively reached from
+`routeTree.gen.ts`) and pre-bundles `pg` into the **client** deps cache.
+TanStack Start strips server-fn handler bodies on the client but not the
+file-level imports, so pg evaluates in the browser, hits `Buffer is not
+defined` / `EventEmitter undefined` / a `DATABASE_URL` throw, and kills React
+hydration — leaving the SSR HTML inert (tabs/buttons appear dead).
+
+A defense-in-depth `Buffer` polyfill is also injected in
+`src/routes/__root.tsx` `<head>` via inline `<script>` (with
+`suppressHydrationWarning` since the Replit dev preview proxy rewrites tags
+inside `<head>`).
+
+**All user-visible date/time strings must use `Intl.DateTimeFormat` with a
+fixed `timeZone: 'Asia/Kolkata'`** (see `formatPickup` in `src/routes/index.tsx`
+and `src/routes/listings.tsx`, `formatTime` in
+`src/components/ui/FoodListingCard.tsx`). `toLocaleString(undefined, ...)`
+hydrates differently on server vs client and triggers React 19 hydration
+mismatches.
+
 ## Project Structure
 
 ```

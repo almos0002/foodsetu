@@ -554,20 +554,39 @@ function RoleCard({
   )
 }
 
+// All times rendered in Asia/Kolkata so SSR (server TZ) and client (browser
+// TZ) produce identical strings — otherwise hydration mismatches.
+const TZ = 'Asia/Kolkata'
+const ymdInTz = (d: Date) =>
+  new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(d)
+
 function formatPickup(startIso: string, endIso: string): string {
   const start = new Date(startIso)
   const end = new Date(endIso)
   const now = new Date()
-  const sameDay = start.toDateString() === now.toDateString()
-  const tomorrow = new Date(now)
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  const isTomorrow = start.toDateString() === tomorrow.toDateString()
+  const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+  const startYmd = ymdInTz(start)
+  const sameDay = startYmd === ymdInTz(now)
+  const isTomorrow = startYmd === ymdInTz(tomorrow)
   const dayLabel = sameDay
     ? 'Today'
     : isTomorrow
       ? 'Tomorrow'
-      : start.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })
+      : new Intl.DateTimeFormat('en-US', {
+          timeZone: TZ,
+          weekday: 'short',
+          day: 'numeric',
+        }).format(start)
   const fmt = (d: Date) =>
-    d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: TZ,
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(d)
   return `${dayLabel} · ${fmt(start)} – ${fmt(end)}`
 }

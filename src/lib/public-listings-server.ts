@@ -1,7 +1,11 @@
 import { createServerFn } from '@tanstack/react-start'
-import { sql } from 'drizzle-orm'
-import { db } from '../db'
 import type { FoodCategory } from './permissions'
+
+// NOTE: this file is imported by public route files (`/`, `/listings`) so its
+// top-level imports MUST stay client-safe. The TanStack Start compiler strips
+// the handler body for the client bundle, so we lazy-import `db` and `sql`
+// inside the handler — keeping `pg` out of the client bundle, which would
+// otherwise crash hydration with `Buffer is not defined`.
 
 export type PublicListingRow = {
   id: string
@@ -43,6 +47,8 @@ function validatePublicInput(value: unknown): Required<Filter> {
 export const listPublicAvailableListingsFn = createServerFn({ method: 'GET' })
   .inputValidator(validatePublicInput)
   .handler(async ({ data }) => {
+    const { sql } = await import('drizzle-orm')
+    const { db } = await import('../db')
     const result = await db.execute<{
       id: string
       title: string

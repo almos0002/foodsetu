@@ -41,10 +41,25 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 })
 
+// Minimal `Buffer` stub injected before any ESM modules evaluate.
+// Background: Vite dev pre-bundles `pg` into the client deps cache because
+// many server-only files (claim-server.ts, listing-server.ts, etc.) statically
+// `import { db } from '../db'` and the route tree statically imports those
+// route files. TanStack Start strips server-fn handler *bodies* on the client,
+// but the file-level imports are still scanned. The bundled pg evaluates at
+// load time and references `Buffer.from`, throwing `Buffer is not defined`,
+// which kills hydration → tabs/buttons appear inert. The stub lets the chunk
+// finish evaluating; the actual pg code is never *called* on the client.
+const BUFFER_STUB = `if(typeof window!=="undefined"&&typeof window.Buffer==="undefined"){window.Buffer={from:function(x){return x},alloc:function(){return{}},allocUnsafe:function(){return{}},isBuffer:function(){return false},concat:function(a){return a},byteLength:function(s){return typeof s==="string"?s.length:0}};}`
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
+      <head suppressHydrationWarning>
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: BUFFER_STUB }}
+        />
         <HeadContent />
       </head>
       <body>
