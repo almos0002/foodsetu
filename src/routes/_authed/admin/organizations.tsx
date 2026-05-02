@@ -12,7 +12,7 @@ import {
 } from '../../../lib/org-server'
 import type { OrganizationWithOwner } from '../../../lib/org-server'
 import {
-  VERIFICATION_BADGE_CLASSES,
+  VERIFICATION_BADGE_TONES,
   VERIFICATION_LABELS,
   VERIFICATION_STATUSES,
   canAccessAdmin,
@@ -104,10 +104,7 @@ function AdminOrganizations() {
       key: 'type',
       header: 'Type',
       render: (org) => (
-        <StatusPill
-          label={org.type ?? '—'}
-          className="bg-gray-100 text-gray-700 ring-1 ring-gray-200"
-        />
+        <StatusPill label={org.type ?? '—'} tone="gray" />
       ),
     },
     {
@@ -129,7 +126,7 @@ function AdminOrganizations() {
             VERIFICATION_LABELS[org.verificationStatus] ??
             org.verificationStatus
           }
-          className={VERIFICATION_BADGE_CLASSES[org.verificationStatus]}
+          tone={VERIFICATION_BADGE_TONES[org.verificationStatus]}
         />
       ),
     },

@@ -14,7 +14,7 @@ import {
 import type { AdminClaimRow } from '../../../lib/admin-server'
 import {
   CLAIM_STATUSES,
-  CLAIM_STATUS_BADGE_CLASSES,
+  CLAIM_STATUS_BADGE_TONES,
   CLAIM_STATUS_LABELS,
   canAccessAdmin,
   roleToDashboard,
@@ -113,7 +113,7 @@ function AdminClaims() {
       render: (c) => (
         <StatusPill
           label={CLAIM_STATUS_LABELS[c.status as ClaimStatus] ?? c.status}
-          className={CLAIM_STATUS_BADGE_CLASSES[c.status as ClaimStatus]}
+          tone={CLAIM_STATUS_BADGE_TONES[c.status as ClaimStatus]}
         />
       ),
     },

@@ -7,12 +7,14 @@ import { listMyVisibleReportsFn } from '../../../lib/report-server'
 import type { VisibleReport } from '../../../lib/report-server'
 import {
   REPORT_REASON_LABELS,
-  REPORT_STATUS_BADGE_CLASSES,
+  REPORT_STATUS_BADGE_TONES,
   REPORT_STATUS_LABELS,
   ROLE_LABELS,
   roleToDashboard,
 } from '../../../lib/permissions'
 import type { Role } from '../../../lib/permissions'
+import { StatusBadge } from '../../../components/ui/StatusBadge'
+import type { BadgeTone } from '../../../components/ui/StatusBadge'
 import { fullDateTime } from '../../../lib/time'
 
 const VISIBILITY_LABEL: Record<VisibleReport['visibility'], string> = {
@@ -21,13 +23,10 @@ const VISIBILITY_LABEL: Record<VisibleReport['visibility'], string> = {
   ABOUT_MY_CLAIM: 'About your claim',
 }
 
-const VISIBILITY_BADGE: Record<VisibleReport['visibility'], string> = {
-  FILED_BY_ME:
-    'border-[var(--color-sky)] bg-[var(--color-sky-soft)] text-[var(--color-sky-ink)]',
-  ABOUT_MY_LISTING:
-    'border-[var(--color-coral)] bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]',
-  ABOUT_MY_CLAIM:
-    'border-[var(--color-berry)] bg-[var(--color-berry-soft)] text-[var(--color-berry-ink)]',
+const VISIBILITY_TONE: Record<VisibleReport['visibility'], BadgeTone> = {
+  FILED_BY_ME: 'blue',
+  ABOUT_MY_LISTING: 'red',
+  ABOUT_MY_CLAIM: 'purple',
 }
 
 export const Route = createFileRoute('/_authed/reports/')({
@@ -102,11 +101,12 @@ function MyReportsPage() {
                     <span className="font-display text-base font-bold text-[var(--color-ink)]">
                       {REPORT_REASON_LABELS[r.reason] ?? r.reason}
                     </span>
-                    <span
-                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold ${VISIBILITY_BADGE[r.visibility]}`}
+                    <StatusBadge
+                      tone={VISIBILITY_TONE[r.visibility]}
+                      size="sm"
                     >
                       {VISIBILITY_LABEL[r.visibility]}
-                    </span>
+                    </StatusBadge>
                   </div>
                   <div className="mt-1 text-xs text-[var(--color-ink-3)]">
                     {r.listingTitle ? (
@@ -121,11 +121,9 @@ function MyReportsPage() {
                     {fullDateTime(r.createdAt)}
                   </div>
                 </div>
-                <span
-                  className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-bold ${REPORT_STATUS_BADGE_CLASSES[r.status]}`}
-                >
+                <StatusBadge tone={REPORT_STATUS_BADGE_TONES[r.status]}>
                   {REPORT_STATUS_LABELS[r.status]}
-                </span>
+                </StatusBadge>
               </div>
               {r.description ? (
                 <p className="mt-3 whitespace-pre-line text-sm text-[var(--color-ink-2)]">

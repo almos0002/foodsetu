@@ -19,7 +19,7 @@ import type { AdminReportRow } from '../../../lib/admin-server'
 import {
   REPORT_REASON_LABELS,
   REPORT_STATUSES,
-  REPORT_STATUS_BADGE_CLASSES,
+  REPORT_STATUS_BADGE_TONES,
   REPORT_STATUS_LABELS,
   canAccessAdmin,
   roleToDashboard,
@@ -138,7 +138,7 @@ function AdminReports() {
       render: (r) => (
         <StatusPill
           label={REPORT_STATUS_LABELS[r.status]}
-          className={REPORT_STATUS_BADGE_CLASSES[r.status]}
+          tone={REPORT_STATUS_BADGE_TONES[r.status]}
         />
       ),
     },

@@ -1,5 +1,3 @@
-import { CheckCircle2, Clock, PackageCheck, Truck, XCircle } from 'lucide-react'
-import type { ReactNode } from 'react'
 import {
   CLAIM_STATUS_LABELS,
   LISTING_STATUS_LABELS,
@@ -17,17 +15,9 @@ const CLAIM_TONE: Record<ClaimStatus, BadgeTone> = {
   COMPLETED: 'green',
 }
 
-const CLAIM_ICON: Record<ClaimStatus, ReactNode> = {
-  PENDING: <Clock className="h-3 w-3" />,
-  ACCEPTED: <CheckCircle2 className="h-3 w-3" />,
-  REJECTED: <XCircle className="h-3 w-3" />,
-  CANCELLED: <XCircle className="h-3 w-3" />,
-  PICKED_UP: <Truck className="h-3 w-3" />,
-  COMPLETED: <PackageCheck className="h-3 w-3" />,
-}
-
 type ClaimProps = {
   status: ClaimStatus | string
+  /** Kept for back-compat; icons are no longer rendered. */
   withIcon?: boolean
   size?: 'sm' | 'md'
   className?: string
@@ -35,7 +25,6 @@ type ClaimProps = {
 
 export function ClaimStatusBadge({
   status,
-  withIcon = true,
   size = 'md',
   className,
 }: ClaimProps) {
@@ -43,7 +32,6 @@ export function ClaimStatusBadge({
   return (
     <StatusBadge
       tone={CLAIM_TONE[s] ?? 'gray'}
-      icon={withIcon ? CLAIM_ICON[s] : undefined}
       size={size}
       className={className}
     >

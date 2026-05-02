@@ -10,12 +10,13 @@ import type { AdminUserRow } from '../../../lib/admin-server'
 import {
   ROLE_LABELS,
   ROLES,
-  VERIFICATION_BADGE_CLASSES,
+  VERIFICATION_BADGE_TONES,
   VERIFICATION_LABELS,
   canAccessAdmin,
   roleToDashboard,
 } from '../../../lib/permissions'
 import type { Role, VerificationStatus } from '../../../lib/permissions'
+import type { BadgeTone } from '../../../components/ui/StatusBadge'
 
 export const Route = createFileRoute('/_authed/admin/users')({
   beforeLoad: ({ context }) => {
@@ -28,11 +29,11 @@ export const Route = createFileRoute('/_authed/admin/users')({
   component: AdminUsers,
 })
 
-const ROLE_BADGE: Record<Role, string> = {
-  ADMIN: 'bg-purple-100 text-purple-800 ring-1 ring-purple-200',
-  RESTAURANT: 'bg-orange-100 text-orange-800 ring-1 ring-orange-200',
-  NGO: 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
-  ANIMAL_RESCUE: 'bg-teal-100 text-teal-800 ring-1 ring-teal-200',
+const ROLE_TONE: Record<Role, BadgeTone> = {
+  ADMIN: 'purple',
+  RESTAURANT: 'orange',
+  NGO: 'blue',
+  ANIMAL_RESCUE: 'teal',
 }
 
 type RoleFilter = 'ALL' | Role
@@ -81,7 +82,7 @@ function AdminUsers() {
         return (
           <StatusPill
             label={r ? ROLE_LABELS[r] : '—'}
-            className={r ? ROLE_BADGE[r] : undefined}
+            tone={r ? ROLE_TONE[r] : 'gray'}
           />
         )
       },
@@ -110,8 +111,8 @@ function AdminUsers() {
                 u.orgVerificationStatus as VerificationStatus
               ] ?? u.orgVerificationStatus
             }
-            className={
-              VERIFICATION_BADGE_CLASSES[
+            tone={
+              VERIFICATION_BADGE_TONES[
                 u.orgVerificationStatus as VerificationStatus
               ]
             }

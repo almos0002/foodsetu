@@ -15,7 +15,7 @@ import type { AdminListingRow } from '../../../lib/admin-server'
 import {
   FOOD_CATEGORY_LABELS,
   LISTING_STATUSES,
-  LISTING_STATUS_BADGE_CLASSES,
+  LISTING_STATUS_BADGE_TONES,
   LISTING_STATUS_LABELS,
   canAccessAdmin,
   roleToDashboard,
@@ -94,11 +94,15 @@ function AdminListings() {
             <span className="font-medium text-gray-900">{l.title}</span>
             {l.reportCount > 0 ? (
               <span
-                className="inline-flex items-center gap-0.5 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-800 ring-1 ring-red-200"
+                className="inline-flex items-center gap-1 rounded-md border border-[var(--color-line)] bg-[var(--color-canvas)] px-1.5 py-px text-[10.5px] font-medium leading-[16px] text-[var(--color-ink)]"
                 title={`${l.reportCount} report(s) filed against this listing`}
               >
-                <Flag className="h-3 w-3" />
-                REPORTED ({l.reportCount})
+                <span
+                  aria-hidden="true"
+                  className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: 'var(--color-danger)' }}
+                />
+                Reported · {l.reportCount}
               </span>
             ) : null}
           </div>
@@ -129,7 +133,7 @@ function AdminListings() {
       render: (l) => (
         <StatusPill
           label={LISTING_STATUS_LABELS[l.status as ListingStatus] ?? l.status}
-          className={LISTING_STATUS_BADGE_CLASSES[l.status as ListingStatus]}
+          tone={LISTING_STATUS_BADGE_TONES[l.status as ListingStatus]}
         />
       ),
     },

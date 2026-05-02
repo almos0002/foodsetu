@@ -166,15 +166,15 @@ export const VERIFICATION_LABELS: Record<VerificationStatus, string> = {
   SUSPENDED: 'Suspended',
 }
 
-export const VERIFICATION_BADGE_CLASSES: Record<VerificationStatus, string> = {
-  PENDING:
-    'border-[var(--color-sun)] bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]',
-  VERIFIED:
-    'border-[var(--color-mint)] bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]',
-  REJECTED:
-    'border-[var(--color-coral)] bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]',
-  SUSPENDED:
-    'border-[var(--color-line-strong)] bg-[var(--color-cream-2)] text-[var(--color-ink-2)]',
+// Tones consumed by StatusPill / StatusBadge. The badge component owns the
+// actual rendered colours — this map only chooses which tone-dot to show.
+import type { BadgeTone } from '../components/ui/StatusBadge'
+
+export const VERIFICATION_BADGE_TONES: Record<VerificationStatus, BadgeTone> = {
+  PENDING: 'amber',
+  VERIFIED: 'green',
+  REJECTED: 'red',
+  SUSPENDED: 'gray',
 }
 
 // ---------------------------------------------------------------------------
@@ -204,23 +204,15 @@ export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
   REPORTED: 'Reported',
 }
 
-export const LISTING_STATUS_BADGE_CLASSES: Record<ListingStatus, string> = {
-  DRAFT:
-    'border-[var(--color-line-strong)] bg-[var(--color-cream)] text-[var(--color-ink-2)]',
-  AVAILABLE:
-    'border-[var(--color-mint)] bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]',
-  CLAIM_REQUESTED:
-    'border-[var(--color-sky)] bg-[var(--color-sky-soft)] text-[var(--color-sky-ink)]',
-  CLAIMED:
-    'border-[var(--color-berry)] bg-[var(--color-berry-soft)] text-[var(--color-berry-ink)]',
-  PICKED_UP:
-    'border-[var(--color-mint)] bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]',
-  EXPIRED:
-    'border-[var(--color-sun)] bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]',
-  CANCELLED:
-    'border-[var(--color-line-strong)] bg-[var(--color-cream-2)] text-[var(--color-ink-2)]',
-  REPORTED:
-    'border-[var(--color-coral)] bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]',
+export const LISTING_STATUS_BADGE_TONES: Record<ListingStatus, BadgeTone> = {
+  DRAFT: 'gray',
+  AVAILABLE: 'green',
+  CLAIM_REQUESTED: 'blue',
+  CLAIMED: 'indigo',
+  PICKED_UP: 'purple',
+  EXPIRED: 'amber',
+  CANCELLED: 'gray',
+  REPORTED: 'red',
 }
 
 // Active = listing is still in the live pipeline (visible to claimants or
@@ -323,19 +315,13 @@ export const CLAIM_STATUS_LABELS: Record<ClaimStatus, string> = {
   COMPLETED: 'Completed',
 }
 
-export const CLAIM_STATUS_BADGE_CLASSES: Record<ClaimStatus, string> = {
-  PENDING:
-    'border-[var(--color-sun)] bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]',
-  ACCEPTED:
-    'border-[var(--color-sky)] bg-[var(--color-sky-soft)] text-[var(--color-sky-ink)]',
-  REJECTED:
-    'border-[var(--color-coral)] bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]',
-  CANCELLED:
-    'border-[var(--color-line-strong)] bg-[var(--color-cream-2)] text-[var(--color-ink-2)]',
-  PICKED_UP:
-    'border-[var(--color-berry)] bg-[var(--color-berry-soft)] text-[var(--color-berry-ink)]',
-  COMPLETED:
-    'border-[var(--color-mint)] bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]',
+export const CLAIM_STATUS_BADGE_TONES: Record<ClaimStatus, BadgeTone> = {
+  PENDING: 'amber',
+  ACCEPTED: 'blue',
+  REJECTED: 'red',
+  CANCELLED: 'gray',
+  PICKED_UP: 'purple',
+  COMPLETED: 'green',
 }
 
 export const ACTIVE_CLAIM_STATUSES: readonly ClaimStatus[] = [
@@ -437,13 +423,10 @@ export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
   RESOLVED: 'Resolved',
 }
 
-export const REPORT_STATUS_BADGE_CLASSES: Record<ReportStatus, string> = {
-  OPEN:
-    'border-[var(--color-coral)] bg-[var(--color-coral-soft)] text-[var(--color-coral-ink)]',
-  REVIEWED:
-    'border-[var(--color-sun)] bg-[var(--color-sun-soft)] text-[var(--color-sun-ink)]',
-  RESOLVED:
-    'border-[var(--color-mint)] bg-[var(--color-mint-soft)] text-[var(--color-mint-ink)]',
+export const REPORT_STATUS_BADGE_TONES: Record<ReportStatus, BadgeTone> = {
+  OPEN: 'red',
+  REVIEWED: 'amber',
+  RESOLVED: 'green',
 }
 
 export function isValidReportReason(v: unknown): v is ReportReason {

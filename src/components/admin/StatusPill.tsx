@@ -1,17 +1,21 @@
+import { StatusBadge } from '../ui/StatusBadge'
+import type { BadgeTone } from '../ui/StatusBadge'
+
 type Props = {
   label: string
+  tone?: BadgeTone
   className?: string
 }
 
-export function StatusPill({ label, className }: Props) {
+/**
+ * Thin wrapper around the shared {@link StatusBadge} so admin tables get the
+ * same minimal Linear/Vercel-style chip (small radius, neutral surface, single
+ * coloured dot) as the rest of the app.
+ */
+export function StatusPill({ label, tone = 'gray', className }: Props) {
   return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
-        className ??
-        'border-[var(--color-line)] bg-[var(--color-canvas-2)] text-[var(--color-ink-2)]'
-      }`}
-    >
+    <StatusBadge tone={tone} size="sm" className={className}>
       {label}
-    </span>
+    </StatusBadge>
   )
 }
