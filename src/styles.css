@@ -1,5 +1,9 @@
-
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-poppins: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+}
 
 * {
   box-sizing: border-box;
@@ -13,5 +17,5 @@ body,
 
 body {
   margin: 0;
+  font-family: var(--font-sans);
 }
-

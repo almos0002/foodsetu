@@ -8,7 +8,9 @@ A TanStack Start (React + Vite + Nitro SSR) web application with file-based rout
 
 - **Framework**: TanStack Start (SSR React framework built on Vite + Nitro)
 - **Router**: TanStack Router (file-based routing in `src/routes/`)
-- **Styling**: Tailwind CSS v4 via `@tailwindcss/vite`
+- **Styling**: Tailwind CSS v4 via `@tailwindcss/vite` (CSS-first config in `src/styles.css`)
+- **Icons**: `lucide-react` (e.g. `import { Heart } from 'lucide-react'`)
+- **Font**: Poppins (loaded from Google Fonts, set as default `font-sans` via Tailwind v4 `@theme`)
 - **Language**: TypeScript
 - **Package Manager**: npm
 
