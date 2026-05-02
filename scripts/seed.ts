@@ -418,8 +418,8 @@ async function createListings(
         s.pickupStartTime,
         s.pickupEndTime,
         s.expiryTime,
-        '12.9716',
-        '77.5946',
+        '27.7172',
+        '85.3240',
       ],
     )
   }

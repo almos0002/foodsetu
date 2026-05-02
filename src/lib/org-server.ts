@@ -62,6 +62,21 @@ async function requireAdmin() {
   return user
 }
 
+// `numeric` columns come back from pg as strings. The `OrganizationRow` type
+// (and every UI consumer of `latitude`/`longitude`) expects numbers, so do the
+// coercion in one place — otherwise the picker silently falls back to its
+// Kathmandu default and overwrites the real coords on save.
+function normalizeOrgRow(row: OrganizationRow | undefined): OrganizationRow | null {
+  if (!row) return null
+  const lat = row.latitude == null ? null : Number(row.latitude)
+  const lng = row.longitude == null ? null : Number(row.longitude)
+  return {
+    ...row,
+    latitude: Number.isFinite(lat) ? (lat as number) : null,
+    longitude: Number.isFinite(lng) ? (lng as number) : null,
+  }
+}
+
 async function fetchOrgForUser(
   userId: string,
 ): Promise<OrganizationRow | null> {
@@ -79,7 +94,7 @@ async function fetchOrgForUser(
       LIMIT 1`,
     [userId],
   )
-  return (rows[0] as OrganizationRow | undefined) ?? null
+  return normalizeOrgRow(rows[0] as OrganizationRow | undefined)
 }
 
 export const getMyOrganizationFn = createServerFn({ method: 'GET' }).handler(

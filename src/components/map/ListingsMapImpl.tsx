@@ -83,9 +83,12 @@ export default function ListingsMapImpl({
   radiusKm,
   height = 460,
 }: Props) {
+  // Coerce defensively: callers may hand us strings from DB rows.
+  const originLat = Number(origin.latitude)
+  const originLng = Number(origin.longitude)
   const center: [number, number] = useMemo(
-    () => [origin.latitude, origin.longitude],
-    [origin.latitude, origin.longitude],
+    () => [originLat, originLng],
+    [originLat, originLng],
   )
   return (
     <div className="overflow-hidden rounded-lg border border-[var(--color-line)]">

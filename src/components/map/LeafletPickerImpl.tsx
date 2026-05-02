@@ -67,19 +67,21 @@ export default function LeafletPickerImpl({
   initialLng,
   onChange,
 }: Props) {
-  const initial: [number, number] = useMemo(() => {
-    if (
-      initialLat != null &&
-      initialLng != null &&
-      Number.isFinite(initialLat) &&
-      Number.isFinite(initialLng)
-    ) {
-      return [initialLat, initialLng]
-    }
-    return KATHMANDU
-  }, [initialLat, initialLng])
+  // Defensive: lat/lng may arrive as strings from DB-backed loaders. Coerce
+  // to numbers before the Number.isFinite guard so we don't silently fall back
+  // to KATHMANDU and overwrite a real location on save.
+  const lat = initialLat == null ? null : Number(initialLat)
+  const lng = initialLng == null ? null : Number(initialLng)
+  const hasInitial =
+    lat != null &&
+    lng != null &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng)
 
-  const hasInitial = initialLat != null && initialLng != null
+  const initial: [number, number] = useMemo(() => {
+    if (hasInitial) return [lat as number, lng as number]
+    return KATHMANDU
+  }, [hasInitial, lat, lng])
   const [position, setPosition] = useState<[number, number] | null>(
     hasInitial ? initial : null,
   )
