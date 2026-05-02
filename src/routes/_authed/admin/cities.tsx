@@ -2,6 +2,7 @@ import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Pencil, Plus, X } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
+import { LocationPicker } from '../../../components/map/LocationPicker'
 import { AdminTable } from '../../../components/admin/AdminTable'
 import type { Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
@@ -320,30 +321,29 @@ function AdminCities() {
                 Visible to users
               </label>
             </Field>
-            <Field label="Latitude">
-              <input
-                type="number"
-                step="any"
-                value={form.latitude}
-                onChange={(e) => setForm({ ...form, latitude: e.target.value })}
-                min={-90}
-                max={90}
-                placeholder="e.g. 19.0760"
-                className={INPUT_CLS}
-              />
-            </Field>
-            <Field label="Longitude">
-              <input
-                type="number"
-                step="any"
-                value={form.longitude}
-                onChange={(e) =>
-                  setForm({ ...form, longitude: e.target.value })
+          </div>
+          <div className="mt-4">
+            <Field label="City center on map">
+              <p className="mb-2 text-xs text-gray-500">
+                Search a place or drop the pin to set the city's coordinates.
+                These power distance calculations for nearby food.
+              </p>
+              <LocationPicker
+                initialLat={form.latitude === '' ? null : Number(form.latitude)}
+                initialLng={
+                  form.longitude === '' ? null : Number(form.longitude)
                 }
-                min={-180}
-                max={180}
-                placeholder="e.g. 72.8777"
-                className={INPUT_CLS}
+                onChange={(lat, lng) =>
+                  setForm((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          latitude: lat.toFixed(7),
+                          longitude: lng.toFixed(7),
+                        }
+                      : prev,
+                  )
+                }
               />
             </Field>
           </div>
