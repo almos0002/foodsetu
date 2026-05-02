@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
+import { randomUUID } from 'node:crypto'
 import { auth, pool } from './auth'
 import {
   REPORT_REASONS,
@@ -126,13 +127,18 @@ export const createReportFn = createServerFn({ method: 'POST' })
       }
     }
 
+    // Generate the id explicitly: the schema helper's `$defaultFn` only fires
+    // when inserts go through the Drizzle ORM, but this path uses raw
+    // `pool.query`, so Postgres would otherwise see a null id and reject.
+    const reportId = randomUUID()
     const { rows } = await pool.query(
       `INSERT INTO reports
-         (food_listing_id, claim_id, reporter_id, reporter_org_id,
+         (id, food_listing_id, claim_id, reporter_id, reporter_org_id,
           reason, description, status)
-       VALUES ($1, $2, $3, $4, $5, $6, 'OPEN')
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'OPEN')
        RETURNING id`,
       [
+        reportId,
         listingIdToInsert,
         data.claimId,
         user.id,
