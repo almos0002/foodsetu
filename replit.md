@@ -254,6 +254,10 @@ to own a RESTAURANT org.
   `verifyPickupFn` flow on `/restaurant/claims/$id` (OTP input is a
   numeric-only `<input>` that strips non-digits both client- and
   server-side, then constant-time-compared to the stored `otp_code`).
+  Critically, **all restaurant-side mutations (`acceptClaimFn`,
+  `rejectClaimFn`, `verifyPickupFn`) return a sanitized
+  `{ ok, id, status }` payload** rather than the raw claim row, so the OTP
+  is never leaked through a mutation response either.
 
 **Restaurant dashboard** (`/restaurant/dashboard`) loads
 `listClaimRequestsForRestaurantFn({scope:'active'})` in parallel with the

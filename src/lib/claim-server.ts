@@ -844,7 +844,9 @@ export const acceptClaimFn = createServerFn({ method: 'POST' })
           : new Error('Failed to issue OTP — please try again')
       }
 
-      return claimRow
+      // Donor-safe response: NEVER include `otpCode` or any other field that
+      // would leak the OTP to the restaurant client.
+      return { ok: true as const, id: claimRow.id, status: claimRow.status }
     })
   })
 
@@ -930,7 +932,9 @@ export const rejectClaimFn = createServerFn({ method: 'POST' })
           )
       }
 
-      return claimRow as Claim
+      // Donor-safe response: keep parity with acceptClaimFn even though a
+      // rejected claim has no otpCode set.
+      return { ok: true as const, id: claimRow.id, status: claimRow.status }
     })
   })
 
@@ -1069,6 +1073,9 @@ export const verifyPickupFn = createServerFn({ method: 'POST' })
         throw new Error('Listing is no longer in the claimed state')
       }
 
-      return claimRow as Claim
+      // Donor-safe response: NEVER include `otpCode` (still populated on the
+      // row even after verification) or any other field that would leak the
+      // OTP to the restaurant client.
+      return { ok: true as const, id: claimRow.id, status: claimRow.status }
     })
   })
