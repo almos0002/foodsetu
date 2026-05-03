@@ -23,7 +23,7 @@ import { pageHead } from '../lib/seo'
 export const Route = createFileRoute('/')({
   head: () =>
     pageHead({
-      title: 'FoodSetu',
+      title: "FoodSetu — Nepal's free surplus food network",
       description:
         'FoodSetu redirects surplus restaurant food to verified NGOs and animal rescues across Nepal. OTP-secured handoffs, audited claims, free forever.',
       path: '/',

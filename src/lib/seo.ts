@@ -44,7 +44,9 @@ export function pageHead({
   noindex = false,
 }: PageSeoInput): { meta: MetaTag[]; links: MetaTag[] } {
   const fullTitle =
-    title === SITE_NAME ? title : `${title} | ${SITE_NAME}`
+    title === SITE_NAME || title.startsWith(`${SITE_NAME} `)
+      ? title
+      : `${title} | ${SITE_NAME}`
   const url = `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`
 
   const meta: MetaTag[] = [
