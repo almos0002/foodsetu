@@ -205,7 +205,10 @@ function Hero() {
         <div className="grid gap-14 lg:grid-cols-12 lg:items-center lg:gap-16">
           <div className="lg:col-span-7">
             <LiveBadge />
-            <h1 className="mt-7 font-display text-[clamp(2.4rem,5.6vw,4.25rem)] leading-[1.05]">
+            <p className="mt-6 text-[13px] font-medium uppercase tracking-[0.18em] text-[var(--color-accent)]">
+              Nepal&apos;s free surplus food network
+            </p>
+            <h1 className="mt-3 font-display text-[clamp(2.4rem,5.6vw,4.25rem)] leading-[1.05]">
               Surplus food,
               <br />
               matched in <RotatingWord />
