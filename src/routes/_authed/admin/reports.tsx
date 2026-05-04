@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { ExternalLink } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
 import { AdminTable, type Column } from '../../../components/admin/AdminTable'
-import { StatusPill } from '../../../components/admin/StatusPill'
+import { StatusBadge } from '../../../components/ui/StatusBadge'
 import {
   listReportsForAdminFn,
   setReportStatusFn,
@@ -12,7 +12,7 @@ import {
 import {
   REPORT_REASON_LABELS,
   REPORT_STATUSES,
-  REPORT_STATUS_BADGE_CLASSES,
+  REPORT_STATUS_BADGE_TONES,
   REPORT_STATUS_LABELS,
   canAccessAdmin,
   roleToDashboard,
@@ -131,10 +131,9 @@ function AdminReports() {
       key: 'status',
       header: 'Status',
       render: (r) => (
-        <StatusPill
-          label={REPORT_STATUS_LABELS[r.status]}
-          className={REPORT_STATUS_BADGE_CLASSES[r.status]}
-        />
+        <StatusBadge tone={REPORT_STATUS_BADGE_TONES[r.status]}>
+          {REPORT_STATUS_LABELS[r.status]}
+        </StatusBadge>
       ),
     },
     {

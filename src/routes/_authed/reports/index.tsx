@@ -8,12 +8,13 @@ import {
 } from '../../../lib/report-server'
 import {
   REPORT_REASON_LABELS,
-  REPORT_STATUS_BADGE_CLASSES,
+  REPORT_STATUS_BADGE_TONES,
   REPORT_STATUS_LABELS,
   ROLE_LABELS,
   roleToDashboard,
   type Role,
 } from '../../../lib/permissions'
+import { StatusBadge } from '../../../components/ui/StatusBadge'
 
 const VISIBILITY_LABEL: Record<VisibleReport['visibility'], string> = {
   FILED_BY_ME: 'Filed by you',
@@ -118,11 +119,9 @@ function MyReportsPage() {
                     {new Date(r.createdAt).toLocaleString()}
                   </div>
                 </div>
-                <span
-                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${REPORT_STATUS_BADGE_CLASSES[r.status]}`}
-                >
+                <StatusBadge tone={REPORT_STATUS_BADGE_TONES[r.status]}>
                   {REPORT_STATUS_LABELS[r.status]}
-                </span>
+                </StatusBadge>
               </div>
               {r.description ? (
                 <p className="mt-2 whitespace-pre-line text-sm text-gray-700">
