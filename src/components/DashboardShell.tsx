@@ -5,11 +5,11 @@ import {
   Clock,
   Flag,
   LogOut,
-  Utensils,
   XCircle,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { signOut } from '../lib/auth-client'
+import { BowlMascot } from '../routes/index'
 import {
   VERIFICATION_BADGE_CLASSES,
   VERIFICATION_LABELS,
@@ -50,9 +50,11 @@ export function DashboardShell({
     <div className="min-h-screen bg-gray-50">
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-          <Link to="/" className="flex items-center gap-2 text-orange-600">
-            <Utensils className="h-6 w-6" />
-            <span className="text-lg font-semibold">FoodSetu</span>
+          <Link to="/" className="flex items-center gap-2.5">
+            <BowlMascot className="h-7 w-7" />
+            <span className="text-[15px] font-semibold tracking-tight text-[var(--color-ink)]">
+              FoodSetu
+            </span>
           </Link>
           <div className="flex items-center gap-3">
             <Link
