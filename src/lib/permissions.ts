@@ -177,6 +177,13 @@ export const VERIFICATION_BADGE_TONES: Record<VerificationStatus, BadgeTone> = {
   SUSPENDED: 'gray',
 }
 
+export const VERIFICATION_BADGE_CLASSES: Record<VerificationStatus, string> = {
+  PENDING: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+  VERIFIED: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
+  REJECTED: 'bg-red-100 text-red-800 ring-1 ring-red-200',
+  SUSPENDED: 'bg-gray-100 text-gray-800 ring-1 ring-gray-200',
+}
+
 // ---------------------------------------------------------------------------
 // Food listings
 // ---------------------------------------------------------------------------
@@ -213,6 +220,17 @@ export const LISTING_STATUS_BADGE_TONES: Record<ListingStatus, BadgeTone> = {
   EXPIRED: 'amber',
   CANCELLED: 'gray',
   REPORTED: 'red',
+}
+
+export const LISTING_STATUS_BADGE_CLASSES: Record<ListingStatus, string> = {
+  DRAFT: 'bg-gray-100 text-gray-800 ring-1 ring-gray-200',
+  AVAILABLE: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
+  CLAIM_REQUESTED: 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
+  CLAIMED: 'bg-indigo-100 text-indigo-800 ring-1 ring-indigo-200',
+  PICKED_UP: 'bg-purple-100 text-purple-800 ring-1 ring-purple-200',
+  EXPIRED: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+  CANCELLED: 'bg-gray-100 text-gray-800 ring-1 ring-gray-200',
+  REPORTED: 'bg-red-100 text-red-800 ring-1 ring-red-200',
 }
 
 // Active = listing is still in the live pipeline (visible to claimants or
@@ -322,6 +340,15 @@ export const CLAIM_STATUS_BADGE_TONES: Record<ClaimStatus, BadgeTone> = {
   CANCELLED: 'gray',
   PICKED_UP: 'purple',
   COMPLETED: 'green',
+}
+
+export const CLAIM_STATUS_BADGE_CLASSES: Record<ClaimStatus, string> = {
+  PENDING: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+  ACCEPTED: 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
+  REJECTED: 'bg-red-100 text-red-800 ring-1 ring-red-200',
+  CANCELLED: 'bg-gray-100 text-gray-800 ring-1 ring-gray-200',
+  PICKED_UP: 'bg-purple-100 text-purple-800 ring-1 ring-purple-200',
+  COMPLETED: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
 }
 
 export const ACTIVE_CLAIM_STATUSES: readonly ClaimStatus[] = [

@@ -276,6 +276,59 @@ export const adminCancelListingFn = createServerFn({ method: 'POST' })
     return { ok: true as const, id: data.id }
   })
 
+const ADMIN_CANCELABLE_CLAIM_STATUSES = new Set<string>([
+  'PENDING',
+  'ACCEPTED',
+])
+
+export const adminCancelClaimFn = createServerFn({ method: 'POST' })
+  .inputValidator(validateListingIdInput)
+  .handler(async ({ data }) => {
+    await requireAdmin()
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      const { rows: crows } = await client.query(
+        `SELECT id, status, food_listing_id FROM claims WHERE id = $1 FOR UPDATE`,
+        [data.id],
+      )
+      if (crows.length === 0) throw new Error('Claim not found')
+      const claim = crows[0] as {
+        id: string
+        status: string
+        food_listing_id: string
+      }
+      if (!ADMIN_CANCELABLE_CLAIM_STATUSES.has(claim.status)) {
+        throw new Error(
+          `Claim can no longer be cancelled (status: ${claim.status})`,
+        )
+      }
+      await client.query(
+        `UPDATE claims
+            SET status = 'CANCELLED', updated_at = NOW()
+          WHERE id = $1`,
+        [data.id],
+      )
+      // Return the listing to AVAILABLE if it was on hold for this claim.
+      await client.query(
+        `UPDATE food_listings
+            SET status = 'AVAILABLE',
+                accepted_claim_id = NULL,
+                updated_at = NOW()
+          WHERE id = $1
+            AND status IN ('CLAIM_REQUESTED','CLAIMED')`,
+        [claim.food_listing_id],
+      )
+      await client.query('COMMIT')
+    } catch (e) {
+      await client.query('ROLLBACK')
+      throw e
+    } finally {
+      client.release()
+    }
+    return { ok: true as const, id: data.id }
+  })
+
 // ---------------------------------------------------------------------------
 // Claims (admin view)
 // ---------------------------------------------------------------------------
