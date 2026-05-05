@@ -61,7 +61,7 @@ export function FoodListingCard({
     >
       {showImage ? (
         listing.imageUrl ? (
-          <div className="relative aspect-[16/10] w-full overflow-hidden bg-[var(--color-canvas-3)]">
+          <div className="relative h-48 w-full overflow-hidden bg-[var(--color-canvas-3)]">
             <img
               src={listing.imageUrl}
               alt={listing.title}
@@ -82,7 +82,7 @@ export function FoodListingCard({
             ) : null}
           </div>
         ) : (
-          <div className="flex h-32 w-full items-center justify-center bg-[var(--color-canvas-2)] text-[var(--color-ink-3)]">
+          <div className="flex h-48 w-full items-center justify-center bg-[var(--color-canvas-2)] text-[var(--color-ink-3)]">
             <Utensils className="h-7 w-7" />
           </div>
         )

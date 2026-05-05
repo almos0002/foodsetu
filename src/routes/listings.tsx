@@ -287,7 +287,7 @@ function ListingCard({
   const pickup = formatPickup(listing.pickupStartTime, listing.pickupEndTime)
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-canvas)] transition-colors hover:border-[var(--color-line-strong)]">
-      <div className="relative aspect-[5/4] overflow-hidden bg-[var(--color-canvas-3)]">
+      <div className="relative h-48 w-full overflow-hidden bg-[var(--color-canvas-3)]">
         <img
           src={listing.imageUrl ?? FALLBACK_IMG}
           alt={listing.title}
