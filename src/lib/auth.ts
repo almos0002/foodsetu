@@ -48,6 +48,15 @@ export const auth = betterAuth({
     autoSignIn: true,
     minPasswordLength: 8,
   },
+  session: {
+    // Cache signed session in the cookie so repeated getSession() calls within
+    // a short window (route loader + child server fns) skip the DB lookup.
+    // After 60s the cookie is treated as stale and a fresh DB read happens.
+    cookieCache: {
+      enabled: true,
+      maxAge: 60,
+    },
+  },
   user: {
     additionalFields: {
       role: {
