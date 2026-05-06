@@ -220,8 +220,8 @@ function Hero() {
               <span className="font-semibold text-[var(--color-ink)]">setu</span>{' '}
               means <em>bridge</em> in Sanskrit — a bridge between surplus food
               and the people, animals, and communities that need it most,
-              connecting hotels, restaurants, and bakeries with verified NGOs
-              and animal rescues.
+              connecting verified hotels, restaurants, and bakeries with
+              verified NGOs and animal rescues.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-2.5">
