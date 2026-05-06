@@ -15,7 +15,6 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSession } from '../lib/auth-client'
-import { IsometricHandoff } from '../components/hero/IsometricHandoff'
 import { roleToDashboard } from '../lib/permissions'
 import { listPublicAvailableListingsFn } from '../lib/public-listings-server'
 import type { PublicListingRow } from '../lib/public-listings-server'
@@ -255,7 +254,7 @@ function Hero() {
           </div>
 
           <div className="lg:col-span-5">
-            <IsometricHandoff />
+            <HeroPanel />
           </div>
         </div>
       </div>
