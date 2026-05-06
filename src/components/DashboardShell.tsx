@@ -14,7 +14,6 @@ import {
   LogOut,
   MapPin,
   Menu,
-  Plus,
   Settings as SettingsIcon,
   ShoppingBag,
   Users,
@@ -61,7 +60,6 @@ type NavItem = {
 const RESTAURANT_NAV: NavItem[] = [
   { label: 'Dashboard', to: '/restaurant/dashboard', icon: LayoutDashboard, exact: true },
   { label: 'Listings', to: '/restaurant/listings', icon: ShoppingBag },
-  { label: 'New listing', to: '/restaurant/listings/new', icon: Plus, exact: true, indent: true },
   { label: 'Claims', to: '/restaurant/claims', icon: Inbox },
   { label: 'Reports', to: '/reports', icon: Flag },
   { label: 'Settings', to: '/settings/organization', icon: SettingsIcon },
