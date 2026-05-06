@@ -49,7 +49,7 @@ export function DashboardListingCard({
         className,
       )}
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-[var(--color-canvas-3)]">
+      <div className="relative h-48 w-full overflow-hidden bg-[var(--color-canvas-3)]">
         <img
           src={imageUrl || FALLBACK_IMG}
           alt={title}
