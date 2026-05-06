@@ -37,7 +37,7 @@ export const Route = createFileRoute('/_authed/settings/organization')({
 })
 
 const inputCls =
-  'w-full rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] px-3.5 py-2.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] transition-colors focus:border-[var(--color-ink)] focus:outline-none'
+  'w-full squircle border border-[var(--color-line)] bg-[var(--color-canvas)] px-3.5 py-2.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] transition-colors focus:border-[var(--color-ink)] focus:outline-none'
 
 function OrganizationSettingsPage() {
   const router = useRouter()
@@ -121,7 +121,7 @@ function OrganizationSettingsPage() {
         eyebrow="Settings"
       />
 
-      <div className="rounded-[24px] border border-[var(--color-line)] bg-white p-6 sm:p-8">
+      <div className="squircle border border-[var(--color-line)] bg-white p-6 sm:p-8">
         <form onSubmit={handleSubmit} className="space-y-5">
           <Field label="Organization name" required>
             <input
@@ -168,7 +168,7 @@ function OrganizationSettingsPage() {
                   ))}
                 </select>
               ) : (
-                <div className="rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas-2)] px-3.5 py-2.5 text-sm text-[var(--color-ink-3)]">
+                <div className="squircle border border-[var(--color-line)] bg-[var(--color-canvas-2)] px-3.5 py-2.5 text-sm text-[var(--color-ink-3)]">
                   No cities seeded yet.
                 </div>
               )}

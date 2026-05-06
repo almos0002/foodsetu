@@ -64,7 +64,7 @@ function EditListingPage() {
       </div>
 
       {!editable ? (
-        <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white p-8 text-sm text-[var(--color-ink-2)]">
+        <div className="squircle border-[1.5px] border-[var(--color-line)] bg-white p-8 text-sm text-[var(--color-ink-2)]">
           This listing is in status{' '}
           <span className="font-bold text-[var(--color-ink)]">
             {listing.status}
@@ -72,7 +72,7 @@ function EditListingPage() {
           and can no longer be edited.
         </div>
       ) : (
-        <div className="rounded-[28px] border-[1.5px] border-[var(--color-line)] bg-white p-6 sm:p-8">
+        <div className="squircle border-[1.5px] border-[var(--color-line)] bg-white p-6 sm:p-8">
           <ListingForm
             initial={listing}
             submitLabel="Save changes"

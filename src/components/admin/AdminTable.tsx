@@ -77,7 +77,7 @@ export function AdminTable<T, TFilter extends string>({
       {(showSearch || filters) && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {filters ? (
-            <div className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas-2)] p-1">
+            <div className="inline-flex flex-wrap items-center gap-1 squircle border border-[var(--color-line)] bg-[var(--color-canvas-2)] p-1">
               {filters.map((f) => {
                 const active = filterValue === f.value
                 return (
@@ -85,7 +85,7 @@ export function AdminTable<T, TFilter extends string>({
                     key={f.value}
                     type="button"
                     onClick={() => onFilterChange?.(f.value)}
-                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    className={`inline-flex items-center gap-1.5 squircle px-3 py-1.5 text-sm font-medium transition-colors ${
                       active
                         ? 'bg-[var(--color-canvas)] text-[var(--color-ink)] shadow-sm'
                         : 'text-[var(--color-ink-2)] hover:text-[var(--color-ink)]'
@@ -94,7 +94,7 @@ export function AdminTable<T, TFilter extends string>({
                     {f.label}
                     {typeof f.count === 'number' ? (
                       <span
-                        className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-medium tabular-nums ${
+                        className={`inline-flex h-4 min-w-4 items-center justify-center squircle px-1 text-[10px] font-medium tabular-nums ${
                           active
                             ? 'bg-[var(--color-canvas-3)] text-[var(--color-ink)]'
                             : 'bg-[var(--color-canvas)] text-[var(--color-ink-3)] border border-[var(--color-line)]'
@@ -118,14 +118,14 @@ export function AdminTable<T, TFilter extends string>({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] py-2 pl-9 pr-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-canvas-3)]"
+                className="w-full squircle border border-[var(--color-line)] bg-[var(--color-canvas)] py-2 pl-9 pr-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-canvas-3)]"
               />
             </div>
           ) : null}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)]">
+      <div className="overflow-hidden squircle border border-[var(--color-line)] bg-[var(--color-canvas)]">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="border-b border-[var(--color-line)] bg-[var(--color-canvas-2)] text-[11px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">

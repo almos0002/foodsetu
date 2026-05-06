@@ -156,7 +156,7 @@ function AdminReports() {
               type="button"
               onClick={() => update(r, 'REVIEWED')}
               disabled={busyId === r.id}
-              className="rounded-md border border-amber-200 bg-white px-2 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50 disabled:opacity-40"
+              className="squircle border border-amber-200 bg-white px-2 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50 disabled:opacity-40"
             >
               Mark reviewed
             </button>
@@ -166,7 +166,7 @@ function AdminReports() {
               type="button"
               onClick={() => update(r, 'RESOLVED')}
               disabled={busyId === r.id}
-              className="rounded-md border border-emerald-200 bg-white px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-40"
+              className="squircle border border-emerald-200 bg-white px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-40"
             >
               Resolve
             </button>
@@ -175,7 +175,7 @@ function AdminReports() {
               type="button"
               onClick={() => update(r, 'OPEN')}
               disabled={busyId === r.id}
-              className="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+              className="squircle border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
               title="Re-open this report"
             >
               Re-open
@@ -189,7 +189,7 @@ function AdminReports() {
   return (
     <AdminShell title="Reports" user={user}>
       {error ? (
-        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
+        <div className="mb-4 squircle bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
           {error}
         </div>
       ) : null}

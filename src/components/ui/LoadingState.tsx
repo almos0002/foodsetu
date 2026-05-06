@@ -14,7 +14,7 @@ export function LoadingState({ label = 'Loading…', className, bare }: Props) {
       className={cn(
         'flex items-center justify-center gap-2 px-6 py-12 text-sm text-[var(--color-ink-2)]',
         !bare &&
-          'rounded-2xl border border-[var(--color-line)] bg-[var(--color-canvas)]',
+          'squircle border border-[var(--color-line)] bg-[var(--color-canvas)]',
         className,
       )}
     >
@@ -32,7 +32,7 @@ export function Skeleton({ className }: SkeletonProps) {
   return (
     <div
       className={cn(
-        'animate-pulse rounded-md bg-[var(--color-canvas-3)]',
+        'animate-pulse squircle bg-[var(--color-canvas-3)]',
         className,
       )}
     />

@@ -207,7 +207,7 @@ function RestaurantClaimDetail() {
             <img
               src={l.imageUrl}
               alt={l.title}
-              className="h-56 w-full rounded-lg border border-gray-200 object-cover"
+              className="h-56 w-full squircle border border-gray-200 object-cover"
             />
           ) : null}
 
@@ -295,7 +295,7 @@ function RestaurantClaimDetail() {
                 ) : null}
               </div>
               {claim.notes?.trim() ? (
-                <div className="mt-3 rounded-md border border-gray-100 bg-gray-50 p-3 text-sm text-gray-700">
+                <div className="mt-3 squircle border border-gray-100 bg-gray-50 p-3 text-sm text-gray-700">
                   <div className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
                     Notes from claimant
                   </div>
@@ -410,7 +410,7 @@ function RestaurantClaimDetail() {
                       setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))
                     }
                     disabled={!canManage || busy != null}
-                    className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-center font-mono text-lg tracking-[0.4em] text-gray-900 placeholder:text-gray-300 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200 disabled:cursor-not-allowed disabled:bg-gray-50"
+                    className="mt-1 w-full squircle border border-gray-300 bg-white px-3 py-2 text-center font-mono text-lg tracking-[0.4em] text-gray-900 placeholder:text-gray-300 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200 disabled:cursor-not-allowed disabled:bg-gray-50"
                   />
                   <Button
                     type="submit"
@@ -448,7 +448,7 @@ function RestaurantClaimDetail() {
             </Alert>
           ) : null}
 
-          <div className="rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-500">
+          <div className="squircle border border-gray-200 bg-white p-4 text-xs text-gray-500">
             <div className="font-mono break-all">{claim.id}</div>
             <div className="mt-1">
               Updated {new Date(claim.updatedAt).toLocaleString()}
@@ -490,7 +490,7 @@ function DetailCard({
   value: ReactNode
 }) {
   return (
-    <div className="rounded-md border border-gray-100 bg-gray-50 px-3 py-2">
+    <div className="squircle border border-gray-100 bg-gray-50 px-3 py-2">
       <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
         {icon}
         {label}

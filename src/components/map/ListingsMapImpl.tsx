@@ -91,7 +91,7 @@ export default function ListingsMapImpl({
     [originLat, originLng],
   )
   return (
-    <div className="overflow-hidden rounded-lg border border-[var(--color-line)]">
+    <div className="overflow-hidden squircle border border-[var(--color-line)]">
       <MapContainer
         center={center}
         zoom={13}

@@ -111,7 +111,7 @@ function OnboardingOrganization() {
 
       <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
         <div className="mb-8 flex items-start gap-4">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl border border-[var(--color-line-strong)] bg-[var(--color-coral)] text-white">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center squircle border border-[var(--color-line-strong)] bg-[var(--color-coral)] text-white">
             <Building2 className="h-5 w-5" />
           </div>
           <div>
@@ -131,7 +131,7 @@ function OnboardingOrganization() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-line)] bg-white p-6 sm:p-8">
+        <div className="squircle border border-[var(--color-line)] bg-white p-6 sm:p-8">
           <Alert tone="warning" className="mb-6">
             Your organization will be reviewed by an admin. You can sign in and
             view your dashboard immediately, but you won&apos;t be able to{' '}
@@ -152,7 +152,7 @@ function OnboardingOrganization() {
             </Field>
 
             <Field label="Type">
-              <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-cream)] px-4 py-3 text-sm text-[var(--color-ink)]">
+              <div className="squircle border border-[var(--color-line)] bg-[var(--color-cream)] px-4 py-3 text-sm text-[var(--color-ink)]">
                 {expectedType || '—'}
                 <span className="ml-2 text-xs text-[var(--color-ink-3)]">
                   (matches your account role)
@@ -196,7 +196,7 @@ function OnboardingOrganization() {
                     ))}
                   </select>
                 ) : (
-                  <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-cream)] px-4 py-3 text-sm text-[var(--color-ink-3)]">
+                  <div className="squircle border border-[var(--color-line)] bg-[var(--color-cream)] px-4 py-3 text-sm text-[var(--color-ink-3)]">
                     No cities seeded yet — leave blank for now.
                   </div>
                 )}
@@ -240,7 +240,7 @@ function OnboardingOrganization() {
 }
 
 const inputCls =
-  'w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none'
+  'w-full squircle border border-[var(--color-line)] bg-white px-4 py-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none'
 
 function Field({
   label,
@@ -266,7 +266,7 @@ function Field({
 
 function BrandMark() {
   return (
-    <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl border border-[var(--color-line-strong)] bg-[var(--color-coral)]">
+    <div className="relative flex h-9 w-9 items-center justify-center squircle border border-[var(--color-line-strong)] bg-[var(--color-coral)]">
       <svg viewBox="0 0 32 32" className="h-5 w-5" aria-hidden>
         <path
           d="M5 16 Q 5 24 16 25 Q 27 24 27 16 Z"

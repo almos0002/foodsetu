@@ -11,8 +11,8 @@ type Props = {
 function MapSkeleton() {
   return (
     <div className="space-y-2">
-      <div className="h-10 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas-2)]" />
-      <div className="flex h-[320px] items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas-2)] text-xs text-[var(--color-ink-3)]">
+      <div className="h-10 squircle border border-[var(--color-line)] bg-[var(--color-canvas-2)]" />
+      <div className="flex h-[320px] items-center justify-center squircle border border-[var(--color-line)] bg-[var(--color-canvas-2)] text-xs text-[var(--color-ink-3)]">
         Loading map…
       </div>
     </div>

@@ -136,7 +136,7 @@ function ListingDetail() {
             <img
               src={listing.imageUrl}
               alt={listing.title}
-              className="h-72 w-full rounded-2xl border border-[var(--color-line)] object-cover"
+              className="h-72 w-full squircle border border-[var(--color-line)] object-cover"
             />
           ) : null}
 
@@ -270,7 +270,7 @@ function DetailCard({
   value: React.ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-line)] bg-white p-4">
+    <div className="squircle border border-[var(--color-line)] bg-white p-4">
       <div className="tiny-cap flex items-center gap-1.5 text-[var(--color-ink-3)]">
         {icon}
         {label}
@@ -284,7 +284,7 @@ function DetailCard({
 
 function ListingMeta({ listing }: { listing: ListingRow }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-cream)] p-4 text-xs text-[var(--color-ink-3)]">
+    <div className="squircle border border-[var(--color-line)] bg-[var(--color-cream)] p-4 text-xs text-[var(--color-ink-3)]">
       <div className="font-mono break-all">{listing.id}</div>
       <div className="mt-1">Updated {fullDateTime(listing.updatedAt)}</div>
     </div>

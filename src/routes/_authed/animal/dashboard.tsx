@@ -156,7 +156,7 @@ function AnimalDashboard() {
               link={{ to: '/animal/nearby-food', label: 'View all' }}
             />
             {recentNearby.length === 0 ? (
-              <div className="mt-4 rounded-xl border border-dashed border-[var(--color-line)] bg-[var(--color-canvas-2)]">
+              <div className="mt-4 squircle border border-dashed border-[var(--color-line)] bg-[var(--color-canvas-2)]">
                 <EmptyState
                   bare
                   icon={Utensils}
@@ -186,7 +186,7 @@ function AnimalDashboard() {
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
+            <div className="squircle border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
               <div className="tiny-cap text-[var(--color-ink-3)]">
                 Quick actions
               </div>
@@ -205,7 +205,7 @@ function AnimalDashboard() {
             </div>
 
             {activeClaims.length > 0 ? (
-              <div className="overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)]">
+              <div className="overflow-hidden squircle border border-[var(--color-line)] bg-[var(--color-canvas)]">
                 <div className="flex items-center justify-between gap-2 border-b border-[var(--color-line)] px-5 py-3">
                   <h3 className="text-[13px] font-semibold tracking-tight text-[var(--color-ink)]">
                     Active claims
@@ -287,7 +287,7 @@ function ActionRow({
   return (
     <Link
       to={to}
-      className="group flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)]"
+      className="group flex items-center gap-2.5 squircle px-2 py-1.5 text-[13px] font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)]"
     >
       <Icon className="h-4 w-4 flex-shrink-0 text-[var(--color-ink-3)] group-hover:text-[var(--color-ink)]" />
       <span className="flex-1 truncate">{label}</span>

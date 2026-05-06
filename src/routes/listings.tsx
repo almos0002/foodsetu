@@ -81,7 +81,7 @@ function BrowseListings() {
             {!isPending && user ? (
               <Link
                 to={ctaForUser?.to ?? roleToDashboard(user.role)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
+                className="inline-flex h-9 items-center gap-1.5 squircle bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
               >
                 {ctaForUser?.label ?? 'Open dashboard'}
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -90,13 +90,13 @@ function BrowseListings() {
               <>
                 <Link
                   to="/login"
-                  className="hidden h-9 items-center rounded-md px-3 text-[13px] font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)] sm:inline-flex"
+                  className="hidden h-9 items-center squircle px-3 text-[13px] font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)] sm:inline-flex"
                 >
                   Sign in
                 </Link>
                 <Link
                   to="/register"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
+                  className="inline-flex h-9 items-center gap-1.5 squircle bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
                 >
                   Get started
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -119,7 +119,7 @@ function BrowseListings() {
           </Link>
           <div className="mt-6 grid gap-8 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-8">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-ink-2)]">
+              <span className="inline-flex items-center gap-2 squircle border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-ink-2)]">
                 <span className="live-dot" />
                 <span className="text-[var(--color-ink)]">
                   {listings.length} live
@@ -141,7 +141,7 @@ function BrowseListings() {
               <div className="lg:col-span-4 lg:text-right">
                 <Link
                   to="/register"
-                  className="inline-flex h-11 items-center gap-2 rounded-md bg-[var(--color-ink)] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
+                  className="inline-flex h-11 items-center gap-2 squircle bg-[var(--color-ink)] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
                 >
                   Sign up to claim
                   <ArrowRight className="h-4 w-4" />
@@ -158,7 +158,7 @@ function BrowseListings() {
           <span className="tiny-cap mr-2 text-[var(--color-ink-3)]">
             Filter
           </span>
-          <div className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] p-1">
+          <div className="inline-flex items-center gap-1 squircle border border-[var(--color-line)] bg-[var(--color-canvas)] p-1">
             {(
               [
                 { key: 'ALL', label: 'All' },
@@ -173,7 +173,7 @@ function BrowseListings() {
                   key={tab.key}
                   type="button"
                   onClick={() => setFilter(tab.key)}
-                  className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                  className={`inline-flex items-center gap-1.5 squircle px-3 py-1.5 text-[13px] font-medium transition-colors ${
                     active
                       ? 'bg-[var(--color-ink)] text-white'
                       : 'text-[var(--color-ink-2)] hover:text-[var(--color-ink)]'
@@ -181,7 +181,7 @@ function BrowseListings() {
                 >
                   {tab.label}
                   <span
-                    className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-medium tabular-nums ${
+                    className={`inline-flex h-4 min-w-4 items-center justify-center squircle px-1 text-[10px] font-medium tabular-nums ${
                       active
                         ? 'bg-white/20 text-white'
                         : 'bg-[var(--color-canvas-3)] text-[var(--color-ink-3)]'
@@ -200,8 +200,8 @@ function BrowseListings() {
       <section className="bg-[var(--color-canvas)]">
         <div className="mx-auto max-w-[1200px] px-5 pb-20 pt-10 sm:px-8">
           {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[var(--color-line-strong)] bg-[var(--color-canvas-2)] p-12 text-center">
-              <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-canvas)]">
+            <div className="squircle border border-dashed border-[var(--color-line-strong)] bg-[var(--color-canvas-2)] p-12 text-center">
+              <div className="mx-auto inline-flex h-12 w-12 items-center justify-center squircle border border-[var(--color-line)] bg-[var(--color-canvas)]">
                 <Utensils
                   className="h-5 w-5 text-[var(--color-ink-3)]"
                   strokeWidth={1.5}
@@ -286,16 +286,16 @@ function ListingCard({
   const isAnimal = listing.foodCategory === 'ANIMAL_SAFE'
   const pickup = formatPickup(listing.pickupStartTime, listing.pickupEndTime)
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-canvas)] transition-colors hover:border-[var(--color-line-strong)]">
+    <article className="group flex flex-col overflow-hidden squircle border border-[var(--color-line)] bg-[var(--color-canvas)] transition-colors hover:border-[var(--color-line-strong)]">
       <div className="relative h-48 w-full overflow-hidden bg-[var(--color-canvas-3)]">
         <img
           src={listing.imageUrl ?? FALLBACK_IMG}
           alt={listing.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] bg-[var(--color-paper)]/95 px-2 py-1 text-[10.5px] font-medium text-[var(--color-ink)] backdrop-blur">
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 squircle border border-[var(--color-line)] bg-[var(--color-paper)]/95 px-2 py-1 text-[10.5px] font-medium text-[var(--color-ink)] backdrop-blur">
           <span
-            className={`h-1.5 w-1.5 rounded-full ${
+            className={`h-1.5 w-1.5 squircle ${
               isAnimal
                 ? 'bg-[var(--color-warn)]'
                 : 'bg-[var(--color-accent)]'
@@ -338,7 +338,7 @@ function ListingCard({
           {ctaHref ? (
             <Link
               to={ctaHref.to}
-              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
+              className="inline-flex h-9 items-center gap-1.5 squircle bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
             >
               {ctaHref.label}
               <ArrowRight className="h-3.5 w-3.5" />
@@ -346,7 +346,7 @@ function ListingCard({
           ) : (
             <Link
               to="/register"
-              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-[var(--color-line-strong)] bg-[var(--color-canvas)] px-3.5 text-[13px] font-medium transition-colors hover:bg-[var(--color-canvas-2)]"
+              className="inline-flex h-9 items-center gap-1.5 squircle border border-[var(--color-line-strong)] bg-[var(--color-canvas)] px-3.5 text-[13px] font-medium transition-colors hover:bg-[var(--color-canvas-2)]"
             >
               Sign up to claim
               <ArrowRight className="h-3.5 w-3.5" />

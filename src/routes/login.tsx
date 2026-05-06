@@ -97,7 +97,7 @@ function LoginPage() {
           Back to home
         </Link>
 
-        <div className="mt-8 rounded-2xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-7 sm:p-9">
+        <div className="mt-8 squircle border border-[var(--color-line)] bg-[var(--color-canvas)] p-7 sm:p-9">
           <Link to="/" className="flex items-center gap-2.5">
             <BowlMascot className="h-7 w-7" />
             <span className="text-[15px] font-semibold tracking-tight">
@@ -136,7 +136,7 @@ function LoginPage() {
             />
 
             {error ? (
-              <div className="rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger-soft)] px-3.5 py-2.5 text-sm font-medium text-[var(--color-danger-ink)]">
+              <div className="squircle border border-[var(--color-danger)]/30 bg-[var(--color-danger-soft)] px-3.5 py-2.5 text-sm font-medium text-[var(--color-danger-ink)]">
                 {error}
               </div>
             ) : null}
@@ -144,18 +144,18 @@ function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-ink)] text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-ink-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[var(--color-line-strong)]"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 squircle bg-[var(--color-ink)] text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-ink-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[var(--color-line-strong)]"
             >
               <LogIn className="h-4 w-4" />
               {submitting ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
 
-          <div className="mt-5 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas-2)]">
+          <div className="mt-5 squircle border border-[var(--color-line)] bg-[var(--color-canvas-2)]">
             <button
               type="button"
               onClick={() => setDemoOpen((v) => !v)}
-              className="flex w-full items-center justify-between gap-2 rounded-lg px-4 py-3 text-left text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-canvas-3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2"
+              className="flex w-full items-center justify-between gap-2 squircle px-4 py-3 text-left text-[13px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-canvas-3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2"
               aria-expanded={demoOpen}
             >
               <span>Try a demo account</span>
@@ -167,7 +167,7 @@ function LoginPage() {
               <div className="border-t border-[var(--color-line)] p-3">
                 <p className="px-1 pb-2 text-xs text-[var(--color-ink-2)]">
                   Tap to fill. Password:{' '}
-                  <code className="font-mono rounded bg-[var(--color-canvas)] px-1.5 py-0.5 text-[11px] tracking-wider">
+                  <code className="font-mono squircle bg-[var(--color-canvas)] px-1.5 py-0.5 text-[11px] tracking-wider">
                     password123
                   </code>
                 </p>
@@ -177,7 +177,7 @@ function LoginPage() {
                       key={acc.email}
                       type="button"
                       onClick={() => fillDemo(acc.email)}
-                      className="flex items-center justify-between gap-3 rounded-md border border-transparent bg-[var(--color-canvas)] px-3 py-2 text-left text-xs transition-colors hover:border-[var(--color-line-strong)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)]"
+                      className="flex items-center justify-between gap-3 squircle border border-transparent bg-[var(--color-canvas)] px-3 py-2 text-left text-xs transition-colors hover:border-[var(--color-line-strong)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)]"
                     >
                       <span className="font-medium text-[var(--color-ink)]">
                         {acc.label}
@@ -243,7 +243,7 @@ function Field({
         minLength={minLength}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] px-3.5 py-2.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] transition-colors focus:border-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-canvas-3)]"
+        className="w-full squircle border border-[var(--color-line)] bg-[var(--color-canvas)] px-3.5 py-2.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] transition-colors focus:border-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-canvas-3)]"
         placeholder={placeholder}
         autoComplete={autoComplete}
       />

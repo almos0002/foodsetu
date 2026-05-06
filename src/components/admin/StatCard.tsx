@@ -28,7 +28,7 @@ export function StatCard({ label, value, icon: Icon, hint, to }: Props) {
     </div>
   )
   const cls =
-    'rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-5 transition-colors'
+    'squircle border border-[var(--color-line)] bg-[var(--color-canvas)] p-5 transition-colors'
   if (to) {
     return (
       <Link to={to} className={`${cls} hover:border-[var(--color-line-strong)]`}>

@@ -152,7 +152,7 @@ function AdminClaims() {
             type="button"
             onClick={() => setConfirmRow(c)}
             disabled={!cancellable || busyId === c.id}
-            className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
+            className="inline-flex items-center gap-1 squircle border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
             title={
               cancellable
                 ? 'Cancel as fraudulent / abusive'

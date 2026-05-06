@@ -232,7 +232,7 @@ function ActionBtn({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center gap-1 rounded-md border bg-white px-2 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-40 ${COLOR_CLASSES[color]}`}
+      className={`inline-flex items-center gap-1 squircle border bg-white px-2 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-40 ${COLOR_CLASSES[color]}`}
     >
       {icon}
       {label}

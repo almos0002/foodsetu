@@ -41,7 +41,7 @@ export function Alert({ tone = 'info', title, children, className }: Props) {
     <div
       role="status"
       className={cn(
-        'flex items-start gap-2.5 rounded-xl border px-4 py-3 text-sm',
+        'flex items-start gap-2.5 squircle border px-4 py-3 text-sm',
         cfg.wrap,
         className,
       )}

@@ -103,7 +103,7 @@ function RegisterPage() {
           Back to home
         </Link>
 
-        <div className="mt-8 rounded-2xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-7 sm:p-9">
+        <div className="mt-8 squircle border border-[var(--color-line)] bg-[var(--color-canvas)] p-7 sm:p-9">
           <Link to="/" className="flex items-center gap-2.5">
             <BowlMascot className="h-7 w-7" />
             <span className="text-[15px] font-semibold tracking-tight">
@@ -167,7 +167,7 @@ function RegisterPage() {
                   return (
                     <label
                       key={r}
-                      className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 text-sm transition-colors focus-within:ring-2 focus-within:ring-[var(--color-ink)] focus-within:ring-offset-2 ${
+                      className={`flex cursor-pointer items-start gap-3 squircle border p-4 text-sm transition-colors focus-within:ring-2 focus-within:ring-[var(--color-ink)] focus-within:ring-offset-2 ${
                         active
                           ? 'border-[var(--color-ink)] bg-[var(--color-canvas-2)]'
                           : 'border-[var(--color-line)] bg-[var(--color-canvas)] hover:border-[var(--color-line-strong)]'
@@ -182,7 +182,7 @@ function RegisterPage() {
                         className="sr-only"
                       />
                       <span
-                        className={`mt-0.5 inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md border ${
+                        className={`mt-0.5 inline-flex h-9 w-9 flex-shrink-0 items-center justify-center squircle border ${
                           active
                             ? 'border-[var(--color-ink)] bg-[var(--color-ink)] text-white'
                             : 'border-[var(--color-line)] bg-[var(--color-canvas-2)] text-[var(--color-ink-2)]'
@@ -199,14 +199,14 @@ function RegisterPage() {
                         </span>
                       </span>
                       <span
-                        className={`mt-1 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border ${
+                        className={`mt-1 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center squircle border ${
                           active
                             ? 'border-[var(--color-ink)] bg-[var(--color-ink)]'
                             : 'border-[var(--color-line-strong)] bg-[var(--color-canvas)]'
                         }`}
                       >
                         {active ? (
-                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-canvas)]" />
+                          <span className="h-1.5 w-1.5 squircle bg-[var(--color-canvas)]" />
                         ) : null}
                       </span>
                     </label>
@@ -216,7 +216,7 @@ function RegisterPage() {
             </div>
 
             {error ? (
-              <div className="rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger-soft)] px-3.5 py-2.5 text-sm font-medium text-[var(--color-danger-ink)]">
+              <div className="squircle border border-[var(--color-danger)]/30 bg-[var(--color-danger-soft)] px-3.5 py-2.5 text-sm font-medium text-[var(--color-danger-ink)]">
                 {error}
               </div>
             ) : null}
@@ -224,7 +224,7 @@ function RegisterPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-ink)] text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-ink-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[var(--color-line-strong)]"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 squircle bg-[var(--color-ink)] text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-ink-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[var(--color-line-strong)]"
             >
               <UserPlus className="h-4 w-4" />
               {submitting ? 'Creating account…' : 'Create my account'}
@@ -287,7 +287,7 @@ function Field({
         minLength={minLength}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] px-3.5 py-2.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] transition-colors focus:border-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-canvas-3)]"
+        className="w-full squircle border border-[var(--color-line)] bg-[var(--color-canvas)] px-3.5 py-2.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] transition-colors focus:border-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-canvas-3)]"
         placeholder={placeholder}
         autoComplete={autoComplete}
       />

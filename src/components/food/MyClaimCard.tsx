@@ -23,7 +23,7 @@ export function MyClaimCard({ claim }: { claim: MyClaim }) {
   const status = claim.status as ClaimStatus
   const l = claim.listing
   return (
-    <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <article className="overflow-hidden squircle border border-gray-200 bg-white shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-gray-100 px-4 py-3">
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-base font-semibold text-gray-900">
@@ -37,7 +37,7 @@ export function MyClaimCard({ claim }: { claim: MyClaim }) {
           </div>
         </div>
         <span
-          className={`rounded-full px-2.5 py-1 text-xs font-medium ${CLAIM_STATUS_BADGE_CLASSES[status] ?? ''}`}
+          className={`squircle px-2.5 py-1 text-xs font-medium ${CLAIM_STATUS_BADGE_CLASSES[status] ?? ''}`}
         >
           {CLAIM_STATUS_LABELS[status] ?? status}
         </span>
@@ -104,7 +104,7 @@ export function MyClaimCard({ claim }: { claim: MyClaim }) {
             The restaurant accepted — head over during the pickup window.
           </div>
           {claim.otpCode ? (
-            <div className="flex items-center gap-2 rounded-lg bg-white p-3 ring-1 ring-blue-200">
+            <div className="flex items-center gap-2 squircle bg-white p-3 ring-1 ring-blue-200">
               <KeyRound className="h-5 w-5 text-blue-700" />
               <div className="flex-1">
                 <div className="text-[10px] font-medium uppercase tracking-wide text-blue-700">
@@ -169,7 +169,7 @@ function Field({
   value: React.ReactNode
 }) {
   return (
-    <div className="rounded-lg bg-gray-50 px-3 py-2">
+    <div className="squircle bg-gray-50 px-3 py-2">
       <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-gray-500">
         {icon}
         {label}

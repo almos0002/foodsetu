@@ -55,7 +55,7 @@ export function FoodListingCard({
   return (
     <article
       className={cn(
-        'flex flex-col overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] transition-colors hover:border-[var(--color-line-strong)]',
+        'flex flex-col overflow-hidden squircle border border-[var(--color-line)] bg-[var(--color-canvas)] transition-colors hover:border-[var(--color-line-strong)]',
         className,
       )}
     >
@@ -68,10 +68,10 @@ export function FoodListingCard({
               className="h-full w-full object-cover"
             />
             {listing.foodCategory ? (
-              <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] bg-[var(--color-canvas)] px-2 py-1 text-[11px] font-medium text-[var(--color-ink)]">
+              <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 squircle border border-[var(--color-line)] bg-[var(--color-canvas)] px-2 py-1 text-[11px] font-medium text-[var(--color-ink)]">
                 <span
                   className={cn(
-                    'h-1.5 w-1.5 rounded-full',
+                    'h-1.5 w-1.5 squircle',
                     isAnimal
                       ? 'bg-[var(--color-warn)]'
                       : 'bg-[var(--color-accent)]',

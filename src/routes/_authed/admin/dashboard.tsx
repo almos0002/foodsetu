@@ -116,7 +116,7 @@ function AdminDashboard() {
 
       <div className="mt-8 grid gap-6 lg:grid-cols-3">
         {/* Org breakdown panel */}
-        <div className="overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] lg:col-span-2">
+        <div className="overflow-hidden squircle border border-[var(--color-line)] bg-[var(--color-canvas)] lg:col-span-2">
           <div className="border-b border-[var(--color-line)] px-6 py-4">
             <h2 className="font-display text-lg font-semibold tracking-tight text-[var(--color-ink)]">
               Organization breakdown
@@ -150,9 +150,9 @@ function AdminDashboard() {
         {/* Action queue */}
         <div className="space-y-4">
           {stats.pendingVerificationRequests > 0 ? (
-            <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
+            <div className="squircle border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
               <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-warn)]" />
+                <span className="h-1.5 w-1.5 squircle bg-[var(--color-warn)]" />
                 <div className="tiny-cap text-[var(--color-ink-3)]">
                   Action required
                 </div>
@@ -175,9 +175,9 @@ function AdminDashboard() {
               </Link>
             </div>
           ) : (
-            <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
+            <div className="squircle border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
               <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
+                <span className="h-1.5 w-1.5 squircle bg-[var(--color-accent)]" />
                 <div className="tiny-cap text-[var(--color-ink-3)]">
                   All caught up
                 </div>
@@ -188,7 +188,7 @@ function AdminDashboard() {
             </div>
           )}
 
-          <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
+          <div className="squircle border border-[var(--color-line)] bg-[var(--color-canvas)] p-5">
             <div className="tiny-cap text-[var(--color-ink-3)]">
               Quick links
             </div>
@@ -282,7 +282,7 @@ function ActionRow({
   return (
     <Link
       to={to}
-      className="group flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)]"
+      className="group flex items-center gap-2.5 squircle px-2 py-1.5 text-[13px] font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)]"
     >
       <Icon className="h-4 w-4 flex-shrink-0 text-[var(--color-ink-3)] group-hover:text-[var(--color-ink)]" />
       <span className="flex-1 truncate">{label}</span>

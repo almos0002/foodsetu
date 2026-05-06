@@ -45,7 +45,7 @@ export function DashboardListingCard({
     <Link
       to={to}
       className={cn(
-        'group block overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] transition-colors hover:border-[var(--color-line-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2',
+        'group block overflow-hidden squircle border border-[var(--color-line)] bg-[var(--color-canvas)] transition-colors hover:border-[var(--color-line-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2',
         className,
       )}
     >

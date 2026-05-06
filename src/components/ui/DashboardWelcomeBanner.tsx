@@ -55,7 +55,7 @@ export function DashboardWelcomeBanner({
             {chips.map((chip) => (
               <span
                 key={chip.label}
-                className="inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] bg-[var(--color-canvas-2)] px-2 py-1 text-[11px] font-medium text-[var(--color-ink-2)]"
+                className="inline-flex items-center gap-1.5 squircle border border-[var(--color-line)] bg-[var(--color-canvas-2)] px-2 py-1 text-[11px] font-medium text-[var(--color-ink-2)]"
               >
                 {chip.icon}
                 {chip.label}

@@ -25,12 +25,12 @@ export function EmptyState({
       className={cn(
         'flex flex-col items-center justify-center gap-3 px-6 py-12 text-center',
         !bare &&
-          'rounded-2xl border border-dashed border-[var(--color-line-strong)] bg-[var(--color-canvas-2)]',
+          'squircle border border-dashed border-[var(--color-line-strong)] bg-[var(--color-canvas-2)]',
         className,
       )}
     >
       {Icon ? (
-        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-canvas)] text-[var(--color-ink-2)]">
+        <div className="flex h-10 w-10 items-center justify-center squircle border border-[var(--color-line)] bg-[var(--color-canvas)] text-[var(--color-ink-2)]">
           <Icon className="h-4 w-4" />
         </div>
       ) : null}

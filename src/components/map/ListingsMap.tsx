@@ -15,7 +15,7 @@ type Props = {
 function MapSkeleton({ height = 460 }: { height?: number }) {
   return (
     <div
-      className="flex items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas-2)] text-xs text-[var(--color-ink-3)]"
+      className="flex items-center justify-center squircle border border-[var(--color-line)] bg-[var(--color-canvas-2)] text-xs text-[var(--color-ink-3)]"
       style={{ height }}
     >
       Loading map…

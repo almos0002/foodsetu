@@ -45,7 +45,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] bg-[var(--color-canvas)] font-medium text-[var(--color-ink-2)]',
+        'inline-flex items-center gap-1.5 squircle border border-[var(--color-line)] bg-[var(--color-canvas)] font-medium text-[var(--color-ink-2)]',
         size === 'sm'
           ? 'px-1.5 py-px text-[10.5px] leading-[16px]'
           : 'px-2 py-0.5 text-[11px] leading-[18px]',
@@ -55,7 +55,7 @@ export function StatusBadge({
       {withDot ? (
         <span
           aria-hidden="true"
-          className="inline-block h-1.5 w-1.5 rounded-full"
+          className="inline-block h-1.5 w-1.5 squircle"
           style={{ backgroundColor: DOT_COLOR[tone] }}
         />
       ) : null}

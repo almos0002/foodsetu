@@ -47,7 +47,7 @@ export function RestaurantClaimCard({
   const l = claim.listing
 
   return (
-    <article className="overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)]">
+    <article className="overflow-hidden squircle border border-[var(--color-line)] bg-[var(--color-canvas)]">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--color-line)] px-5 py-4">
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-[15px] font-semibold tracking-tight text-[var(--color-ink)]">

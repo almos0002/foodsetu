@@ -54,13 +54,13 @@ export function ConfirmDialog({
       }}
     >
       <div
-        className="w-full max-w-md rounded-t-2xl border border-[var(--color-line-strong)] bg-[var(--color-canvas)] sm:rounded-2xl"
+        className="w-full max-w-md squircle border border-[var(--color-line-strong)] bg-[var(--color-canvas)] sm:squircle"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start gap-3 border-b border-[var(--color-line)] p-5">
           <div
             className={cn(
-              'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border',
+              'flex h-9 w-9 flex-shrink-0 items-center justify-center squircle border',
               destructive
                 ? 'border-[var(--color-danger)]/25 bg-[var(--color-danger-soft)] text-[var(--color-danger)]'
                 : 'border-[var(--color-warn)]/25 bg-[var(--color-warn-soft)] text-[var(--color-warn)]',
@@ -88,7 +88,7 @@ export function ConfirmDialog({
             }}
             disabled={busy}
             aria-label="Close"
-            className="rounded-md p-1.5 text-[var(--color-ink-3)] hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)] disabled:opacity-40"
+            className="squircle p-1.5 text-[var(--color-ink-3)] hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)] disabled:opacity-40"
           >
             <X className="h-4 w-4" />
           </button>

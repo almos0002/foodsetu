@@ -65,7 +65,7 @@ function Home() {
 /* ───────────────────────── Brand mark ────────────────────────────────── */
 
 /**
- * Minimal monogram mark — two interlocking rounded shapes that read as
+ * Minimal monogram mark — two interlocking squircle shapes that read as
  * "F + S" / "give + receive". Used in the navbar, footer, login, register,
  * and listings pages. Replaces the previous cartoon bowl mascot but kept
  * the export name `BowlMascot` so existing imports keep working.
@@ -158,7 +158,7 @@ function NavBar({
           {!isPending && user ? (
             <Link
               to={roleToDashboard(user.role)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
+              className="inline-flex h-9 items-center gap-1.5 squircle bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
             >
               Dashboard
               <ArrowRight className="h-3.5 w-3.5" />
@@ -167,13 +167,13 @@ function NavBar({
             <>
               <Link
                 to="/login"
-                className="hidden h-9 items-center rounded-md px-3 text-[13px] font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)] sm:inline-flex"
+                className="hidden h-9 items-center squircle px-3 text-[13px] font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)] sm:inline-flex"
               >
                 Sign in
               </Link>
               <Link
                 to="/register"
-                className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
+                className="inline-flex h-9 items-center gap-1.5 squircle bg-[var(--color-ink)] px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
               >
                 Get started
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -226,14 +226,14 @@ function Hero() {
             <div className="mt-9 flex flex-wrap items-center gap-2.5">
               <Link
                 to="/register"
-                className="group inline-flex h-12 items-center gap-2 rounded-md bg-[var(--color-ink)] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
+                className="group inline-flex h-12 items-center gap-2 squircle bg-[var(--color-ink)] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
               >
                 Start in 60 seconds
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link
                 to="/listings"
-                className="inline-flex h-12 items-center gap-2 rounded-md border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-5 text-[14px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-canvas-2)]"
+                className="inline-flex h-12 items-center gap-2 squircle border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-5 text-[14px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-canvas-2)]"
               >
                 Browse live listings
               </Link>
@@ -266,7 +266,7 @@ function Hero() {
 
 function LiveBadge() {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-ink-2)]">
+    <span className="inline-flex items-center gap-2 squircle border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-ink-2)]">
       <span className="live-dot" />
       <span className="text-[var(--color-ink)]">Live</span>
       in Kathmandu, Pokhara, Lalitpur
@@ -326,7 +326,7 @@ function HeroPanel() {
   return (
     <div className="relative">
       {/* Main image card */}
-      <div className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)]">
+      <div className="relative h-[520px] w-full overflow-hidden squircle border border-[var(--color-line)] bg-[var(--color-paper)]">
         <img
           src="https://i.pinimg.com/originals/ab/42/de/ab42deebb59aa7de907a277f71a8e6f3.jpg"
           alt="Freshly prepared Samay Baji ready for pickup"
@@ -335,7 +335,7 @@ function HeroPanel() {
         />
 
         {/* Bottom info bar inside the card */}
-        <div className="absolute inset-x-3 bottom-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)]/95 p-3 backdrop-blur">
+        <div className="absolute inset-x-3 bottom-3 squircle border border-[var(--color-line)] bg-[var(--color-paper)]/95 p-3 backdrop-blur">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--color-accent)]">
@@ -355,7 +355,7 @@ function HeroPanel() {
             </div>
             <button
               type="button"
-              className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md bg-[var(--color-ink)] px-2.5 text-[11px] font-medium text-white"
+              className="inline-flex h-8 shrink-0 items-center gap-1 squircle bg-[var(--color-ink)] px-2.5 text-[11px] font-medium text-white"
             >
               Claim
               <ArrowRight className="h-3 w-3" />
@@ -365,7 +365,7 @@ function HeroPanel() {
       </div>
 
       {/* Floating stat — top-right */}
-      <div className="absolute -right-3 -top-4 hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 sm:block">
+      <div className="absolute -right-3 -top-4 hidden squircle border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 sm:block">
         <div className="text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
           Avg. handoff
         </div>
@@ -375,7 +375,7 @@ function HeroPanel() {
       </div>
 
       {/* Floating stat — bottom-left */}
-      <div className="absolute -bottom-4 -left-3 hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 sm:block">
+      <div className="absolute -bottom-4 -left-3 hidden squircle border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 sm:block">
         <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
           <ShieldCheck className="h-3 w-3 text-[var(--color-accent)]" />
           This week
@@ -416,7 +416,7 @@ function LogosTape() {
                 key={`${p}-${i}`}
                 className="flex items-center gap-2 text-[14px] font-medium text-[var(--color-ink-2)]"
               >
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-line-strong)]" />
+                <span className="h-1.5 w-1.5 squircle bg-[var(--color-line-strong)]" />
                 {p}
               </div>
             ))}
@@ -471,7 +471,7 @@ function HowItWorks() {
           </div>
 
           <div className="lg:col-span-8">
-            <ol className="grid gap-px overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-3">
+            <ol className="grid gap-px overflow-hidden squircle border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-3">
               {steps.map((s) => {
                 const Icon = s.icon
                 return (
@@ -528,7 +528,7 @@ function TodaysPicks({ listings }: { listings: PublicListingRow[] }) {
           </div>
           <Link
             to="/listings"
-            className="group inline-flex h-10 items-center gap-1.5 rounded-md border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-4 text-[13px] font-medium transition-colors hover:bg-[var(--color-ink)] hover:text-white"
+            className="group inline-flex h-10 items-center gap-1.5 squircle border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-4 text-[13px] font-medium transition-colors hover:bg-[var(--color-ink)] hover:text-white"
           >
             See all listings
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -551,8 +551,8 @@ function TodaysPicks({ listings }: { listings: PublicListingRow[] }) {
 
 function EmptyShelf() {
   return (
-    <div className="mt-12 rounded-2xl border border-dashed border-[var(--color-line-strong)] bg-[var(--color-paper)] p-12 text-center">
-      <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-canvas-2)]">
+    <div className="mt-12 squircle border border-dashed border-[var(--color-line-strong)] bg-[var(--color-paper)] p-12 text-center">
+      <div className="mx-auto inline-flex h-12 w-12 items-center justify-center squircle border border-[var(--color-line)] bg-[var(--color-canvas-2)]">
         <Utensils
           className="h-5 w-5 text-[var(--color-ink-3)]"
           strokeWidth={1.5}
@@ -564,7 +564,7 @@ function EmptyShelf() {
       </p>
       <Link
         to="/register"
-        className="mt-6 inline-flex h-10 items-center gap-1.5 rounded-md bg-[var(--color-ink)] px-4 text-[13px] font-medium text-white hover:bg-[var(--color-accent)]"
+        className="mt-6 inline-flex h-10 items-center gap-1.5 squircle bg-[var(--color-ink)] px-4 text-[13px] font-medium text-white hover:bg-[var(--color-accent)]"
       >
         Sign up to be notified
         <ArrowRight className="h-3.5 w-3.5" />
@@ -578,7 +578,7 @@ function PublicCard({ listing }: { listing: PublicListingRow }) {
   return (
     <Link
       to="/listings"
-      className="group block overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)] transition-all hover:border-[var(--color-line-strong)]"
+      className="group block overflow-hidden squircle border border-[var(--color-line)] bg-[var(--color-paper)] transition-all hover:border-[var(--color-line-strong)]"
     >
       <div className="relative h-48 w-full overflow-hidden bg-[var(--color-canvas-3)]">
         <img
@@ -586,7 +586,7 @@ function PublicCard({ listing }: { listing: PublicListingRow }) {
           alt={listing.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] bg-[var(--color-paper)]/95 px-2 py-1 text-[10.5px] font-medium backdrop-blur">
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 squircle border border-[var(--color-line)] bg-[var(--color-paper)]/95 px-2 py-1 text-[10.5px] font-medium backdrop-blur">
           {isAnimal ? (
             <PawPrint className="h-3 w-3 text-[var(--color-ink-2)]" />
           ) : (
@@ -657,7 +657,7 @@ function Numbers() {
           </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 lg:grid-cols-4">
+        <div className="mt-12 grid grid-cols-2 gap-px overflow-hidden squircle border border-white/10 bg-white/10 lg:grid-cols-4">
           {items.map((s) => (
             <div key={s.k} className="bg-[var(--color-ink)] p-7">
               <div className="font-display text-[clamp(2.4rem,4vw,3.4rem)] leading-none numeric">
@@ -732,9 +732,9 @@ function Roles() {
             return (
               <div
                 key={c.title}
-                className="group flex flex-col rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)] p-7 transition-all hover:border-[var(--color-ink)]"
+                className="group flex flex-col squircle border border-[var(--color-line)] bg-[var(--color-paper)] p-7 transition-all hover:border-[var(--color-ink)]"
               >
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas-2)] text-[var(--color-ink)] transition-colors group-hover:border-[var(--color-accent)] group-hover:bg-[var(--color-accent-soft)] group-hover:text-[var(--color-accent-ink)]">
+                <div className="inline-flex h-10 w-10 items-center justify-center squircle border border-[var(--color-line)] bg-[var(--color-canvas-2)] text-[var(--color-ink)] transition-colors group-hover:border-[var(--color-accent)] group-hover:bg-[var(--color-accent-soft)] group-hover:text-[var(--color-accent-ink)]">
                   <Icon className="h-5 w-5" strokeWidth={1.6} />
                 </div>
                 <h3 className="mt-6 text-[19px] font-semibold tracking-tight">
@@ -756,7 +756,7 @@ function Roles() {
                 </ul>
                 <Link
                   to="/register"
-                  className="mt-7 inline-flex h-10 w-fit items-center gap-1.5 rounded-md border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-4 text-[13px] font-medium transition-colors hover:bg-[var(--color-ink)] hover:text-white"
+                  className="mt-7 inline-flex h-10 w-fit items-center gap-1.5 squircle border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-4 text-[13px] font-medium transition-colors hover:bg-[var(--color-ink)] hover:text-white"
                 >
                   {c.cta}
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -777,7 +777,7 @@ function FinalCta({ loggedIn }: { loggedIn: boolean }) {
   return (
     <section className="py-20 sm:py-28">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
-        <div className="relative overflow-hidden rounded-[28px] border border-[var(--color-line)] bg-[var(--color-canvas-2)] px-7 py-16 sm:px-14 sm:py-20">
+        <div className="relative overflow-hidden squircle border border-[var(--color-line)] bg-[var(--color-canvas-2)] px-7 py-16 sm:px-14 sm:py-20">
           <div
             className="grid-bg pointer-events-none absolute inset-0 opacity-50"
             aria-hidden="true"
@@ -802,14 +802,14 @@ function FinalCta({ loggedIn }: { loggedIn: boolean }) {
               <div className="mt-8 flex flex-wrap items-center gap-2.5">
                 <Link
                   to="/register"
-                  className="inline-flex h-12 items-center gap-2 rounded-md bg-[var(--color-ink)] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
+                  className="inline-flex h-12 items-center gap-2 squircle bg-[var(--color-ink)] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
                 >
                   <UserPlus className="h-4 w-4" />
                   Sign up — it&rsquo;s free
                 </Link>
                 <Link
                   to="/login"
-                  className="inline-flex h-12 items-center gap-2 rounded-md border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-5 text-[14px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-canvas-3)]"
+                  className="inline-flex h-12 items-center gap-2 squircle border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-5 text-[14px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-canvas-3)]"
                 >
                   <LogIn className="h-4 w-4" />
                   Sign in
@@ -818,7 +818,7 @@ function FinalCta({ loggedIn }: { loggedIn: boolean }) {
             </div>
 
             <div className="lg:col-span-5">
-              <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)] p-6">
+              <div className="squircle border border-[var(--color-line)] bg-[var(--color-paper)] p-6">
                 <div className="text-[11px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
                   Today on FoodSetu
                 </div>
@@ -869,7 +869,7 @@ function MiniRow({
   return (
     <li className="flex items-start gap-3">
       <span
-        className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${accent ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-line-strong)]'}`}
+        className={`mt-1.5 h-1.5 w-1.5 shrink-0 squircle ${accent ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-line-strong)]'}`}
       />
       <div className="min-w-0 flex-1">
         <div className="text-[13.5px] leading-snug text-[var(--color-ink)]">

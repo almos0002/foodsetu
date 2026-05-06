@@ -59,7 +59,7 @@ export function DashboardShell({
           <div className="flex items-center gap-3">
             <Link
               to="/reports"
-              className="hidden items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 sm:inline-flex"
+              className="hidden items-center gap-1.5 squircle px-2 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 sm:inline-flex"
               title="View reports related to you"
             >
               <Flag className="h-4 w-4" />
@@ -74,7 +74,7 @@ export function DashboardShell({
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              className="flex items-center gap-1.5 squircle border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               <LogOut className="h-4 w-4" />
               Sign out
@@ -100,7 +100,7 @@ export function DashboardShell({
           </div>
           {status ? (
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
+              className={`inline-flex items-center gap-1.5 squircle px-2.5 py-1 text-xs font-medium ${
                 VERIFICATION_BADGE_CLASSES[status] ?? ''
               }`}
             >
@@ -160,7 +160,7 @@ function VerificationBanner({ status }: { status: VerificationStatus }) {
   }
   const c = config[status]
   return (
-    <div className={`mb-6 rounded-xl px-4 py-3 text-sm ring-1 ${c.wrapper}`}>
+    <div className={`mb-6 squircle px-4 py-3 text-sm ring-1 ${c.wrapper}`}>
       <div className="font-semibold">{c.title}</div>
       <div className="mt-0.5">{c.body}</div>
     </div>

@@ -20,9 +20,9 @@ const VARIANTS: Record<Variant, string> = {
 }
 
 const SIZES: Record<Size, string> = {
-  sm: 'h-8 px-3 text-xs gap-1.5 rounded-lg',
-  md: 'h-10 px-4 text-sm gap-2 rounded-lg',
-  lg: 'h-11 px-5 text-sm gap-2 rounded-lg',
+  sm: 'h-8 px-3 text-xs gap-1.5 squircle',
+  md: 'h-10 px-4 text-sm gap-2 squircle',
+  lg: 'h-11 px-5 text-sm gap-2 squircle',
 }
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {

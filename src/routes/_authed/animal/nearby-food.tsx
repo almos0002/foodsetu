@@ -135,7 +135,7 @@ function NearbyAnimalFoodPage() {
           {error ? <Alert tone="error">{error}</Alert> : null}
 
           {hasOrgLocation ? (
-            <div className="inline-flex rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] p-1">
+            <div className="inline-flex squircle border border-[var(--color-line)] bg-[var(--color-canvas)] p-1">
               <ToggleBtn
                 active={view === 'list'}
                 onClick={() => setView('list')}
@@ -227,7 +227,7 @@ function ToggleBtn({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
+      className={`inline-flex items-center gap-1.5 squircle px-3 py-1.5 text-[13px] font-medium transition-colors ${
         active
           ? 'bg-[var(--color-canvas-3)] text-[var(--color-ink)]'
           : 'text-[var(--color-ink-2)] hover:bg-[var(--color-canvas-2)] hover:text-[var(--color-ink)]'

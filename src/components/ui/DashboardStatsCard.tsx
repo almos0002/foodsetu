@@ -81,7 +81,7 @@ export function DashboardStatsCard({
     </div>
   )
   const cls = cn(
-    'block rounded-xl border border-[var(--color-line)] bg-[var(--color-canvas)] p-5 transition-colors',
+    'block squircle border border-[var(--color-line)] bg-[var(--color-canvas)] p-5 transition-colors',
     to &&
       'hover:border-[var(--color-line-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2',
     className,

@@ -53,7 +53,7 @@ const EMPTY_FORM: FormState = {
 }
 
 const INPUT_CLS =
-  'mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20'
+  'mt-1 block w-full squircle border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20'
 
 function AdminCities() {
   const router = useRouter()
@@ -258,7 +258,7 @@ function AdminCities() {
       {form ? (
         <form
           onSubmit={handleSubmit}
-          className="mb-6 rounded-lg border border-gray-200 bg-white p-5"
+          className="mb-6 squircle border border-gray-200 bg-white p-5"
         >
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-gray-900">
@@ -267,7 +267,7 @@ function AdminCities() {
             <button
               type="button"
               onClick={() => setForm(null)}
-              className="rounded-md p-1 text-gray-500 hover:bg-gray-100"
+              className="squircle p-1 text-gray-500 hover:bg-gray-100"
               aria-label="Close"
             >
               <X className="h-4 w-4" />
@@ -317,7 +317,7 @@ function AdminCities() {
                   onChange={(e) =>
                     setForm({ ...form, isActive: e.target.checked })
                   }
-                  className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                  className="squircle border-gray-300 text-orange-600 focus:ring-orange-500"
                 />
                 Visible to users
               </label>

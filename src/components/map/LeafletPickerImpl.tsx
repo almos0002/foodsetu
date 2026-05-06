@@ -189,10 +189,10 @@ export default function LeafletPickerImpl({
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => results.length > 0 && setResultsOpen(true)}
             placeholder="Search address (Nepal)…"
-            className="w-full rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] py-2.5 pl-9 pr-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none"
+            className="w-full squircle border border-[var(--color-line)] bg-[var(--color-canvas)] py-2.5 pl-9 pr-3 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-3)] focus:border-[var(--color-ink)] focus:outline-none"
           />
           {resultsOpen && results.length > 0 ? (
-            <div className="absolute left-0 right-0 top-full z-[1100] mt-1 max-h-64 overflow-auto rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] shadow-md">
+            <div className="absolute left-0 right-0 top-full z-[1100] mt-1 max-h-64 overflow-auto squircle border border-[var(--color-line)] bg-[var(--color-canvas)] shadow-md">
               {results.map((r) => (
                 <button
                   key={`${r.lat},${r.lon},${r.display_name}`}
@@ -232,7 +232,7 @@ export default function LeafletPickerImpl({
         <div className="text-xs text-[var(--color-danger)]">{error}</div>
       ) : null}
 
-      <div className="overflow-hidden rounded-lg border border-[var(--color-line)]">
+      <div className="overflow-hidden squircle border border-[var(--color-line)]">
         <MapContainer
           center={position ?? initial}
           zoom={position ? 15 : 12}

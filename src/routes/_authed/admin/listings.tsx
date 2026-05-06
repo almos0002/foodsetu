@@ -101,7 +101,7 @@ function AdminListings() {
             <span className="font-medium text-gray-900">{l.title}</span>
             {l.reportCount > 0 ? (
               <span
-                className="inline-flex items-center gap-0.5 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-800 ring-1 ring-red-200"
+                className="inline-flex items-center gap-0.5 squircle bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-800 ring-1 ring-red-200"
                 title={`${l.reportCount} report(s) filed against this listing`}
               >
                 <Flag className="h-3 w-3" />
@@ -181,7 +181,7 @@ function AdminListings() {
             type="button"
             onClick={() => handleCancel(l)}
             disabled={blocked || busyId === l.id}
-            className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
+            className="inline-flex items-center gap-1 squircle border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
             title={
               blocked
                 ? `Cannot cancel a listing in ${l.status}`
@@ -199,7 +199,7 @@ function AdminListings() {
   return (
     <AdminShell title="Food listings" user={user}>
       {error ? (
-        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
+        <div className="mb-4 squircle bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
           {error}
         </div>
       ) : null}
