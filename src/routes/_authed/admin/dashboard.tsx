@@ -16,6 +16,7 @@ import { AdminShell } from '../../../components/admin/AdminShell'
 import { Button } from '../../../components/ui/Button'
 import { DashboardStatsCard } from '../../../components/ui/DashboardStatsCard'
 import { DashboardWelcomeBanner } from '../../../components/ui/DashboardWelcomeBanner'
+import { OrgBreakdownChart } from '../../../components/ui/OrgBreakdownChart'
 import { getAdminStatsFn } from '../../../lib/admin-server'
 import { canAccessAdmin, roleToDashboard } from '../../../lib/permissions'
 import { todayLabel } from '../../../lib/time'
@@ -130,7 +131,29 @@ function AdminDashboard() {
               Verified and pending across each role
             </p>
           </div>
-          <div className="grid gap-px bg-[var(--color-line)] sm:grid-cols-3">
+          <div className="px-6 py-6">
+            <OrgBreakdownChart
+              centerLabel="orgs"
+              slices={[
+                {
+                  label: 'Restaurants',
+                  value: stats.totalRestaurants,
+                  color: '#FF6A1F',
+                },
+                {
+                  label: 'NGOs',
+                  value: stats.totalNgos,
+                  color: '#3B82F6',
+                },
+                {
+                  label: 'Animal rescues',
+                  value: stats.totalAnimalRescues,
+                  color: '#10B981',
+                },
+              ]}
+            />
+          </div>
+          <div className="grid gap-px border-t border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-3">
             <OrgStat
               label="Restaurants"
               value={stats.totalRestaurants}

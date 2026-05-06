@@ -5,8 +5,8 @@ import { AdminShell } from '../../../components/admin/AdminShell'
 import { AdminTable } from '../../../components/admin/AdminTable'
 import type { Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
-import { Alert } from '../../../components/ui/Alert'
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog'
+import { useToast } from '../../../components/ui/Toast'
 import {
   deleteUserFn,
   listUsersForAdminFn,
@@ -54,8 +54,7 @@ function AdminUsers() {
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL')
   const [confirmRow, setConfirmRow] = useState<AdminUserRow | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const toast = useToast()
 
   const filtered =
     roleFilter === 'ALL' ? users : users.filter((u) => u.role === roleFilter)
@@ -78,16 +77,14 @@ function AdminUsers() {
   ]
 
   async function handleDelete(row: AdminUserRow) {
-    setError(null)
-    setSuccess(null)
     setBusyId(row.id)
     try {
       await deleteUserFn({ data: { id: row.id } })
-      setSuccess(`Deleted ${row.email ?? row.name ?? 'user'}`)
+      toast.success(`Deleted ${row.email ?? row.name ?? 'user'}`)
       setConfirmRow(null)
       router.invalidate()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete user')
+      toast.error(err instanceof Error ? err.message : 'Failed to delete user')
     } finally {
       setBusyId(null)
     }
@@ -95,15 +92,15 @@ function AdminUsers() {
 
   async function handleRoleChange(row: AdminUserRow, role: Role) {
     if (row.role === role) return
-    setError(null)
-    setSuccess(null)
     setBusyId(row.id)
     try {
       await setUserRoleFn({ data: { id: row.id, role } })
-      setSuccess(`Updated role for ${row.email ?? row.name ?? 'user'}`)
+      toast.success(
+        `Role updated for ${row.email ?? row.name ?? 'user'} → ${ROLE_LABELS[role]}`,
+      )
       router.invalidate()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update role')
+      toast.error(err instanceof Error ? err.message : 'Failed to update role')
     } finally {
       setBusyId(null)
     }
@@ -239,16 +236,6 @@ function AdminUsers() {
         <ShieldCheck className="h-4 w-4 text-orange-600" />
         Roles are server-managed; admins are not self-assigned.
       </div>
-      {error ? (
-        <div className="mb-4">
-          <Alert tone="error">{error}</Alert>
-        </div>
-      ) : null}
-      {success ? (
-        <div className="mb-4">
-          <Alert tone="success">{success}</Alert>
-        </div>
-      ) : null}
       <AdminTable
         rows={filtered}
         columns={columns}

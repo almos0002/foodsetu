@@ -26,6 +26,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { signOut } from '../lib/auth-client'
 import { BowlMascot } from '../routes/index'
+import { NotificationBell } from './NotificationBell'
 import {
   VERIFICATION_BADGE_CLASSES,
   VERIFICATION_LABELS,
@@ -212,6 +213,7 @@ export function DashboardShell({
             </span>
           </Link>
           <div className="ml-auto flex items-center gap-3">
+            <NotificationBell />
             <div className="hidden text-right sm:block md:hidden">
               <div className="text-sm font-medium text-gray-900">
                 {user.name ?? user.email}

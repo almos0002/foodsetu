@@ -4,6 +4,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import appCss from '../styles.css?url'
 import { DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '../lib/seo'
+import { ToastProvider } from '../components/ui/Toast'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -94,7 +95,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <ToastProvider>{children}</ToastProvider>
         <TanStackDevtools
           config={{
             position: 'bottom-right',

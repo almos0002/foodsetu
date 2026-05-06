@@ -4,6 +4,8 @@ import { Ban, Flag } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
 import { AdminTable, type Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog'
+import { useToast } from '../../../components/ui/Toast'
 import {
   adminCancelListingFn,
   listListingsForAdminFn,
@@ -48,6 +50,8 @@ function AdminListings() {
   const [filter, setFilter] = useState<StatusFilter>('ALL')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [confirmRow, setConfirmRow] = useState<AdminListingRow | null>(null)
+  const toast = useToast()
 
   const filtered =
     filter === 'ALL'
@@ -72,20 +76,17 @@ function AdminListings() {
   ]
 
   async function handleCancel(row: AdminListingRow) {
-    if (
-      !confirm(
-        `Cancel "${row.title}"? Any active claim on this listing will also be cancelled.`,
-      )
-    ) {
-      return
-    }
     setError(null)
     setBusyId(row.id)
     try {
       await adminCancelListingFn({ data: { id: row.id } })
+      toast.success(`Cancelled "${row.title}"`)
+      setConfirmRow(null)
       router.invalidate()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to cancel listing')
+      const msg = err instanceof Error ? err.message : 'Failed to cancel listing'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setBusyId(null)
     }
@@ -179,7 +180,7 @@ function AdminListings() {
         return (
           <button
             type="button"
-            onClick={() => handleCancel(l)}
+            onClick={() => setConfirmRow(l)}
             disabled={blocked || busyId === l.id}
             className="inline-flex items-center gap-1 squircle border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
             title={
@@ -213,6 +214,21 @@ function AdminListings() {
         filterValue={filter}
         onFilterChange={setFilter}
         emptyLabel="No listings yet."
+      />
+      <ConfirmDialog
+        open={confirmRow != null}
+        title="Cancel this listing?"
+        description={
+          confirmRow
+            ? `Cancel "${confirmRow.title}"? Any active claim on this listing will also be cancelled.`
+            : ''
+        }
+        confirmLabel="Cancel listing"
+        cancelLabel="Keep active"
+        destructive
+        busy={confirmRow != null && busyId === confirmRow.id}
+        onConfirm={() => confirmRow && handleCancel(confirmRow)}
+        onCancel={() => setConfirmRow(null)}
       />
     </AdminShell>
   )
