@@ -1,6 +1,13 @@
 import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
-import { useState } from 'react'
-import { CheckCircle2, ShieldCheck, Trash2, XCircle } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import {
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ShieldCheck,
+  Trash2,
+  XCircle,
+} from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
 import { AdminTable } from '../../../components/admin/AdminTable'
 import type { Column } from '../../../components/admin/AdminTable'
@@ -44,6 +51,82 @@ const ROLE_TONE: Record<Role, BadgeTone> = {
 }
 
 const ASSIGNABLE_ROLES: Role[] = ['RESTAURANT', 'NGO', 'ANIMAL_RESCUE']
+
+function RoleCombobox({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: Role | null
+  disabled?: boolean
+  onChange: (next: Role) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onDoc(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  const label = value ? ROLE_LABELS[value] : 'Select role'
+
+  return (
+    <div ref={ref} className="relative inline-block w-32">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-1 squircle border border-[var(--color-line)] bg-[var(--color-canvas)] px-2 py-1 text-xs text-[var(--color-ink)] hover:bg-[var(--color-canvas-2)] focus:border-[var(--color-ink)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span className="truncate">{label}</span>
+        <ChevronDown className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-ink-3)]" />
+      </button>
+      {open ? (
+        <ul
+          role="listbox"
+          className="absolute right-0 top-[calc(100%+4px)] z-30 w-40 squircle border border-[var(--color-line-strong)] bg-[var(--color-canvas)] py-1 shadow-lg"
+        >
+          {ASSIGNABLE_ROLES.map((opt) => {
+            const selected = opt === value
+            return (
+              <li key={opt}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onClick={() => {
+                    setOpen(false)
+                    if (!selected) onChange(opt)
+                  }}
+                  className="flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-xs text-[var(--color-ink)] hover:bg-[var(--color-canvas-2)]"
+                >
+                  <span>{ROLE_LABELS[opt]}</span>
+                  {selected ? (
+                    <Check className="h-3.5 w-3.5 text-[var(--color-accent)]" />
+                  ) : null}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      ) : null}
+    </div>
+  )
+}
 
 type RoleFilter = 'ALL' | Role
 
@@ -133,18 +216,11 @@ function AdminUsers() {
           )
         }
         return (
-          <select
-            className="squircle border border-[var(--color-line)] bg-[var(--color-canvas)] px-2 py-1 text-xs text-[var(--color-ink)] focus:border-[var(--color-ink)] focus:outline-none disabled:opacity-50"
-            value={r ?? ''}
+          <RoleCombobox
+            value={r}
             disabled={busyId === u.id}
-            onChange={(e) => handleRoleChange(u, e.target.value as Role)}
-          >
-            {ASSIGNABLE_ROLES.map((opt) => (
-              <option key={opt} value={opt}>
-                {ROLE_LABELS[opt]}
-              </option>
-            ))}
-          </select>
+            onChange={(next) => handleRoleChange(u, next)}
+          />
         )
       },
     },
