@@ -218,10 +218,10 @@ function Hero() {
             <p className="mt-7 max-w-lg text-[17px] leading-[1.55] text-[var(--color-ink-2)]">
               FoodSetu, where{' '}
               <span className="font-semibold text-[var(--color-ink)]">setu</span>{' '}
-              means <em>bridge</em> in Sanskrit, connects restaurants and
-              bakeries with verified NGOs and animal rescues. We handle the OTP
-              handoff, paperwork, and audit trail — so good food finds the right
-              hands, fast.
+              means <em>bridge</em> in Sanskrit — a bridge between surplus food
+              and the people, animals, and communities that need it most,
+              connecting hotels, restaurants, and bakeries with verified NGOs
+              and animal rescues.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-2.5">
