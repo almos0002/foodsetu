@@ -340,7 +340,7 @@ type HeroNode = {
 const VBW = 400
 const VBH = 500
 
-type HeroNetworkNode = {
+type MapLocation = {
   id: string
   x: number
   y: number
@@ -349,29 +349,39 @@ type HeroNetworkNode = {
   kind: 'donor' | 'claim'
 }
 
-// Mixed donor/claimant placement so the network reads as an organic
-// constellation, not two strict rows.
-const NETWORK_NODES: HeroNetworkNode[] = [
-  { id: 'd0', x: 70, y: 80, iconId: 'i-bakery', name: 'Bhojan Griha', kind: 'donor' },
-  { id: 'd1', x: 220, y: 50, iconId: 'i-hotel', name: 'Hotel Annapurna', kind: 'donor' },
-  { id: 'd2', x: 340, y: 130, iconId: 'i-restaurant', name: 'Thakali Kitchen', kind: 'donor' },
-  { id: 'd3', x: 175, y: 220, iconId: 'i-cafe', name: 'Himalayan Java', kind: 'donor' },
-  { id: 'c0', x: 60, y: 290, iconId: 'i-ngo', name: 'Karuna Nepal', kind: 'claim' },
-  { id: 'c1', x: 320, y: 270, iconId: 'i-shelter', name: 'Sarvanam Trust', kind: 'claim' },
-  { id: 'c2', x: 130, y: 415, iconId: 'i-bowl', name: 'CARE Nepal', kind: 'claim' },
-  { id: 'c3', x: 320, y: 425, iconId: 'i-paw', name: 'KAT Centre', kind: 'claim' },
+// Locations on the FoodSetu mini-map. Coordinates in a 400×500 viewBox.
+const LOCATIONS: MapLocation[] = [
+  { id: 'L0', x: 70, y: 78, iconId: 'i-bakery', name: 'Bhojan Griha', kind: 'donor' },
+  { id: 'L1', x: 220, y: 55, iconId: 'i-hotel', name: 'Hotel Annapurna', kind: 'donor' },
+  { id: 'L2', x: 340, y: 118, iconId: 'i-restaurant', name: 'Thakali Kitchen', kind: 'donor' },
+  { id: 'L3', x: 55, y: 232, iconId: 'i-cafe', name: 'Himalayan Java', kind: 'donor' },
+  { id: 'L4', x: 345, y: 248, iconId: 'i-ngo', name: 'Sarvanam Trust', kind: 'claim' },
+  { id: 'L5', x: 200, y: 320, iconId: 'i-shelter', name: 'Hopecare Home', kind: 'claim' },
+  { id: 'L6', x: 75, y: 420, iconId: 'i-bowl', name: 'CARE Nepal', kind: 'claim' },
+  { id: 'L7', x: 335, y: 412, iconId: 'i-paw', name: 'KAT Centre', kind: 'claim' },
 ]
 
-// Each route picks two NETWORK_NODES indices (donor → claimant).
-const NETWORK_ROUTES = [
-  { from: 0, to: 4, bow: -28 },
-  { from: 1, to: 5, bow: 26 },
-  { from: 2, to: 5, bow: -22 },
-  { from: 3, to: 6, bow: -22 },
-  { from: 0, to: 6, bow: 30 },
-  { from: 1, to: 7, bow: -34 },
-  { from: 2, to: 7, bow: -22 },
-  { from: 3, to: 4, bow: 24 },
+// Roads — each is a winding path used both as visual asphalt AND as the
+// motion path that delivery parcels follow continuously.
+const ROADS = [
+  { id: 'r0', d: 'M 70 78 Q 145 60 220 55 Q 290 70 340 118' },
+  { id: 'r1', d: 'M 340 118 Q 360 180 345 248 Q 340 330 335 412' },
+  { id: 'r2', d: 'M 75 420 Q 205 470 335 412' },
+  { id: 'r3', d: 'M 70 78 Q 50 160 55 232 Q 60 330 75 420' },
+  { id: 'r4', d: 'M 55 232 Q 200 270 345 248' },
+  { id: 'r5', d: 'M 220 55 Q 245 200 200 320 Q 265 380 335 412' },
+]
+
+// Highlight cycle — pairs of LOCATIONS ids that take turns being "in transit".
+const HIGHLIGHTS: Array<[string, string]> = [
+  ['L0', 'L6'],
+  ['L1', 'L5'],
+  ['L2', 'L4'],
+  ['L0', 'L4'],
+  ['L1', 'L7'],
+  ['L3', 'L5'],
+  ['L2', 'L7'],
+  ['L3', 'L6'],
 ]
 
 // All icons share a 24×24 viewBox, stroke-based, currentColor.
@@ -427,183 +437,223 @@ const ICON_PATHS: Record<string, React.ReactNode> = {
 }
 
 function HeroNetwork() {
-  const donors = NETWORK_NODES.filter((n) => n.kind === 'donor')
-  const claimants = NETWORK_NODES.filter((n) => n.kind === 'claim')
-  void donors
-  void claimants
-
-  const [active, setActive] = useState(0)
   const svgRef = useRef<SVGSVGElement>(null)
+  const [activeIdx, setActiveIdx] = useState(0)
+  const active = HIGHLIGHTS[activeIdx]
+  const activeFrom = LOCATIONS.find((l) => l.id === active[0])!
+  const activeTo = LOCATIONS.find((l) => l.id === active[1])!
 
-  // Build the curved path string for a route.
-  const curve = (a: HeroNetworkNode, b: HeroNetworkNode, bow: number) => {
-    const mx = (a.x + b.x) / 2
-    const my = (a.y + b.y) / 2
-    const dx = b.x - a.x
-    const dy = b.y - a.y
-    const len = Math.hypot(dx, dy) || 1
-    const px = -dy / len
-    const py = dx / len
-    return `M ${a.x} ${a.y} Q ${mx + px * bow} ${my + py * bow} ${b.x} ${b.y}`
-  }
-
-  const activeRoute = NETWORK_ROUTES[active]
-  const activeFromNode = NETWORK_NODES[activeRoute.from]
-  const activeToNode = NETWORK_NODES[activeRoute.to]
-  const activeD = curve(activeFromNode, activeToNode, activeRoute.bow)
-
-  // Cycle the active route.
+  // Cycle which pair of locations is "in transit".
   useEffect(() => {
     const id = setInterval(
-      () => setActive((i) => (i + 1) % NETWORK_ROUTES.length),
-      2400,
+      () => setActiveIdx((i) => (i + 1) % HIGHLIGHTS.length),
+      2600,
     )
     return () => clearInterval(id)
   }, [])
 
-  // Mount: stagger-in nodes, gentle perpetual breathing on each.
+  // Mount: parcels flow along roads, cards drop in, roads draw in,
+  // breathing loops, compass spins.
   useEffect(() => {
     if (!svgRef.current) return
     let cancelled = false
-    let cleanups: Array<() => void> = []
+    const teardown: Array<() => void> = []
     ;(async () => {
-      const anime = await import('animejs')
+      const animeMod: any = await import('animejs')
       if (cancelled || !svgRef.current) return
+      const animate = animeMod.animate
+      const stagger = animeMod.stagger
+      const svgUtil = animeMod.svg
       const root = svgRef.current
 
-      // Entrance: scale-in nodes with overshoot
-      anime.animate(root.querySelectorAll('.hn-node-inner'), {
-        scale: [{ from: 0, to: 1 }],
-        opacity: [{ from: 0, to: 1 }],
-        rotate: [{ from: -90, to: 0 }],
-        duration: 750,
-        delay: anime.stagger(70),
-        ease: 'outBack(1.6)',
+      // Roads draw in via stroke-dashoffset.
+      const roads = root.querySelectorAll<SVGPathElement>('.mm-road-inner')
+      roads.forEach((r, i) => {
+        const len = r.getTotalLength()
+        r.style.strokeDasharray = String(len)
+        r.style.strokeDashoffset = String(len)
+        const a = animate(r, {
+          strokeDashoffset: [len, 0],
+          duration: 1100,
+          delay: 60 + i * 70,
+          ease: 'outQuad',
+        })
+        teardown.push(() => a.pause?.())
       })
 
-      // Continuous breathing — different phase per node so they don't sync
-      const inners = root.querySelectorAll<SVGGElement>('.hn-node-inner')
-      inners.forEach((el, i) => {
-        const a = anime.animate(el, {
+      // Cards drop in with overshoot.
+      const cardWraps = root.querySelectorAll<SVGGElement>('.mm-card')
+      cardWraps.forEach((el) => {
+        el.style.opacity = '0'
+        el.style.transform = 'translateY(-22px) scale(0.6)'
+      })
+      const cardEntry = animate(cardWraps, {
+        translateY: [-22, 0],
+        scale: [0.6, 1],
+        opacity: [0, 1],
+        duration: 760,
+        delay: stagger(70, { from: 'center', start: 700 }),
+        ease: 'outBack(1.6)',
+      })
+      teardown.push(() => cardEntry.pause?.())
+
+      // Breathing — subtle continuous Y oscillation, out of phase.
+      cardWraps.forEach((el, i) => {
+        const a = animate(el, {
           translateY: [
-            { to: -3, duration: 2200 + i * 180, ease: 'inOutSine' },
-            { to: 3, duration: 2200 + i * 180, ease: 'inOutSine' },
-            { to: 0, duration: 2200 + i * 180, ease: 'inOutSine' },
+            { to: -2, duration: 2200 + (i % 4) * 240, ease: 'inOutSine' },
+            { to: 2, duration: 2200 + (i % 4) * 240, ease: 'inOutSine' },
+            { to: 0, duration: 2200 + (i % 4) * 240, ease: 'inOutSine' },
           ],
           loop: true,
-          delay: i * 180,
+          delay: 1600 + i * 180,
         })
-        cleanups.push(() => a.pause())
+        teardown.push(() => a.pause?.())
       })
+
+      // Parcels flow continuously along their road via createMotionPath.
+      ROADS.forEach((road, i) => {
+        const path = root.querySelector<SVGPathElement>(`#${road.id}-path`)
+        const parcel = root.querySelector<SVGGElement>(`#${road.id}-parcel`)
+        if (!path || !parcel || !svgUtil?.createMotionPath) return
+        const motion = svgUtil.createMotionPath(path)
+        const a = animate(parcel, {
+          ...motion,
+          duration: 8500 + i * 1300,
+          loop: true,
+          ease: 'linear',
+          delay: 900 + i * 420,
+        })
+        teardown.push(() => a.pause?.())
+      })
+
+      // Compass needle slow rotate.
+      const needle = root.querySelector<SVGGElement>('.mm-compass-needle')
+      if (needle) {
+        const a = animate(needle, {
+          rotate: [0, 360],
+          duration: 22000,
+          loop: true,
+          ease: 'linear',
+        })
+        teardown.push(() => a.pause?.())
+      }
+
+      // Live-network indicator dot — soft sine breathing on opacity.
+      const liveDot = root.querySelector<SVGCircleElement>('.mm-live-dot')
+      if (liveDot) {
+        const a = animate(liveDot, {
+          scale: [1, 1.4, 1],
+          opacity: [1, 0.55, 1],
+          duration: 1600,
+          loop: true,
+          ease: 'inOutSine',
+        })
+        teardown.push(() => a.pause?.())
+      }
     })()
     return () => {
       cancelled = true
-      cleanups.forEach((c) => c())
+      teardown.forEach((t) => t())
     }
   }, [])
 
-  // Per-cycle: draw active path, fly parcel, ping rings, spin active icons.
+  // Per-highlight cycle: icon flip, particle burst, floating chip pop.
   useEffect(() => {
     if (!svgRef.current) return
     let cancelled = false
-    const anims: Array<{ pause: () => void }> = []
+    const anims: Array<{ pause?: () => void }> = []
     ;(async () => {
-      const anime = await import('animejs')
+      const animeMod: any = await import('animejs')
       if (cancelled || !svgRef.current) return
+      const animate = animeMod.animate
       const root = svgRef.current
-      const path = root.querySelector<SVGPathElement>('.hn-active-path')
-      const glow = root.querySelector<SVGPathElement>('.hn-active-glow')
-      const parcel = root.querySelector<SVGGElement>('.hn-parcel')
-      const tail1 = root.querySelector<SVGGElement>('.hn-tail-1')
-      const tail2 = root.querySelector<SVGGElement>('.hn-tail-2')
-      if (!path || !parcel || !tail1 || !tail2 || !glow) return
 
-      const len = path.getTotalLength()
-      path.style.strokeDasharray = String(len)
-      path.style.strokeDashoffset = String(len)
-      glow.style.strokeDasharray = String(len)
-      glow.style.strokeDashoffset = String(len)
-
-      // Reset parcel + tail to start
-      parcel.style.opacity = '0'
-      tail1.style.opacity = '0'
-      tail2.style.opacity = '0'
-
-      // 1. Draw the line
-      const drawA = anime.animate(path, {
-        strokeDashoffset: [len, 0],
-        duration: 900,
-        ease: 'outQuad',
-      })
-      const drawB = anime.animate(glow, {
-        strokeDashoffset: [len, 0],
-        duration: 900,
-        ease: 'outQuad',
-      })
-      anims.push(drawA, drawB)
-
-      // 2. Fly parcel along the path
-      const motion = anime.svg.createMotionPath(path)
-      const parcelAnim = anime.animate(parcel, {
-        ...motion,
-        opacity: [{ to: 1, duration: 100 }],
-        duration: 1400,
-        delay: 250,
-        ease: 'inOutSine',
-      })
-      const tail1Anim = anime.animate(tail1, {
-        ...motion,
-        opacity: [{ to: 0.55, duration: 100 }],
-        duration: 1400,
-        delay: 380,
-        ease: 'inOutSine',
-      })
-      const tail2Anim = anime.animate(tail2, {
-        ...motion,
-        opacity: [{ to: 0.3, duration: 100 }],
-        duration: 1400,
-        delay: 480,
-        ease: 'inOutSine',
-      })
-      anims.push(parcelAnim, tail1Anim, tail2Anim)
-
-      // 3. Ping rings on active endpoints (radar pulses)
-      const rings = root.querySelectorAll<SVGCircleElement>('.hn-ping circle')
-      rings.forEach((c, i) => {
-        c.setAttribute('r', '12')
-        c.setAttribute('opacity', '0')
-        const a = anime.animate(c, {
-          r: [12, 38],
-          opacity: [{ to: 0.7, duration: 80 }, { to: 0, duration: 1100 }],
-          strokeWidth: [2, 0.4],
-          duration: 1200,
-          delay: 100 + (i % 3) * 180 + Math.floor(i / 3) * 0,
-          loop: 2,
-          ease: 'outQuad',
+      // Active card icon: rotate + scale pop.
+      root
+        .querySelectorAll<SVGGElement>('.mm-card-active .mm-card-glyph')
+        .forEach((glyph, i) => {
+          glyph.style.transformBox = 'fill-box'
+          glyph.style.transformOrigin = 'center'
+          const a = animate(glyph, {
+            rotate: [0, 360],
+            scale: [
+              { to: 1.32, duration: 260, ease: 'outQuad' },
+              { to: 1, duration: 380, ease: 'outBack(2)' },
+            ],
+            duration: 700,
+            delay: i * 90,
+          })
+          anims.push(a)
         })
-        anims.push(a)
-      })
 
-      // 4. Spin + pop the two active icon glyphs
-      const activeGlyphs = root.querySelectorAll<SVGGElement>('.hn-glyph-active')
-      activeGlyphs.forEach((g) => {
-        const a = anime.animate(g, {
-          rotate: [{ from: 0, to: 360 }],
-          scale: [
-            { from: 1, to: 1.25, duration: 220 },
-            { to: 1, duration: 280 },
+      // Active card body: brief lift bounce.
+      root
+        .querySelectorAll<SVGGElement>('.mm-card-active .mm-card-body')
+        .forEach((body, i) => {
+          const a = animate(body, {
+            translateY: [
+              { to: -6, duration: 260, ease: 'outQuad' },
+              { to: 0, duration: 460, ease: 'outBack(1.8)' },
+            ],
+            delay: i * 90,
+          })
+          anims.push(a)
+        })
+
+      // Particle burst from each active card centre.
+      const particles = root.querySelectorAll<SVGCircleElement>('.mm-particle')
+      const half = particles.length / 2
+      particles.forEach((p, i) => {
+        const target = i < half ? activeFrom : activeTo
+        const k = i % half
+        const angle = (Math.PI * 2 * k) / half + Math.random() * 0.6
+        const dist = 30 + Math.random() * 18
+        p.setAttribute('cx', String(target.x))
+        p.setAttribute('cy', String(target.y - 4))
+        p.style.opacity = '0'
+        p.style.transform = ''
+        const a = animate(p, {
+          translateX: [0, Math.cos(angle) * dist],
+          translateY: [0, Math.sin(angle) * dist - 6],
+          opacity: [
+            { to: 1, duration: 60 },
+            { to: 0, duration: 720 },
           ],
-          duration: 700,
-          ease: 'outBack(2)',
+          scale: [
+            { from: 1.2, to: 0.3, duration: 780, ease: 'outExpo' },
+          ],
+          duration: 800,
+          ease: 'outExpo',
+          delay: 60 + (i % half) * 30,
         })
         anims.push(a)
       })
+
+      // Floating chip pop above active-from card.
+      const chip = root.querySelector<SVGGElement>('.mm-chip')
+      if (chip) {
+        chip.style.opacity = '0'
+        const a = animate(chip, {
+          opacity: [
+            { to: 1, duration: 220, ease: 'outQuad' },
+            { to: 0, duration: 520, delay: 1500 },
+          ],
+          translateY: [10, 0],
+          scale: [
+            { from: 0.82, to: 1.04, duration: 280, ease: 'outBack(1.6)' },
+            { to: 1, duration: 240 },
+          ],
+          duration: 2400,
+        })
+        anims.push(a)
+      }
     })()
     return () => {
       cancelled = true
-      anims.forEach((a) => a.pause())
+      anims.forEach((a) => a.pause?.())
     }
-  }, [active])
+  }, [activeIdx])
 
   return (
     <div className="relative h-full w-full">
@@ -611,17 +661,10 @@ function HeroNetwork() {
         ref={svgRef}
         viewBox={`0 0 ${VBW} ${VBH}`}
         preserveAspectRatio="xMidYMid meet"
-        className="absolute inset-0 h-full w-full overflow-visible"
-        aria-hidden="true"
+        className="absolute inset-0 h-full w-full"
+        style={{ fontFamily: 'inherit' }}
       >
         <defs>
-          <filter id="hn-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="b" />
-            <feMerge>
-              <feMergeNode in="b" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
           {Object.entries(ICON_PATHS).map(([id, body]) => (
             <symbol
               key={id}
@@ -629,171 +672,345 @@ function HeroNetwork() {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.7"
+              strokeWidth={1.7}
               strokeLinecap="round"
               strokeLinejoin="round"
             >
               {body}
             </symbol>
           ))}
+          <filter id="mm-shadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.6" />
+          </filter>
+          <linearGradient id="mm-bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--color-canvas-2, #f6f4ee)" />
+            <stop offset="100%" stopColor="var(--color-canvas, #ece8dd)" />
+          </linearGradient>
         </defs>
 
-        {/* Background routes — every connection visible at all times */}
-        {NETWORK_ROUTES.map((r, i) => {
-          const a = NETWORK_NODES[r.from]
-          const b = NETWORK_NODES[r.to]
-          const d = curve(a, b, r.bow)
-          const isActive = i === active
-          return (
+        {/* Map ground */}
+        <rect x="0" y="0" width={VBW} height={VBH} rx="22" fill="url(#mm-bg)" />
+
+        {/* Faint topographic contour rings */}
+        <g
+          stroke="var(--color-line, #d8d3c5)"
+          strokeWidth="0.6"
+          fill="none"
+          opacity="0.55"
+        >
+          <ellipse cx="200" cy="250" rx="190" ry="230" />
+          <ellipse cx="200" cy="250" rx="150" ry="180" />
+          <ellipse cx="200" cy="250" rx="105" ry="125" />
+          <ellipse cx="200" cy="250" rx="62" ry="74" />
+        </g>
+
+        {/* River / decorative blue ribbon across the map */}
+        <path
+          d="M -10 380 Q 90 340 175 360 Q 255 380 310 340 Q 360 310 410 330"
+          fill="none"
+          stroke="#bcd9d6"
+          strokeWidth="10"
+          strokeLinecap="round"
+          opacity="0.55"
+        />
+        <path
+          d="M -10 380 Q 90 340 175 360 Q 255 380 310 340 Q 360 310 410 330"
+          fill="none"
+          stroke="#dfeeec"
+          strokeWidth="6"
+          strokeLinecap="round"
+        />
+
+        {/* Roads — 3-layer asphalt look */}
+        {ROADS.map((road) => (
+          <g key={road.id}>
             <path
-              key={`bg-${i}`}
-              d={d}
+              d={road.d}
               fill="none"
-              stroke="var(--color-line-strong)"
-              strokeWidth="1"
+              stroke="rgba(20,20,18,0.85)"
+              strokeWidth="11"
               strokeLinecap="round"
-              strokeDasharray="3 5"
-              opacity={isActive ? 0 : 0.55}
+              strokeLinejoin="round"
+              opacity="0.18"
             />
-          )
-        })}
-
-        {/* Active route — soft glow underlay + crisp accent line */}
-        <path
-          className="hn-active-glow"
-          d={activeD}
-          fill="none"
-          stroke="var(--color-accent)"
-          strokeWidth="4"
-          strokeLinecap="round"
-          opacity="0.3"
-          filter="url(#hn-glow)"
-        />
-        <path
-          className="hn-active-path"
-          d={activeD}
-          fill="none"
-          stroke="var(--color-accent)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-
-        {/* Radar pulse rings on the two active endpoints */}
-        <g className="hn-ping">
-          {[0, 1, 2].map((i) => (
-            <circle
-              key={`pf-${i}`}
-              cx={activeFromNode.x}
-              cy={activeFromNode.y}
-              r="12"
+            <path
+              id={`${road.id}-path`}
+              className="mm-road-inner"
+              d={road.d}
               fill="none"
-              stroke="var(--color-accent)"
-              strokeWidth="2"
-              opacity="0"
+              stroke="#ffffff"
+              strokeWidth="6.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
-          ))}
-          {[0, 1, 2].map((i) => (
-            <circle
-              key={`pt-${i}`}
-              cx={activeToNode.x}
-              cy={activeToNode.y}
-              r="12"
+            <path
+              d={road.d}
               fill="none"
-              stroke="var(--color-accent)"
-              strokeWidth="2"
-              opacity="0"
+              stroke="#cdc6b6"
+              strokeWidth="0.9"
+              strokeLinecap="round"
+              strokeDasharray="3 6"
+              opacity="0.85"
             />
-          ))}
-        </g>
+          </g>
+        ))}
 
-        {/* Parcel + comet tail — anime.js drives translateX/Y along the path */}
-        <g className="hn-parcel" style={{ opacity: 0 }}>
-          <circle r="6" fill="var(--color-accent)" filter="url(#hn-glow)" />
-        </g>
-        <g className="hn-tail-1" style={{ opacity: 0 }}>
-          <circle r="3.5" fill="var(--color-accent)" opacity="0.6" />
-        </g>
-        <g className="hn-tail-2" style={{ opacity: 0 }}>
-          <circle r="2.2" fill="var(--color-accent)" opacity="0.4" />
-        </g>
+        {/* Parcels — small delivery vans flowing continuously */}
+        {ROADS.map((road) => (
+          <g key={`p-${road.id}`} id={`${road.id}-parcel`}>
+            <rect
+              x="-7.5"
+              y="-5"
+              width="15"
+              height="10"
+              rx="2.4"
+              fill="var(--color-accent, #d97706)"
+            />
+            <path
+              d="M 7.5 0 L 4 -3.5 L 4 3.5 Z"
+              fill="var(--color-accent, #d97706)"
+            />
+            <rect
+              x="-6"
+              y="-3.5"
+              width="6"
+              height="2"
+              rx="0.6"
+              fill="rgba(255,255,255,0.4)"
+            />
+            <circle cx="-4" cy="5.5" r="1.3" fill="#1f1d18" />
+            <circle cx="4" cy="5.5" r="1.3" fill="#1f1d18" />
+          </g>
+        ))}
 
-        {/* Nodes */}
-        {NETWORK_NODES.map((n) => {
+        {/* Particle pool — repositioned per highlight cycle */}
+        {Array.from({ length: 14 }).map((_, i) => (
+          <circle
+            key={`pt-${i}`}
+            className="mm-particle"
+            cx="0"
+            cy="0"
+            r="1.8"
+            fill="var(--color-accent, #d97706)"
+            opacity="0"
+          />
+        ))}
+
+        {/* Location cards (squircle, NOT circular) */}
+        {LOCATIONS.map((loc) => {
           const isActive =
-            n.id === activeFromNode.id || n.id === activeToNode.id
+            loc.id === activeFrom.id || loc.id === activeTo.id
           return (
-            <g key={n.id} transform={`translate(${n.x} ${n.y})`}>
-              <g className="hn-node-inner" style={{ transformOrigin: '0 0' }}>
-                {/* Outer ring chip */}
-                <circle
-                  r="20"
-                  fill={isActive ? 'var(--color-accent)' : 'var(--color-paper)'}
-                  stroke={
-                    isActive
-                      ? 'var(--color-accent)'
-                      : 'var(--color-line-strong)'
-                  }
-                  strokeWidth={isActive ? 2 : 1}
-                  style={{
-                    filter: isActive
-                      ? 'drop-shadow(0 6px 14px rgba(220,90,40,0.35))'
-                      : 'drop-shadow(0 2px 4px rgba(0,0,0,0.06))',
-                    transition: 'all 400ms ease',
-                  }}
+            <g
+              key={loc.id}
+              transform={`translate(${loc.x} ${loc.y})`}
+              style={{ pointerEvents: 'none' }}
+            >
+              <g className="mm-card" style={{ transformOrigin: '0 0' }}>
+                {/* shadow */}
+                <ellipse
+                  cx="0"
+                  cy="24"
+                  rx="20"
+                  ry="3.5"
+                  fill="rgba(0,0,0,0.18)"
+                  filter="url(#mm-shadow)"
+                  opacity="0.55"
                 />
                 <g
-                  className={isActive ? 'hn-glyph-active' : 'hn-glyph'}
-                  style={{
-                    color: isActive
-                      ? 'var(--color-paper)'
-                      : 'var(--color-ink-2)',
-                    transformOrigin: '0 0',
-                  }}
+                  className={`mm-card-body ${
+                    isActive ? 'mm-card-active' : ''
+                  }`}
+                  style={{ transformOrigin: '0 0' }}
                 >
-                  <use href={`#${n.iconId}`} x={-11} y={-11} width={22} height={22} />
+                  {/* squircle card */}
+                  <rect
+                    x="-26"
+                    y="-22"
+                    width="52"
+                    height="40"
+                    rx="13"
+                    fill={
+                      isActive
+                        ? 'var(--color-accent, #d97706)'
+                        : '#ffffff'
+                    }
+                    stroke={
+                      isActive
+                        ? 'var(--color-accent, #d97706)'
+                        : 'rgba(20,20,18,0.85)'
+                    }
+                    strokeWidth={isActive ? 1.6 : 1.4}
+                  />
+                  {/* tiny pin notch under card */}
+                  <path
+                    d="M -5 17 L 0 23 L 5 17 Z"
+                    fill={
+                      isActive
+                        ? 'var(--color-accent, #d97706)'
+                        : '#ffffff'
+                    }
+                    stroke={
+                      isActive
+                        ? 'var(--color-accent, #d97706)'
+                        : 'rgba(20,20,18,0.85)'
+                    }
+                    strokeWidth={isActive ? 1.6 : 1.4}
+                    strokeLinejoin="round"
+                  />
+                  {/* icon */}
+                  <g
+                    className="mm-card-glyph"
+                    style={{
+                      color: isActive ? '#ffffff' : '#1f1d18',
+                    }}
+                  >
+                    <use
+                      href={`#${loc.iconId}`}
+                      x="-11"
+                      y="-12"
+                      width="22"
+                      height="22"
+                    />
+                  </g>
+                  {/* tiny role tag inside the card top-right */}
+                  <circle
+                    cx="20"
+                    cy="-16"
+                    r="3"
+                    fill={
+                      loc.kind === 'donor'
+                        ? '#22c55e'
+                        : '#3b82f6'
+                    }
+                    stroke={isActive ? '#ffffff' : 'rgba(20,20,18,0.85)'}
+                    strokeWidth="1"
+                  />
                 </g>
+                {/* name label */}
+                <text
+                  x="0"
+                  y="35"
+                  textAnchor="middle"
+                  fontSize="9.5"
+                  fill={isActive ? '#1f1d18' : 'rgba(31,29,24,0.72)'}
+                  fontWeight={isActive ? 700 : 600}
+                >
+                  {loc.name}
+                </text>
               </g>
             </g>
           )
         })}
-      </svg>
 
-      {/* HTML popover labels — always visible, active one highlighted */}
-      <div className="pointer-events-none absolute inset-0">
-        {NETWORK_NODES.map((n) => {
-          const isActive =
-            n.id === activeFromNode.id || n.id === activeToNode.id
-          // place label above for nodes in lower half, below for upper half
-          const above = n.y > VBH * 0.55
-          return (
-            <div
-              key={n.id}
-              className="absolute -translate-x-1/2 transition-all duration-300"
-              style={{
-                left: `${(n.x / VBW) * 100}%`,
-                top: `calc(${(n.y / VBH) * 100}% + ${above ? '-44px' : '28px'})`,
-              }}
+        {/* Floating "in transit" chip above active-from card */}
+        <g
+          transform={`translate(${activeFrom.x} ${activeFrom.y - 38})`}
+          style={{ pointerEvents: 'none' }}
+        >
+          <g className="mm-chip" style={{ opacity: 0, transformOrigin: '0 0' }}>
+            <rect
+              x="-38"
+              y="-12"
+              width="76"
+              height="22"
+              rx="11"
+              fill="#1f1d18"
+            />
+            <circle cx="-28" cy="-1" r="2.4" fill="var(--color-accent, #d97706)" />
+            <text
+              x="-21"
+              y="3"
+              fontSize="9.5"
+              fill="#ffffff"
+              fontWeight="600"
             >
-              <span
-                className="inline-block whitespace-nowrap rounded-md px-2 py-0.5 text-[10px] font-medium shadow-sm"
-                style={{
-                  background: isActive
-                    ? 'var(--color-ink)'
-                    : 'var(--color-paper)',
-                  color: isActive
-                    ? 'var(--color-paper)'
-                    : 'var(--color-ink-2)',
-                  border: `1px solid ${isActive ? 'var(--color-ink)' : 'var(--color-line)'}`,
-                  transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
-                  opacity: isActive ? 1 : 0.78,
-                }}
-              >
-                {n.name}
-              </span>
-            </div>
-          )
-        })}
-      </div>
+              In transit · 28 portions
+            </text>
+          </g>
+        </g>
+
+        {/* Map title chip top-left */}
+        <g transform="translate(14 14)" style={{ pointerEvents: 'none' }}>
+          <rect
+            x="0"
+            y="0"
+            width="138"
+            height="24"
+            rx="12"
+            fill="#ffffff"
+            stroke="rgba(20,20,18,0.18)"
+          />
+          <circle
+            className="mm-live-dot"
+            cx="12"
+            cy="12"
+            r="3.2"
+            fill="#22c55e"
+            style={{ transformOrigin: '12px 12px' }}
+          />
+          <text
+            x="22"
+            y="15.5"
+            fontSize="10"
+            fill="#1f1d18"
+            fontWeight="700"
+          >
+            FoodSetu Live Network
+          </text>
+        </g>
+
+        {/* Compass top-right */}
+        <g transform={`translate(${VBW - 28} 30)`} style={{ pointerEvents: 'none' }}>
+          <circle
+            cx="0"
+            cy="0"
+            r="14"
+            fill="#ffffff"
+            stroke="rgba(20,20,18,0.2)"
+          />
+          <g className="mm-compass-needle" style={{ transformBox: 'fill-box', transformOrigin: 'center' }}>
+            <path d="M 0 -10 L 3 0 L 0 2 L -3 0 Z" fill="var(--color-accent, #d97706)" />
+            <path d="M 0 10 L 3 0 L 0 -2 L -3 0 Z" fill="rgba(31,29,24,0.55)" />
+          </g>
+          <text
+            x="0"
+            y="-16"
+            textAnchor="middle"
+            fontSize="7.5"
+            fill="#1f1d18"
+            fontWeight="800"
+          >
+            N
+          </text>
+        </g>
+
+        {/* Scale bar bottom-left */}
+        <g transform={`translate(14 ${VBH - 24})`} style={{ pointerEvents: 'none' }}>
+          <line x1="0" y1="0" x2="64" y2="0" stroke="#1f1d18" strokeWidth="2" />
+          <line x1="0" y1="-3" x2="0" y2="3" stroke="#1f1d18" strokeWidth="1.5" />
+          <line x1="32" y1="-3" x2="32" y2="3" stroke="#1f1d18" strokeWidth="1.5" />
+          <line x1="64" y1="-3" x2="64" y2="3" stroke="#1f1d18" strokeWidth="1.5" />
+          <text x="0" y="14" fontSize="8" fill="rgba(31,29,24,0.7)" fontWeight="600">
+            0
+          </text>
+          <text x="32" y="14" textAnchor="middle" fontSize="8" fill="rgba(31,29,24,0.7)" fontWeight="600">
+            5km
+          </text>
+          <text x="64" y="14" textAnchor="middle" fontSize="8" fill="rgba(31,29,24,0.7)" fontWeight="600">
+            10km
+          </text>
+        </g>
+
+        {/* Legend chip bottom-right */}
+        <g transform={`translate(${VBW - 130} ${VBH - 32})`} style={{ pointerEvents: 'none' }}>
+          <rect x="0" y="0" width="116" height="22" rx="11" fill="#ffffff" stroke="rgba(20,20,18,0.18)" />
+          <circle cx="11" cy="11" r="3" fill="#22c55e" />
+          <text x="18" y="14" fontSize="9" fill="#1f1d18" fontWeight="600">Donors</text>
+          <circle cx="62" cy="11" r="3" fill="#3b82f6" />
+          <text x="69" y="14" fontSize="9" fill="#1f1d18" fontWeight="600">Rescues</text>
+        </g>
+      </svg>
     </div>
   )
 }
