@@ -326,7 +326,7 @@ function HeroPanel() {
       {/* Main image card */}
       <div className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)]">
         <img
-          src="https://v.greattibettour.com/photos/2021/07/newari-khaja-set-12-04765.jpg"
+          src="https://i.pinimg.com/originals/ab/42/de/ab42deebb59aa7de907a277f71a8e6f3.jpg"
           alt="Freshly prepared Samay Baji ready for pickup"
           className="absolute inset-0 block h-full w-full object-cover"
           style={{ height: '100%', width: '100%' }}
