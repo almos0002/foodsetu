@@ -190,18 +190,22 @@ function NavBar({
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden border-b border-[var(--color-line)]">
+    <section className="relative overflow-hidden border-b border-[var(--color-line)] min-h-[760px]">
       {/* 3D perspective grid floor — receding into the distance */}
       <div className="grid-bg-3d pointer-events-none" aria-hidden="true">
         <div className="grid-bg-3d-floor" />
+      </div>
+      {/* Animated delivery network — sits behind the hero text */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <DeliveryNetwork />
       </div>
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,var(--color-accent-soft)_0%,transparent_60%)] opacity-60"
         aria-hidden="true"
       />
-      {/* Vignette so text reads cleanly over the grid */}
+      {/* Soft halo masking the network behind the central text so it stays readable */}
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,var(--color-canvas)_85%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_60%_at_center,var(--color-canvas)_0%,rgba(255,255,255,0.85)_45%,transparent_85%)]"
         aria-hidden="true"
       />
 
@@ -255,11 +259,6 @@ function Hero() {
             No card required
           </span>
         </div>
-
-        {/* Animated delivery network — restaurants → NGOs / animal rescues */}
-        <div className="mt-14 sm:mt-20">
-          <DeliveryNetwork />
-        </div>
       </div>
     </section>
   )
@@ -275,30 +274,54 @@ type NetNode = {
   label: string
 }
 
+// Coordinates are snapped to a 100-unit grid so paths line up with the
+// background grid lines. viewBox is 1600 × 800.
 const NET_NODES: NetNode[] = [
-  { id: 'r1', x: 110, y: 70, kind: 'restaurant', label: 'Bhojan Griha' },
-  { id: 'r2', x: 880, y: 95, kind: 'restaurant', label: 'Thakali Kitchen' },
-  { id: 'r3', x: 230, y: 320, kind: 'restaurant', label: 'Himalayan Java' },
-  { id: 'r4', x: 760, y: 340, kind: 'restaurant', label: 'Roadhouse' },
-  { id: 'n1', x: 500, y: 200, kind: 'ngo', label: 'Sarvanam Trust' },
-  { id: 'n2', x: 380, y: 60, kind: 'ngo', label: 'Karuna Nepal' },
-  { id: 'n3', x: 640, y: 290, kind: 'ngo', label: 'CARE Nepal' },
-  { id: 'a1', x: 60, y: 200, kind: 'animal', label: 'KAT Centre' },
-  { id: 'a2', x: 940, y: 230, kind: 'animal', label: 'Project Mukti' },
+  { id: 'r1', x: 100, y: 100, kind: 'restaurant', label: 'Bhojan Griha' },
+  { id: 'r2', x: 1500, y: 100, kind: 'restaurant', label: 'Thakali Kitchen' },
+  { id: 'r3', x: 200, y: 700, kind: 'restaurant', label: 'Himalayan Java' },
+  { id: 'r4', x: 1400, y: 700, kind: 'restaurant', label: 'Roadhouse' },
+  { id: 'n1', x: 100, y: 400, kind: 'ngo', label: 'Sarvanam Trust' },
+  { id: 'n2', x: 1500, y: 400, kind: 'ngo', label: 'Karuna Nepal' },
+  { id: 'n3', x: 700, y: 100, kind: 'ngo', label: 'CARE Nepal' },
+  { id: 'a1', x: 900, y: 700, kind: 'animal', label: 'KAT Centre' },
+  { id: 'a2', x: 300, y: 400, kind: 'animal', label: 'Project Mukti' },
 ]
 
-const NET_EDGES: { from: string; to: string; delay: number }[] = [
-  { from: 'r1', to: 'n2', delay: 0 },
-  { from: 'r1', to: 'a1', delay: 1.4 },
-  { from: 'r2', to: 'n1', delay: 0.8 },
-  { from: 'r2', to: 'a2', delay: 2.1 },
-  { from: 'r3', to: 'n1', delay: 0.4 },
-  { from: 'r3', to: 'a1', delay: 1.8 },
-  { from: 'r4', to: 'n3', delay: 1.0 },
-  { from: 'r4', to: 'a2', delay: 2.6 },
-  { from: 'r3', to: 'n3', delay: 0.6 },
-  { from: 'r2', to: 'n2', delay: 1.6 },
+// `corner: 'h'` routes horizontal-then-vertical (corner at bx,ay).
+// `corner: 'v'` routes vertical-then-horizontal (corner at ax,by).
+const NET_EDGES: {
+  from: string
+  to: string
+  delay: number
+  corner: 'h' | 'v'
+}[] = [
+  { from: 'r1', to: 'n3', delay: 0.0, corner: 'h' },
+  { from: 'r1', to: 'a2', delay: 1.2, corner: 'v' },
+  { from: 'r2', to: 'n3', delay: 0.6, corner: 'h' },
+  { from: 'r2', to: 'n2', delay: 2.0, corner: 'v' },
+  { from: 'r3', to: 'n1', delay: 0.4, corner: 'v' },
+  { from: 'r3', to: 'a1', delay: 1.8, corner: 'h' },
+  { from: 'r4', to: 'n2', delay: 1.0, corner: 'v' },
+  { from: 'r4', to: 'a1', delay: 2.4, corner: 'h' },
+  { from: 'n1', to: 'a2', delay: 0.8, corner: 'h' },
+  { from: 'n3', to: 'a1', delay: 1.5, corner: 'v' },
 ]
+
+function manhattanPath(
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  corner: 'h' | 'v',
+): string {
+  if (corner === 'h') {
+    // horizontal first, then vertical — corner at (bx, ay)
+    return `M ${ax} ${ay} L ${bx} ${ay} L ${bx} ${by}`
+  }
+  // vertical first, then horizontal — corner at (ax, by)
+  return `M ${ax} ${ay} L ${ax} ${by} L ${bx} ${by}`
+}
 
 function nodeColor(kind: NetNode['kind']) {
   if (kind === 'restaurant') return 'var(--color-accent)'
@@ -306,160 +329,106 @@ function nodeColor(kind: NetNode['kind']) {
   return '#7c3aed'
 }
 
-function nodeIcon(kind: NetNode['kind']) {
-  if (kind === 'restaurant')
-    return <Utensils className="h-3 w-3" strokeWidth={2.4} />
-  if (kind === 'ngo') return <HeartHandshake className="h-3 w-3" strokeWidth={2.4} />
-  return <ShieldCheck className="h-3 w-3" strokeWidth={2.4} />
-}
-
 function DeliveryNetwork() {
   const byId = Object.fromEntries(NET_NODES.map((n) => [n.id, n]))
   return (
-    <div className="relative mx-auto aspect-[1000/400] w-full max-w-[1000px]">
-      <svg
-        viewBox="0 0 1000 400"
-        className="absolute inset-0 h-full w-full"
-        aria-hidden="true"
-      >
-        <defs>
-          <radialGradient id="pulseGrad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="1" />
-            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
-          </radialGradient>
-        </defs>
+    <svg
+      viewBox="0 0 1600 800"
+      preserveAspectRatio="xMidYMid slice"
+      className="absolute inset-0 h-full w-full"
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="pulseGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="1" />
+          <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
+        </radialGradient>
+      </defs>
 
-        {/* Edges — dashed paths */}
-        {NET_EDGES.map((e, i) => {
-          const a = byId[e.from]
-          const b = byId[e.to]
-          if (!a || !b) return null
-          const d = `M ${a.x} ${a.y} L ${b.x} ${b.y}`
-          return (
-            <g key={`${e.from}-${e.to}-${i}`}>
-              <path
-                d={d}
-                stroke="var(--color-line-strong)"
-                strokeWidth="1"
-                strokeDasharray="3 5"
-                fill="none"
-                opacity="0.7"
-              />
-              {/* Traveling pulse dot */}
-              <circle r="4.5" fill="var(--color-accent)">
-                <animateMotion
-                  path={d}
-                  dur="2.6s"
-                  begin={`${e.delay}s`}
-                  repeatCount="indefinite"
-                  rotate="auto"
-                />
-                <animate
-                  attributeName="opacity"
-                  values="0;1;1;0"
-                  keyTimes="0;0.1;0.9;1"
-                  dur="2.6s"
-                  begin={`${e.delay}s`}
-                  repeatCount="indefinite"
-                />
-              </circle>
-              {/* Soft glow trailing the dot */}
-              <circle r="9" fill="url(#pulseGrad)" opacity="0.6">
-                <animateMotion
-                  path={d}
-                  dur="2.6s"
-                  begin={`${e.delay}s`}
-                  repeatCount="indefinite"
-                />
-                <animate
-                  attributeName="opacity"
-                  values="0;0.5;0.5;0"
-                  keyTimes="0;0.1;0.9;1"
-                  dur="2.6s"
-                  begin={`${e.delay}s`}
-                  repeatCount="indefinite"
-                />
-              </circle>
-            </g>
-          )
-        })}
-
-        {/* Nodes */}
-        {NET_NODES.map((n, i) => {
-          const color = nodeColor(n.kind)
-          return (
-            <g key={n.id}>
-              {/* Outer pulse ring */}
-              <circle
-                cx={n.x}
-                cy={n.y}
-                r="14"
-                fill={color}
-                opacity="0.18"
-                className="node-ring"
-                style={{ animationDelay: `${(i % 5) * 0.45}s` }}
-              />
-              <circle
-                cx={n.x}
-                cy={n.y}
-                r="10"
-                fill="var(--color-paper)"
-                stroke={color}
-                strokeWidth="2"
-              />
-            </g>
-          )
-        })}
-      </svg>
-
-      {/* Foreground node labels (HTML for crispness) */}
-      <div className="pointer-events-none absolute inset-0">
-        {NET_NODES.map((n) => {
-          const color = nodeColor(n.kind)
-          return (
-            <div
-              key={n.id}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{
-                left: `${(n.x / 1000) * 100}%`,
-                top: `${(n.y / 400) * 100}%`,
-              }}
-            >
-              <div
-                className="flex items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] px-2 py-1 text-[10.5px] font-medium text-[var(--color-ink)] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-                style={{ marginTop: 18 }}
-              >
-                <span style={{ color }} className="inline-flex items-center">
-                  {nodeIcon(n.kind)}
-                </span>
-                <span className="whitespace-nowrap">{n.label}</span>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Legend */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full pt-4">
-        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11.5px] font-medium text-[var(--color-ink-2)]">
-          <span className="inline-flex items-center gap-1.5">
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ background: 'var(--color-accent)' }}
+      {/* Edges — Manhattan paths that hug the grid lines */}
+      {NET_EDGES.map((e, i) => {
+        const a = byId[e.from]
+        const b = byId[e.to]
+        if (!a || !b) return null
+        const d = manhattanPath(a.x, a.y, b.x, b.y, e.corner)
+        return (
+          <g key={`${e.from}-${e.to}-${i}`}>
+            <path
+              d={d}
+              stroke="var(--color-line-strong)"
+              strokeWidth="1.25"
+              strokeDasharray="4 6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+              opacity="0.55"
             />
-            Restaurants
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#2563eb]" />
-            NGOs
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#7c3aed]" />
-            Animal rescues
-          </span>
-        </div>
-      </div>
-    </div>
+            {/* Traveling pulse dot */}
+            <circle r="5" fill="var(--color-accent)">
+              <animateMotion
+                path={d}
+                dur="3.2s"
+                begin={`${e.delay}s`}
+                repeatCount="indefinite"
+                rotate="auto"
+              />
+              <animate
+                attributeName="opacity"
+                values="0;1;1;0"
+                keyTimes="0;0.08;0.92;1"
+                dur="3.2s"
+                begin={`${e.delay}s`}
+                repeatCount="indefinite"
+              />
+            </circle>
+            {/* Soft glow trailing the dot */}
+            <circle r="11" fill="url(#pulseGrad)" opacity="0.5">
+              <animateMotion
+                path={d}
+                dur="3.2s"
+                begin={`${e.delay}s`}
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="opacity"
+                values="0;0.45;0.45;0"
+                keyTimes="0;0.08;0.92;1"
+                dur="3.2s"
+                begin={`${e.delay}s`}
+                repeatCount="indefinite"
+              />
+            </circle>
+          </g>
+        )
+      })}
+
+      {/* Nodes */}
+      {NET_NODES.map((n, i) => {
+        const color = nodeColor(n.kind)
+        return (
+          <g key={n.id}>
+            <circle
+              cx={n.x}
+              cy={n.y}
+              r="18"
+              fill={color}
+              opacity="0.18"
+              className="node-ring"
+              style={{ animationDelay: `${(i % 5) * 0.45}s` }}
+            />
+            <circle
+              cx={n.x}
+              cy={n.y}
+              r="11"
+              fill="var(--color-paper)"
+              stroke={color}
+              strokeWidth="2.5"
+            />
+            <circle cx={n.x} cy={n.y} r="3.5" fill={color} />
+          </g>
+        )
+      })}
+    </svg>
   )
 }
 
