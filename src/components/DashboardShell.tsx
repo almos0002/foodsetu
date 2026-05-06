@@ -90,7 +90,6 @@ const ADMIN_NAV: NavItem[] = [
   { label: 'Claims', to: '/admin/claims', icon: ClipboardList },
   { label: 'Reports', to: '/admin/reports', icon: Flag },
   { label: 'Cities', to: '/admin/cities', icon: BookOpen },
-  { label: 'Settings', to: '/settings/organization', icon: SettingsIcon },
 ]
 
 function navForRole(role: string | null | undefined): NavItem[] {

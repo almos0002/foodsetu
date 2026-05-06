@@ -68,9 +68,14 @@ function AdminDashboard() {
         ]}
         actions={
           <>
+            <Link to="/admin/users">
+              <Button leftIcon={<Users className="h-4 w-4" />}>
+                Manage users
+              </Button>
+            </Link>
             <Link to="/admin/organizations">
-              <Button leftIcon={<Building2 className="h-4 w-4" />}>
-                Review organizations
+              <Button variant="outline" leftIcon={<Building2 className="h-4 w-4" />}>
+                Organizations
               </Button>
             </Link>
             <Link to="/admin/reports">
