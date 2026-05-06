@@ -191,74 +191,275 @@ function NavBar({
 function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-[var(--color-line)]">
-      {/* Soft grid backdrop — faint, only on this section */}
+      {/* 3D perspective grid floor — receding into the distance */}
+      <div className="grid-bg-3d pointer-events-none" aria-hidden="true">
+        <div className="grid-bg-3d-floor" />
+      </div>
       <div
-        className="grid-bg pointer-events-none absolute inset-0 opacity-[0.55]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,var(--color-accent-soft)_0%,transparent_60%)] opacity-60"
         aria-hidden="true"
       />
+      {/* Vignette so text reads cleanly over the grid */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(ellipse_at_top,var(--color-accent-soft)_0%,transparent_55%)] opacity-50"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,var(--color-canvas)_85%)]"
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-[1200px] px-5 pb-20 pt-16 sm:px-8 sm:pb-28 sm:pt-24">
-        <div className="grid gap-14 lg:grid-cols-12 lg:items-center lg:gap-16">
-          <div className="lg:col-span-7">
-            <LiveBadge />
-            <p className="mt-6 text-[13px] font-medium uppercase tracking-[0.18em] text-[var(--color-accent)]">
-              Nepal&apos;s free surplus food network
-            </p>
-            <h1 className="mt-3 font-display text-[clamp(2.4rem,5.6vw,4.25rem)] leading-[1.05]">
-              Surplus food,
-              <br />
-              matched in <RotatingWord />
-              <br />
-              <span className="text-[var(--color-ink-3)]">not the bin.</span>
-            </h1>
-            <p className="mt-7 max-w-lg text-[17px] leading-[1.55] text-[var(--color-ink-2)]">
-              FoodSetu connects restaurants and bakeries with verified NGOs
-              and animal rescues. We handle the OTP handoff, paperwork, and
-              audit trail — so good food finds the right hands, fast.
-            </p>
+      <div className="relative mx-auto max-w-[920px] px-5 pb-16 pt-16 text-center sm:px-8 sm:pb-24 sm:pt-24">
+        <div className="flex justify-center">
+          <LiveBadge />
+        </div>
+        <p className="mt-6 text-[13px] font-medium uppercase tracking-[0.18em] text-[var(--color-accent)]">
+          Nepal&apos;s free surplus food network
+        </p>
+        <h1 className="mt-3 font-display text-[clamp(2.4rem,5.6vw,4.5rem)] leading-[1.05]">
+          Surplus food,
+          <br />
+          matched in <RotatingWord />
+          <br />
+          <span className="text-[var(--color-ink-3)]">not the bin.</span>
+        </h1>
+        <p className="mx-auto mt-7 max-w-xl text-[17px] leading-[1.55] text-[var(--color-ink-2)]">
+          FoodSetu connects restaurants and bakeries with verified NGOs
+          and animal rescues. We handle the OTP handoff, paperwork, and
+          audit trail — so good food finds the right hands, fast.
+        </p>
 
-            <div className="mt-9 flex flex-wrap items-center gap-2.5">
-              <Link
-                to="/register"
-                className="group inline-flex h-12 items-center gap-2 rounded-md bg-[var(--color-ink)] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
-              >
-                Start in 60 seconds
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <Link
-                to="/listings"
-                className="inline-flex h-12 items-center gap-2 rounded-md border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-5 text-[14px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-canvas-2)]"
-              >
-                Browse live listings
-              </Link>
-            </div>
+        <div className="mt-9 flex flex-wrap items-center justify-center gap-2.5">
+          <Link
+            to="/register"
+            className="group inline-flex h-12 items-center gap-2 rounded-md bg-[var(--color-ink)] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
+          >
+            Start in 60 seconds
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <Link
+            to="/listings"
+            className="inline-flex h-12 items-center gap-2 rounded-md border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-5 text-[14px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-canvas-2)]"
+          >
+            Browse live listings
+          </Link>
+        </div>
 
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-[var(--color-ink-2)]">
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
-                Verified partners only
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
-                Free, forever
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
-                No card required
-              </span>
-            </div>
-          </div>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-[var(--color-ink-2)]">
+          <span className="inline-flex items-center gap-1.5">
+            <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
+            Verified partners only
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
+            Free, forever
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
+            No card required
+          </span>
+        </div>
 
-          <div className="lg:col-span-5">
-            <HeroPanel />
-          </div>
+        {/* Animated delivery network — restaurants → NGOs / animal rescues */}
+        <div className="mt-14 sm:mt-20">
+          <DeliveryNetwork />
         </div>
       </div>
     </section>
+  )
+}
+
+/* ───────────────────────── Delivery network ──────────────────────────── */
+
+type NetNode = {
+  id: string
+  x: number
+  y: number
+  kind: 'restaurant' | 'ngo' | 'animal'
+  label: string
+}
+
+const NET_NODES: NetNode[] = [
+  { id: 'r1', x: 110, y: 70, kind: 'restaurant', label: 'Bhojan Griha' },
+  { id: 'r2', x: 880, y: 95, kind: 'restaurant', label: 'Thakali Kitchen' },
+  { id: 'r3', x: 230, y: 320, kind: 'restaurant', label: 'Himalayan Java' },
+  { id: 'r4', x: 760, y: 340, kind: 'restaurant', label: 'Roadhouse' },
+  { id: 'n1', x: 500, y: 200, kind: 'ngo', label: 'Sarvanam Trust' },
+  { id: 'n2', x: 380, y: 60, kind: 'ngo', label: 'Karuna Nepal' },
+  { id: 'n3', x: 640, y: 290, kind: 'ngo', label: 'CARE Nepal' },
+  { id: 'a1', x: 60, y: 200, kind: 'animal', label: 'KAT Centre' },
+  { id: 'a2', x: 940, y: 230, kind: 'animal', label: 'Project Mukti' },
+]
+
+const NET_EDGES: { from: string; to: string; delay: number }[] = [
+  { from: 'r1', to: 'n2', delay: 0 },
+  { from: 'r1', to: 'a1', delay: 1.4 },
+  { from: 'r2', to: 'n1', delay: 0.8 },
+  { from: 'r2', to: 'a2', delay: 2.1 },
+  { from: 'r3', to: 'n1', delay: 0.4 },
+  { from: 'r3', to: 'a1', delay: 1.8 },
+  { from: 'r4', to: 'n3', delay: 1.0 },
+  { from: 'r4', to: 'a2', delay: 2.6 },
+  { from: 'r3', to: 'n3', delay: 0.6 },
+  { from: 'r2', to: 'n2', delay: 1.6 },
+]
+
+function nodeColor(kind: NetNode['kind']) {
+  if (kind === 'restaurant') return 'var(--color-accent)'
+  if (kind === 'ngo') return '#2563eb'
+  return '#7c3aed'
+}
+
+function nodeIcon(kind: NetNode['kind']) {
+  if (kind === 'restaurant')
+    return <Utensils className="h-3 w-3" strokeWidth={2.4} />
+  if (kind === 'ngo') return <HeartHandshake className="h-3 w-3" strokeWidth={2.4} />
+  return <ShieldCheck className="h-3 w-3" strokeWidth={2.4} />
+}
+
+function DeliveryNetwork() {
+  const byId = Object.fromEntries(NET_NODES.map((n) => [n.id, n]))
+  return (
+    <div className="relative mx-auto aspect-[1000/400] w-full max-w-[1000px]">
+      <svg
+        viewBox="0 0 1000 400"
+        className="absolute inset-0 h-full w-full"
+        aria-hidden="true"
+      >
+        <defs>
+          <radialGradient id="pulseGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="1" />
+            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Edges — dashed paths */}
+        {NET_EDGES.map((e, i) => {
+          const a = byId[e.from]
+          const b = byId[e.to]
+          if (!a || !b) return null
+          const d = `M ${a.x} ${a.y} L ${b.x} ${b.y}`
+          return (
+            <g key={`${e.from}-${e.to}-${i}`}>
+              <path
+                d={d}
+                stroke="var(--color-line-strong)"
+                strokeWidth="1"
+                strokeDasharray="3 5"
+                fill="none"
+                opacity="0.7"
+              />
+              {/* Traveling pulse dot */}
+              <circle r="4.5" fill="var(--color-accent)">
+                <animateMotion
+                  path={d}
+                  dur="2.6s"
+                  begin={`${e.delay}s`}
+                  repeatCount="indefinite"
+                  rotate="auto"
+                />
+                <animate
+                  attributeName="opacity"
+                  values="0;1;1;0"
+                  keyTimes="0;0.1;0.9;1"
+                  dur="2.6s"
+                  begin={`${e.delay}s`}
+                  repeatCount="indefinite"
+                />
+              </circle>
+              {/* Soft glow trailing the dot */}
+              <circle r="9" fill="url(#pulseGrad)" opacity="0.6">
+                <animateMotion
+                  path={d}
+                  dur="2.6s"
+                  begin={`${e.delay}s`}
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="opacity"
+                  values="0;0.5;0.5;0"
+                  keyTimes="0;0.1;0.9;1"
+                  dur="2.6s"
+                  begin={`${e.delay}s`}
+                  repeatCount="indefinite"
+                />
+              </circle>
+            </g>
+          )
+        })}
+
+        {/* Nodes */}
+        {NET_NODES.map((n, i) => {
+          const color = nodeColor(n.kind)
+          return (
+            <g key={n.id}>
+              {/* Outer pulse ring */}
+              <circle
+                cx={n.x}
+                cy={n.y}
+                r="14"
+                fill={color}
+                opacity="0.18"
+                className="node-ring"
+                style={{ animationDelay: `${(i % 5) * 0.45}s` }}
+              />
+              <circle
+                cx={n.x}
+                cy={n.y}
+                r="10"
+                fill="var(--color-paper)"
+                stroke={color}
+                strokeWidth="2"
+              />
+            </g>
+          )
+        })}
+      </svg>
+
+      {/* Foreground node labels (HTML for crispness) */}
+      <div className="pointer-events-none absolute inset-0">
+        {NET_NODES.map((n) => {
+          const color = nodeColor(n.kind)
+          return (
+            <div
+              key={n.id}
+              className="absolute -translate-x-1/2 -translate-y-1/2"
+              style={{
+                left: `${(n.x / 1000) * 100}%`,
+                top: `${(n.y / 400) * 100}%`,
+              }}
+            >
+              <div
+                className="flex items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] px-2 py-1 text-[10.5px] font-medium text-[var(--color-ink)] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                style={{ marginTop: 18 }}
+              >
+                <span style={{ color }} className="inline-flex items-center">
+                  {nodeIcon(n.kind)}
+                </span>
+                <span className="whitespace-nowrap">{n.label}</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Legend */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full pt-4">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11.5px] font-medium text-[var(--color-ink-2)]">
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              className="h-2 w-2 rounded-full"
+              style={{ background: 'var(--color-accent)' }}
+            />
+            Restaurants
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-[#2563eb]" />
+            NGOs
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-[#7c3aed]" />
+            Animal rescues
+          </span>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -314,73 +515,6 @@ function RotatingWord() {
         </span>
       ))}
     </span>
-  )
-}
-
-function HeroPanel() {
-  return (
-    <div className="relative">
-      {/* Main image card */}
-      <div className="relative overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)]">
-        <div className="aspect-[5/6] w-full overflow-hidden">
-          <img
-            src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&auto=format&fit=crop&q=80"
-            alt="Freshly cooked surplus meal ready for pickup"
-            className="h-full w-full object-cover"
-          />
-        </div>
-
-        {/* Bottom info bar inside the card */}
-        <div className="absolute inset-x-3 bottom-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)]/95 p-3 backdrop-blur">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--color-accent)]">
-                <span className="live-dot" />
-                Available now
-              </div>
-              <div className="mt-1 truncate text-[14px] font-semibold">
-                28 portions · Daal bhat
-              </div>
-              <div className="mt-0.5 flex items-center gap-2 text-[11px] text-[var(--color-ink-3)] numeric">
-                <MapPin className="h-3 w-3" />
-                Thamel
-                <span className="h-2.5 w-px bg-[var(--color-line)]" />
-                <Clock className="h-3 w-3" />
-                Pickup by 9:30 PM
-              </div>
-            </div>
-            <button
-              type="button"
-              className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md bg-[var(--color-ink)] px-2.5 text-[11px] font-medium text-white"
-            >
-              Claim
-              <ArrowRight className="h-3 w-3" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Floating stat — top-right */}
-      <div className="absolute -right-3 -top-4 hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 sm:block">
-        <div className="text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
-          Avg. handoff
-        </div>
-        <div className="mt-1 text-[20px] font-semibold leading-none numeric">
-          7 min
-        </div>
-      </div>
-
-      {/* Floating stat — bottom-left */}
-      <div className="absolute -bottom-4 -left-3 hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 sm:block">
-        <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
-          <ShieldCheck className="h-3 w-3 text-[var(--color-accent)]" />
-          This week
-        </div>
-        <div className="mt-1 text-[20px] font-semibold leading-none numeric">
-          1,284 meals
-        </div>
-      </div>
-    </div>
   )
 }
 

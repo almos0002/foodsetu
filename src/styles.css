@@ -336,6 +336,57 @@ img { max-width: 100%; height: auto; }
   background-position: -1px -1px;
 }
 
+/* ── 3D perspective grid (hero floor) ────────────────────────────────── */
+@utility grid-bg-3d {
+  position: absolute;
+  inset: 0;
+  perspective: 900px;
+  perspective-origin: 50% 0%;
+  overflow: hidden;
+}
+@utility grid-bg-3d-floor {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -20%;
+  height: 140%;
+  background-image:
+    linear-gradient(to right, var(--color-line-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-line-strong) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: 0 0;
+  transform: rotateX(62deg) translateZ(0);
+  transform-origin: 50% 100%;
+  mask-image: radial-gradient(
+    ellipse 80% 70% at 50% 35%,
+    #000 0%,
+    rgba(0, 0, 0, 0.55) 45%,
+    transparent 80%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 80% 70% at 50% 35%,
+    #000 0%,
+    rgba(0, 0, 0, 0.55) 45%,
+    transparent 80%
+  );
+  animation: grid-3d-drift 22s linear infinite;
+}
+@keyframes grid-3d-drift {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 64px; }
+}
+
+/* ── Delivery network — node pop + pulse rings ───────────────────────── */
+@keyframes node-ping {
+  0% { transform: scale(0.6); opacity: 0.55; }
+  80%, 100% { transform: scale(2.4); opacity: 0; }
+}
+.node-ring {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: node-ping 2.4s cubic-bezier(0.2, 0.7, 0.2, 1) infinite;
+}
+
 /* ── Gradient mask for fade edges on marquees / scrollers ────────────── */
 @utility mask-fade-x {
   mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
