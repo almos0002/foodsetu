@@ -732,7 +732,7 @@ function Roles() {
             return (
               <div
                 key={c.title}
-                className="group flex flex-col squircle border border-[var(--color-line)] bg-[var(--color-paper)] p-7 transition-all hover:border-[var(--color-ink)]"
+                className="group flex flex-col squircle border border-[var(--color-line)] bg-[var(--color-paper)] p-7 transition-all hover:border-[var(--color-line-strong)] hover:bg-[var(--color-canvas-2)]"
               >
                 <div className="inline-flex h-10 w-10 items-center justify-center squircle border border-[var(--color-line)] bg-[var(--color-canvas-2)] text-[var(--color-ink)] transition-colors group-hover:border-[var(--color-accent)] group-hover:bg-[var(--color-accent-soft)] group-hover:text-[var(--color-accent-ink)]">
                   <Icon className="h-5 w-5" strokeWidth={1.6} />
