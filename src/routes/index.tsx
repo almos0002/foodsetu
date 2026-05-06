@@ -38,7 +38,7 @@ export const Route = createFileRoute('/')({
 })
 
 const FALLBACK_IMG =
-  'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&auto=format&fit=crop&q=80'
+  'https://v.greattibettour.com/photos/2021/07/newari-khaja-set-12-04765.jpg'
 
 function Home() {
   const { data: session, isPending } = useSession()
@@ -216,9 +216,9 @@ function Hero() {
               <span className="text-[var(--color-ink-3)]">not the bin.</span>
             </h1>
             <p className="mt-7 max-w-lg text-[17px] leading-[1.55] text-[var(--color-ink-2)]">
-              FoodSetu connects restaurants and bakeries with verified NGOs
-              and animal rescues. We handle the OTP handoff, paperwork, and
-              audit trail — so good food finds the right hands, fast.
+              FoodSetu connects restaurants and bakeries with verified NGOs and
+              animal rescues. We handle the OTP handoff, paperwork, and audit
+              trail — so good food finds the right hands, fast.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-2.5">
@@ -284,13 +284,15 @@ function RotatingWord() {
     )
     return () => clearInterval(id)
   }, [])
-  const widest = ROTATING_WORDS.reduce((a, b) =>
-    a.length >= b.length ? a : b,
-  )
+  const widest = ROTATING_WORDS.reduce((a, b) => (a.length >= b.length ? a : b))
   return (
     <span
       className="relative inline-block overflow-hidden align-bottom text-[var(--color-accent)]"
-      style={{ height: '1.05em', lineHeight: '1.05em', verticalAlign: 'bottom' }}
+      style={{
+        height: '1.05em',
+        lineHeight: '1.05em',
+        verticalAlign: 'bottom',
+      }}
     >
       <span className="invisible whitespace-nowrap" aria-hidden="true">
         {widest}
@@ -305,7 +307,8 @@ function RotatingWord() {
             transform:
               idx === i
                 ? 'translateY(0)'
-                : idx === (i - 1 + ROTATING_WORDS.length) % ROTATING_WORDS.length
+                : idx ===
+                    (i - 1 + ROTATING_WORDS.length) % ROTATING_WORDS.length
                   ? 'translateY(-100%)'
                   : 'translateY(100%)',
           }}
@@ -323,8 +326,8 @@ function HeroPanel() {
       {/* Main image card */}
       <div className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)]">
         <img
-          src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&auto=format&fit=crop&q=80"
-          alt="Freshly cooked surplus meal ready for pickup"
+          src="https://v.greattibettour.com/photos/2021/07/newari-khaja-set-12-04765.jpg"
+          alt="Freshly prepared Samay Baji ready for pickup"
           className="absolute inset-0 block h-full w-full object-cover"
           style={{ height: '100%', width: '100%' }}
         />
@@ -338,7 +341,7 @@ function HeroPanel() {
                 Available now
               </div>
               <div className="mt-1 truncate text-[14px] font-semibold">
-                28 portions · Daal bhat
+                28 portions · Samay Baji
               </div>
               <div className="mt-0.5 flex items-center gap-2 text-[11px] text-[var(--color-ink-3)] numeric">
                 <MapPin className="h-3 w-3" />
@@ -460,8 +463,8 @@ function HowItWorks() {
               Zero paperwork.
             </h2>
             <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[var(--color-ink-2)]">
-              The whole flow is built around the people doing the work — not
-              the people watching it. No spreadsheets, no chasing.
+              The whole flow is built around the people doing the work — not the
+              people watching it. No spreadsheets, no chasing.
             </p>
           </div>
 
@@ -677,14 +680,22 @@ function Roles() {
     {
       title: 'Restaurants & bakeries',
       desc: 'Turn closing-time surplus into a 60-second post. Built-in pickup windows mean no calls and no negotiation.',
-      points: ['Free, unlimited posts', 'Photo + auto category', 'Cancel anytime'],
+      points: [
+        'Free, unlimited posts',
+        'Photo + auto category',
+        'Cancel anytime',
+      ],
       cta: 'Become a partner kitchen',
       icon: Utensils,
     },
     {
       title: 'NGOs & feeding programs',
       desc: 'See only human-safe meals near you. Reserve in one tap, get the address and a contact line on accept.',
-      points: ['City-filtered feed', 'Verified-only access', 'Audit history per claim'],
+      points: [
+        'City-filtered feed',
+        'Verified-only access',
+        'Audit history per claim',
+      ],
       cta: 'Join as a feeding NGO',
       icon: HeartHandshake,
     },
