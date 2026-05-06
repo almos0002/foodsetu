@@ -236,7 +236,7 @@ function AdminCities() {
       <PageHeader
         eyebrow="Operations"
         title="Cities"
-        description="Cities listed here power the city dropdown shown to restaurants and claimants. Disabling a city hides it from new sign-ups but keeps existing references intact."
+        description="Powers the city dropdown for sign-ups. Disabling hides a city from new users without affecting existing ones."
         actions={
           <Button onClick={startCreate} leftIcon={<Plus className="h-4 w-4" />}>
             New city
