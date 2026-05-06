@@ -317,17 +317,240 @@ function RotatingWord() {
   )
 }
 
+/**
+ * HeroNetwork
+ *
+ * Animated SVG that visualises FoodSetu's core loop: surplus food (orange
+ * donor pins, top half) being routed to verified claimants (teal claimant
+ * pins, bottom half). Dots travel along curved paths with staggered timing,
+ * giving a "live network" feel. Pure SVG + CSS — no JS animation lib yet.
+ */
+function HeroNetwork() {
+  // Donor (D) and claimant (C) anchor points in the 400×500 viewBox.
+  const donors = [
+    { x: 70, y: 95, label: 'Bakery' },
+    { x: 200, y: 60, label: 'Hotel' },
+    { x: 330, y: 110, label: 'Cafe' },
+  ]
+  const claimants = [
+    { x: 90, y: 380, kind: 'NGO' },
+    { x: 220, y: 420, kind: 'Shelter' },
+    { x: 320, y: 370, kind: 'Rescue' },
+  ]
+  // Each route: donor index → claimant index, with a stagger delay (s).
+  const routes = [
+    { from: 0, to: 0, delay: 0 },
+    { from: 1, to: 1, delay: 1.1 },
+    { from: 2, to: 2, delay: 2.2 },
+    { from: 0, to: 1, delay: 3.3 },
+    { from: 2, to: 1, delay: 4.0 },
+  ]
+
+  // Build a quadratic bezier from (a) to (b) bowing through the middle so
+  // routes feel organic, not like a starburst.
+  const curve = (
+    a: { x: number; y: number },
+    b: { x: number; y: number },
+    bow = 30,
+  ) => {
+    const mx = (a.x + b.x) / 2
+    const my = (a.y + b.y) / 2
+    const dx = b.x - a.x
+    const dy = b.y - a.y
+    const len = Math.hypot(dx, dy) || 1
+    // perpendicular offset
+    const px = -dy / len
+    const py = dx / len
+    return `M ${a.x} ${a.y} Q ${mx + px * bow} ${my + py * bow} ${b.x} ${b.y}`
+  }
+
+  return (
+    <div className="relative h-full w-full bg-[var(--color-canvas)]">
+      {/* Soft grid backdrop */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 opacity-60"
+        style={{
+          backgroundImage:
+            'linear-gradient(var(--color-line) 1px, transparent 1px), linear-gradient(90deg, var(--color-line) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+          maskImage:
+            'radial-gradient(ellipse at center, black 55%, transparent 88%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse at center, black 55%, transparent 88%)',
+        }}
+      />
+      {/* Top accent glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,var(--color-accent-soft)_0%,transparent_70%)] opacity-70"
+      />
+
+      {/* Section labels */}
+      <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] bg-[var(--color-paper)]/85 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-2)] backdrop-blur">
+        <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
+        Donors
+      </div>
+      <div className="absolute bottom-20 right-4 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] bg-[var(--color-paper)]/85 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-2)] backdrop-blur">
+        <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-info)]" />
+        Claimants
+      </div>
+
+      <svg
+        viewBox="0 0 400 500"
+        preserveAspectRatio="xMidYMid slice"
+        className="absolute inset-0 h-full w-full"
+        aria-hidden="true"
+      >
+        <defs>
+          <radialGradient id="hero-donor-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="hero-claim-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="var(--color-info)" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="var(--color-info)" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Routes — faint always-on, animated dot travels along each */}
+        {routes.map((r, i) => {
+          const a = donors[r.from]
+          const b = claimants[r.to]
+          const d = curve(a, b, i % 2 === 0 ? 35 : -35)
+          return (
+            <g key={i}>
+              <path
+                d={d}
+                fill="none"
+                stroke="var(--color-line-strong)"
+                strokeWidth="1"
+                strokeDasharray="3 4"
+                opacity="0.55"
+              />
+              <circle r="4" fill="var(--color-accent)">
+                <animateMotion
+                  dur="4.4s"
+                  begin={`${r.delay}s`}
+                  repeatCount="indefinite"
+                  path={d}
+                  rotate="auto"
+                />
+                <animate
+                  attributeName="opacity"
+                  values="0;1;1;0"
+                  keyTimes="0;0.05;0.85;1"
+                  dur="4.4s"
+                  begin={`${r.delay}s`}
+                  repeatCount="indefinite"
+                />
+              </circle>
+              {/* trailing fade */}
+              <circle r="2.5" fill="var(--color-accent)" opacity="0.5">
+                <animateMotion
+                  dur="4.4s"
+                  begin={`${r.delay + 0.18}s`}
+                  repeatCount="indefinite"
+                  path={d}
+                />
+                <animate
+                  attributeName="opacity"
+                  values="0;0.4;0.4;0"
+                  keyTimes="0;0.1;0.85;1"
+                  dur="4.4s"
+                  begin={`${r.delay + 0.18}s`}
+                  repeatCount="indefinite"
+                />
+              </circle>
+            </g>
+          )
+        })}
+
+        {/* Donor pins */}
+        {donors.map((p, i) => (
+          <g key={`d${i}`}>
+            <circle cx={p.x} cy={p.y} r="22" fill="url(#hero-donor-glow)">
+              <animate
+                attributeName="r"
+                values="18;26;18"
+                dur="2.6s"
+                begin={`${i * 0.4}s`}
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r="6"
+              fill="var(--color-accent)"
+              stroke="var(--color-paper)"
+              strokeWidth="2"
+            />
+          </g>
+        ))}
+
+        {/* Claimant pins */}
+        {claimants.map((p, i) => (
+          <g key={`c${i}`}>
+            <circle cx={p.x} cy={p.y} r="20" fill="url(#hero-claim-glow)">
+              <animate
+                attributeName="r"
+                values="16;24;16"
+                dur="2.8s"
+                begin={`${0.6 + i * 0.4}s`}
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r="5.5"
+              fill="var(--color-info)"
+              stroke="var(--color-paper)"
+              strokeWidth="2"
+            />
+          </g>
+        ))}
+      </svg>
+
+      {/* Pin labels overlay (HTML so font matches the rest of the site) */}
+      <div className="pointer-events-none absolute inset-0">
+        {donors.map((p, i) => (
+          <span
+            key={`dl${i}`}
+            className="absolute -translate-x-1/2 rounded-md border border-[var(--color-line)] bg-[var(--color-paper)] px-1.5 py-0.5 text-[9.5px] font-medium text-[var(--color-ink-2)] shadow-sm"
+            style={{
+              left: `${(p.x / 400) * 100}%`,
+              top: `calc(${(p.y / 500) * 100}% - 22px)`,
+            }}
+          >
+            {p.label}
+          </span>
+        ))}
+        {claimants.map((p, i) => (
+          <span
+            key={`cl${i}`}
+            className="absolute -translate-x-1/2 rounded-md border border-[var(--color-line)] bg-[var(--color-paper)] px-1.5 py-0.5 text-[9.5px] font-medium text-[var(--color-ink-2)] shadow-sm"
+            style={{
+              left: `${(p.x / 400) * 100}%`,
+              top: `calc(${(p.y / 500) * 100}% + 12px)`,
+            }}
+          >
+            {p.kind}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function HeroPanel() {
   return (
     <div className="relative">
-      {/* Main image card */}
+      {/* Main visual card */}
       <div className="relative overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)]">
         <div className="aspect-[5/6] w-full overflow-hidden">
-          <img
-            src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&auto=format&fit=crop&q=80"
-            alt="Freshly cooked surplus meal ready for pickup"
-            className="h-full w-full object-cover"
-          />
+          <HeroNetwork />
         </div>
 
         {/* Bottom info bar inside the card */}
