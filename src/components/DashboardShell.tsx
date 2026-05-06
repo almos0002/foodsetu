@@ -231,34 +231,6 @@ export function DashboardShell({
 
         <main className="min-w-0 flex-1 px-4 py-8 md:px-8">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
-                <p className="text-sm text-gray-600">
-                  {organization?.name ? (
-                    <>
-                      <span className="font-medium text-gray-800">
-                        {organization.name}
-                      </span>{' '}
-                      · {roleLabel}
-                    </>
-                  ) : (
-                    <>{roleLabel} workspace</>
-                  )}
-                </p>
-              </div>
-              {status ? (
-                <span
-                  className={`inline-flex items-center gap-1.5 squircle px-2.5 py-1 text-xs font-medium ${
-                    VERIFICATION_BADGE_CLASSES[status] ?? ''
-                  }`}
-                >
-                  <StatusIcon status={status} />
-                  {VERIFICATION_LABELS[status] ?? status}
-                </span>
-              ) : null}
-            </div>
-
             {status && status !== 'VERIFIED' ? (
               <VerificationBanner status={status} />
             ) : null}
