@@ -48,6 +48,8 @@ npx drizzle-kit generate --name <change_description> # For domain schema changes
 - **Atomic Claim Management**: Claim creation, acceptance, rejection, and pickup verification are handled via Drizzle transactions with race guards, status checks, and OTPs to ensure data integrity and prevent concurrency issues.
 - **OTP Handoff Model**: OTPs are generated on claim acceptance but are only visible to the claimant, while the restaurant verifies the code, ensuring secure and private food handoff.
 - **Listing Expiry Sweep**: An expiry sweep runs opportunistically on hot-path data fetches to keep listing statuses current without requiring a dedicated cron job.
+- **Session Cookie Cache**: Better Auth `session.cookieCache` (60s TTL) avoids hitting the DB on every `getSession()` call. Combined with router preload (`defaultPreloadStaleTime: 30s`), this materially reduces nav latency.
+- **Card Image Sizing**: All listing cards use fixed `h-48 object-cover` for visual consistency. The hero panel uses an explicit pixel height (`h-[520px]`) rather than `aspect-*` because absolute-positioned `h-full` images don't reliably resolve against an `aspect-ratio`-derived container height.
 
 ## Product
 

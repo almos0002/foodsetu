@@ -321,14 +321,13 @@ function HeroPanel() {
   return (
     <div className="relative">
       {/* Main image card */}
-      <div className="relative overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)]">
-        <div className="h-[520px] w-full overflow-hidden">
-          <img
-            src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&auto=format&fit=crop&q=80"
-            alt="Freshly cooked surplus meal ready for pickup"
-            className="h-full w-full object-cover"
-          />
-        </div>
+      <div className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)]">
+        <img
+          src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&auto=format&fit=crop&q=80"
+          alt="Freshly cooked surplus meal ready for pickup"
+          className="absolute inset-0 block h-full w-full object-cover"
+          style={{ height: '100%', width: '100%' }}
+        />
 
         {/* Bottom info bar inside the card */}
         <div className="absolute inset-x-3 bottom-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)]/95 p-3 backdrop-blur">
