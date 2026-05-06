@@ -266,8 +266,19 @@ function Hero() {
 
 function NetworkPanel() {
   return (
-    <div className="relative aspect-[5/4] w-full">
-      <DeliveryNetwork />
+    <div
+      className="relative aspect-[5/4] w-full"
+      style={{ perspective: '1300px', perspectiveOrigin: '50% 30%' }}
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          transform: 'rotateX(28deg) rotateZ(-2deg)',
+          transformOrigin: '50% 60%',
+        }}
+      >
+        <DeliveryNetwork />
+      </div>
 
       {/* Legend (no card chrome) */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full pt-4">
