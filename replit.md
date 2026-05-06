@@ -58,6 +58,7 @@ npm run lint       # ESLint
 - `src/lib/org-server.ts`: Server functions for organization management.
 - `src/lib/expiry-server.ts`: Logic for expiring old listings.
 - `src/lib/permissions.ts`: Defines enums, roles, and status constants.
+- `src/components/hero/IsometricHandoff.tsx`: Three.js / r3f animated globe in the hero (low-poly sphere, glowing donor/receiver city dots across Nepal, animated bezier arcs with traveling pulses). Client-only via `mounted` flag; respects `prefers-reduced-motion`.
 
 ## Architecture decisions
 

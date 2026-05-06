@@ -1,24 +1,62 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { ContactShadows, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 
 const COLOR = {
-  ground: '#f4f1ea',
-  road: '#d8d4ca',
-  donor: '#e08a3c',
-  donorRoof: '#b9601f',
-  ngo: '#1e8a55',
-  ngoRoof: '#0a5c36',
-  bike: '#1f1f1f',
-  cargo: '#ff8c2b',
-  cargoGlow: '#ffb068',
-  ink: '#0a0a0a',
+  sphere: '#1b2330',
+  sphereLand: '#2a3645',
+  grid: '#3a4757',
+  donor: '#ff8a3c',
+  donorGlow: '#ffb676',
+  receiver: '#3ddb88',
+  receiverGlow: '#9af2c0',
+  arc: '#cfd6e0',
+  atmosphere: '#7fb8ff',
+  rim: '#ffd9a8',
 }
 
-const DONOR_POS = new THREE.Vector3(-2.6, 0, 0)
-const NGO_POS = new THREE.Vector3(2.6, 0, 0)
-const CYCLE = 9
+const RADIUS = 1.55
+
+function llToVec3(lat: number, lng: number, r = RADIUS) {
+  const phi = (90 - lat) * (Math.PI / 180)
+  const theta = (lng + 180) * (Math.PI / 180)
+  return new THREE.Vector3(
+    -r * Math.sin(phi) * Math.cos(theta),
+    r * Math.cos(phi),
+    r * Math.sin(phi) * Math.sin(theta),
+  )
+}
+
+type Role = 'donor' | 'receiver'
+const CITIES: Array<{ name: string; lat: number; lng: number; role: Role }> = [
+  { name: 'Kathmandu',  lat: 27.7172, lng: 85.3240, role: 'donor' },
+  { name: 'Pokhara',    lat: 28.2096, lng: 83.9856, role: 'receiver' },
+  { name: 'Lalitpur',   lat: 27.6588, lng: 85.3247, role: 'receiver' },
+  { name: 'Biratnagar', lat: 26.4525, lng: 87.2718, role: 'donor' },
+  { name: 'Bharatpur',  lat: 27.6766, lng: 84.4385, role: 'donor' },
+  { name: 'Birgunj',    lat: 27.0067, lng: 84.8672, role: 'receiver' },
+  { name: 'Janakpur',   lat: 26.7288, lng: 85.9266, role: 'receiver' },
+  { name: 'Nepalgunj',  lat: 28.0500, lng: 81.6167, role: 'donor' },
+  { name: 'Butwal',     lat: 27.7000, lng: 83.4486, role: 'receiver' },
+  { name: 'Dharan',     lat: 26.8147, lng: 87.2769, role: 'donor' },
+  { name: 'Delhi',      lat: 28.6139, lng: 77.2090, role: 'donor' },
+  { name: 'Patna',      lat: 25.5941, lng: 85.1376, role: 'receiver' },
+  { name: 'Lhasa',      lat: 29.6500, lng: 91.1000, role: 'receiver' },
+  { name: 'Dhaka',      lat: 23.8103, lng: 90.4125, role: 'receiver' },
+]
+
+// donor index → receiver index, with a phase offset (0..1) so pulses stagger
+const ROUTES: Array<[number, number, number]> = [
+  [0, 1, 0.00],
+  [4, 2, 0.14],
+  [3, 6, 0.28],
+  [7, 8, 0.42],
+  [9, 5, 0.56],
+  [10, 11, 0.70],
+  [0, 12, 0.84],
+  [3, 13, 0.20],
+  [10, 0, 0.62],
+]
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false)
@@ -32,279 +70,345 @@ function useReducedMotion() {
   return reduced
 }
 
-function Building({
+/* ─────────────────────────  Globe core  ───────────────────────── */
+
+function Globe() {
+  return (
+    <group>
+      {/* Solid base sphere */}
+      <mesh>
+        <sphereGeometry args={[RADIUS, 64, 64]} />
+        <meshStandardMaterial
+          color={COLOR.sphere}
+          roughness={0.9}
+          metalness={0.05}
+        />
+      </mesh>
+
+      {/* Lat/long wire grid — premium, very subtle */}
+      <mesh>
+        <sphereGeometry args={[RADIUS * 1.001, 36, 18]} />
+        <meshBasicMaterial
+          color={COLOR.grid}
+          wireframe
+          transparent
+          opacity={0.22}
+        />
+      </mesh>
+
+      {/* Inner equatorial accent ring */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[RADIUS * 1.004, RADIUS * 1.012, 96]} />
+        <meshBasicMaterial
+          color={COLOR.grid}
+          transparent
+          opacity={0.35}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Atmosphere halo — additive backside */}
+      <mesh scale={1.13}>
+        <sphereGeometry args={[RADIUS, 48, 48]} />
+        <meshBasicMaterial
+          color={COLOR.atmosphere}
+          side={THREE.BackSide}
+          transparent
+          opacity={0.18}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh scale={1.06}>
+        <sphereGeometry args={[RADIUS, 48, 48]} />
+        <meshBasicMaterial
+          color={COLOR.atmosphere}
+          side={THREE.BackSide}
+          transparent
+          opacity={0.22}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
+  )
+}
+
+/* ─────────────────────────  City dots  ───────────────────────── */
+
+function CityDot({
   position,
-  bodyColor,
-  roofColor,
-  accent,
+  role,
+  pulsePhase,
 }: {
   position: THREE.Vector3
-  bodyColor: string
-  roofColor: string
-  accent: 'donor' | 'ngo'
+  role: Role
+  pulsePhase: number
 }) {
-  return (
-    <group position={position}>
-      <RoundedBox args={[1.6, 1.4, 1.4]} radius={0.08} smoothness={4} position={[0, 0.7, 0]} castShadow receiveShadow>
-        <meshStandardMaterial color={bodyColor} roughness={0.7} />
-      </RoundedBox>
-      <mesh position={[0, 1.55, 0]} castShadow>
-        <coneGeometry args={[1.25, 0.55, 4]} />
-        <meshStandardMaterial color={roofColor} roughness={0.65} />
-      </mesh>
-      <mesh position={[0, 0.45, 0.71]}>
-        <planeGeometry args={[0.42, 0.7]} />
-        <meshStandardMaterial color={COLOR.ink} roughness={0.9} />
-      </mesh>
-      <mesh position={[-0.45, 0.95, 0.71]}>
-        <planeGeometry args={[0.32, 0.32]} />
-        <meshStandardMaterial color="#fff6dd" emissive="#ffd98a" emissiveIntensity={0.6} />
-      </mesh>
-      <mesh position={[0.45, 0.95, 0.71]}>
-        <planeGeometry args={[0.32, 0.32]} />
-        <meshStandardMaterial color="#fff6dd" emissive="#ffd98a" emissiveIntensity={0.6} />
-      </mesh>
-      {accent === 'donor' ? (
-        <mesh position={[0, 2.1, 0]}>
-          <boxGeometry args={[0.18, 0.4, 0.18]} />
-          <meshStandardMaterial color={roofColor} />
-        </mesh>
-      ) : (
-        <group position={[0, 1.95, 0.71]}>
-          <mesh>
-            <boxGeometry args={[0.08, 0.32, 0.04]} />
-            <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
-          </mesh>
-          <mesh>
-            <boxGeometry args={[0.24, 0.08, 0.04]} />
-            <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
-          </mesh>
-        </group>
-      )}
-    </group>
-  )
-}
+  const ringRef = useRef<THREE.Mesh>(null)
+  const matRef = useRef<THREE.MeshBasicMaterial>(null)
+  const color = role === 'donor' ? COLOR.donor : COLOR.receiver
+  const glow = role === 'donor' ? COLOR.donorGlow : COLOR.receiverGlow
 
-function Bike({ phase }: { phase: number }) {
-  const group = useRef<THREE.Group>(null)
-  const cargo = useRef<THREE.Group>(null)
-  const wheels = useRef<THREE.Mesh[]>([])
-  const setWheel = (i: number) => (m: THREE.Mesh | null) => {
-    if (m) wheels.current[i] = m
-  }
+  // Orient ring tangent to the sphere surface
+  const quat = useMemo(() => {
+    const up = new THREE.Vector3(0, 0, 1)
+    const normal = position.clone().normalize()
+    return new THREE.Quaternion().setFromUnitVectors(up, normal)
+  }, [position])
 
-  useFrame((_, dt) => {
-    if (!group.current) return
-    let x = 0
-    let facing: 1 | -1 = 1
-    let cargoVisible = 0
-    let cargoY = 0
-
-    if (phase < 0.12) {
-      x = DONOR_POS.x + 0.8
-      facing = 1
-      cargoVisible = THREE.MathUtils.smoothstep(phase, 0.04, 0.12)
-      cargoY = THREE.MathUtils.lerp(1.2, 0.45, cargoVisible)
-    } else if (phase < 0.5) {
-      const t = (phase - 0.12) / 0.38
-      x = THREE.MathUtils.lerp(DONOR_POS.x + 0.8, NGO_POS.x - 0.8, t)
-      facing = 1
-      cargoVisible = 1
-    } else if (phase < 0.62) {
-      x = NGO_POS.x - 0.8
-      facing = 1
-      cargoVisible = 1 - THREE.MathUtils.smoothstep(phase, 0.5, 0.62)
-      cargoY = THREE.MathUtils.lerp(0.45, 1.2, 1 - cargoVisible)
-    } else if (phase < 0.95) {
-      const t = (phase - 0.62) / 0.33
-      x = THREE.MathUtils.lerp(NGO_POS.x - 0.8, DONOR_POS.x + 0.8, t)
-      facing = -1
-      cargoVisible = 0
-    } else {
-      x = DONOR_POS.x + 0.8
-      facing = 1
-      cargoVisible = 0
+  useFrame((state) => {
+    const t = (state.clock.elapsedTime + pulsePhase) % 2.4
+    const k = t / 2.4
+    if (ringRef.current) {
+      const s = 1 + k * 4
+      ringRef.current.scale.set(s, s, 1)
     }
-
-    const moving =
-      (phase >= 0.12 && phase < 0.5) || (phase >= 0.62 && phase < 0.95)
-    const bob = moving ? Math.sin(phase * Math.PI * 2 * 8) * 0.025 : 0
-    group.current.position.set(x, 0.18 + bob, 0)
-    group.current.rotation.y = facing > 0 ? 0 : Math.PI
-
-    if (cargo.current) {
-      cargo.current.scale.setScalar(cargoVisible)
-      cargo.current.position.y = cargoY > 0 ? cargoY : 0.45
-      cargo.current.rotation.y += dt * 1.4
-    }
-    if (moving) {
-      const spin = dt * 12 * facing
-      for (const w of wheels.current) w.rotation.z -= spin
+    if (matRef.current) {
+      matRef.current.opacity = (1 - k) * 0.55
     }
   })
 
   return (
-    <group ref={group}>
-      <RoundedBox args={[0.7, 0.18, 0.32]} radius={0.06} position={[0, 0.05, 0]} castShadow>
-        <meshStandardMaterial color={COLOR.bike} roughness={0.5} metalness={0.3} />
-      </RoundedBox>
-      {[
-        [-0.28, -0.05, 0.16],
-        [0.28, -0.05, 0.16],
-        [-0.28, -0.05, -0.16],
-        [0.28, -0.05, -0.16],
-      ].map(([x, y, z], i) => (
-        <mesh
-          key={i}
-          ref={setWheel(i)}
-          position={[x, y, z]}
-          rotation={[Math.PI / 2, 0, 0]}
-          castShadow
-        >
-          <torusGeometry args={[0.12, 0.04, 8, 16]} />
-          <meshStandardMaterial color="#111" roughness={0.9} />
-        </mesh>
-      ))}
-      <mesh position={[0.18, 0.32, 0]} castShadow>
-        <capsuleGeometry args={[0.12, 0.28, 4, 8]} />
-        <meshStandardMaterial color="#3b3b3b" />
+    <group position={position} quaternion={quat}>
+      {/* Outward stem */}
+      <mesh position={[0, 0, 0.04]}>
+        <sphereGeometry args={[0.022, 12, 12]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={glow}
+          emissiveIntensity={1.4}
+          roughness={0.3}
+        />
       </mesh>
-      <mesh position={[0.18, 0.55, 0]} castShadow>
-        <sphereGeometry args={[0.12, 12, 12]} />
-        <meshStandardMaterial color="#f0c89a" />
+      {/* Halo dot */}
+      <mesh position={[0, 0, 0.04]}>
+        <circleGeometry args={[0.05, 24]} />
+        <meshBasicMaterial color={glow} transparent opacity={0.35} />
       </mesh>
-      <RoundedBox args={[0.34, 0.34, 0.34]} radius={0.05} position={[-0.22, 0.32, 0]} castShadow>
-        <meshStandardMaterial color={COLOR.donorRoof} roughness={0.6} />
-      </RoundedBox>
-      <group ref={cargo} position={[-0.22, 0.45, 0]}>
-        <RoundedBox args={[0.22, 0.22, 0.22]} radius={0.04}>
-          <meshStandardMaterial
-            color={COLOR.cargo}
-            emissive={COLOR.cargoGlow}
-            emissiveIntensity={0.7}
-            roughness={0.4}
-          />
-        </RoundedBox>
-        <pointLight color={COLOR.cargoGlow} intensity={0.8} distance={1.6} />
-      </group>
+      {/* Expanding ping ring */}
+      <mesh ref={ringRef} position={[0, 0, 0.045]}>
+        <ringGeometry args={[0.05, 0.058, 32]} />
+        <meshBasicMaterial
+          ref={matRef}
+          color={glow}
+          transparent
+          opacity={0.5}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
     </group>
   )
 }
 
-function Ground() {
+/* ─────────────────────────  Arc + pulse  ───────────────────────── */
+
+function makeArcCurve(a: THREE.Vector3, b: THREE.Vector3) {
+  const mid = a.clone().add(b).multiplyScalar(0.5)
+  const dist = a.distanceTo(b)
+  // Lift control point along the midpoint normal — taller for longer arcs
+  const lift = THREE.MathUtils.clamp(dist * 0.55, 0.15, 0.9)
+  mid.normalize().multiplyScalar(RADIUS + lift)
+  return new THREE.QuadraticBezierCurve3(a.clone(), mid, b.clone())
+}
+
+function Arc({
+  from,
+  to,
+  phaseOffset,
+  cycle,
+}: {
+  from: THREE.Vector3
+  to: THREE.Vector3
+  phaseOffset: number
+  cycle: number
+}) {
+  const curve = useMemo(() => makeArcCurve(from, to), [from, to])
+
+  // Static line geometry
+  const lineGeom = useMemo(() => {
+    const pts = curve.getPoints(64)
+    const g = new THREE.BufferGeometry().setFromPoints(pts)
+    return g
+  }, [curve])
+
+  // Animated trail geometry (recomputed each frame from a sliding window of curve points)
+  const trailGeom = useMemo(() => {
+    const positions = new Float32Array(24 * 3)
+    const g = new THREE.BufferGeometry()
+    g.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    return g
+  }, [])
+
+  const head = useRef<THREE.Mesh>(null)
+  const headMat = useRef<THREE.MeshBasicMaterial>(null)
+  const trailMat = useRef<THREE.LineBasicMaterial>(null)
+
+  useFrame((state) => {
+    const t = ((state.clock.elapsedTime / cycle + phaseOffset) % 1)
+    // Use a smooth window — pulse fades in, races, fades out
+    const visible = t < 0.78
+    const local = THREE.MathUtils.clamp(t / 0.78, 0, 1)
+
+    if (head.current && headMat.current) {
+      const p = curve.getPoint(local)
+      head.current.position.copy(p)
+      const fade =
+        local < 0.08
+          ? local / 0.08
+          : local > 0.92
+            ? (1 - local) / 0.08
+            : 1
+      headMat.current.opacity = visible ? fade : 0
+      const s = visible ? 1 : 0
+      head.current.scale.setScalar(s)
+    }
+
+    // Trail: 24 points behind the head along the curve
+    if (trailMat.current) {
+      const positions = trailGeom.attributes.position.array as Float32Array
+      const trailLen = 0.16
+      for (let i = 0; i < 24; i++) {
+        const u = local - (i / 23) * trailLen
+        const uc = THREE.MathUtils.clamp(u, 0, 1)
+        const p = curve.getPoint(uc)
+        positions[i * 3] = p.x
+        positions[i * 3 + 1] = p.y
+        positions[i * 3 + 2] = p.z
+      }
+      trailGeom.attributes.position.needsUpdate = true
+      trailMat.current.opacity = visible ? 0.85 : 0
+    }
+  })
+
   return (
-    <>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-        <circleGeometry args={[7, 48]} />
-        <meshStandardMaterial color={COLOR.ground} roughness={1} />
+    <group>
+      {/* Faint base arc */}
+      <line>
+        <primitive object={lineGeom} attach="geometry" />
+        <lineBasicMaterial
+          color={COLOR.arc}
+          transparent
+          opacity={0.16}
+          depthWrite={false}
+        />
+      </line>
+      {/* Bright leading trail */}
+      <line>
+        <primitive object={trailGeom} attach="geometry" />
+        <lineBasicMaterial
+          ref={trailMat}
+          color={COLOR.donorGlow}
+          transparent
+          opacity={0.85}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </line>
+      {/* Head pulse */}
+      <mesh ref={head}>
+        <sphereGeometry args={[0.035, 16, 16]} />
+        <meshBasicMaterial
+          ref={headMat}
+          color={COLOR.donorGlow}
+          transparent
+          opacity={1}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]} receiveShadow>
-        <planeGeometry args={[5.2, 0.55]} />
-        <meshStandardMaterial color={COLOR.road} roughness={1} />
-      </mesh>
-      {[-1.6, -0.6, 0.4, 1.4].map((x) => (
-        <mesh
-          key={x}
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[x, 0.01, 0]}
-          receiveShadow
-        >
-          <planeGeometry args={[0.32, 0.05]} />
-          <meshStandardMaterial color="#fff" />
-        </mesh>
-      ))}
-      {[
-        [-3.5, 0, 1.6],
-        [3.4, 0, -1.7],
-        [-3.0, 0, -1.9],
-        [3.1, 0, 1.5],
-      ].map(([x, y, z], i) => (
-        <group key={i} position={[x, y, z]}>
-          <mesh position={[0, 0.18, 0]} castShadow>
-            <cylinderGeometry args={[0.05, 0.06, 0.36, 6]} />
-            <meshStandardMaterial color="#7a5a3b" />
-          </mesh>
-          <mesh position={[0, 0.5, 0]} castShadow>
-            <icosahedronGeometry args={[0.28, 0]} />
-            <meshStandardMaterial color={COLOR.ngo} roughness={0.8} />
-          </mesh>
-        </group>
-      ))}
-    </>
+    </group>
   )
 }
+
+/* ─────────────────────────  Scene  ───────────────────────── */
 
 function Scene({ animated }: { animated: boolean }) {
-  const camera = useRef<THREE.PerspectiveCamera>(null)
-  const phaseRef = useRef(animated ? 0 : 0.3)
+  const root = useRef<THREE.Group>(null)
+
+  // Pre-compute world positions of every city (sit them very slightly above surface)
+  const cityPositions = useMemo(
+    () => CITIES.map((c) => llToVec3(c.lat, c.lng, RADIUS * 1.005)),
+    [],
+  )
+
+  // Initial rotation so Nepal sits center-frame, with a small downward latitude tilt
+  const initialRot = useMemo(() => {
+    // Map Kathmandu (lng 85.32, lat 27.7) to face +z (camera)
+    const targetLng = 85.32
+    const yRot = -((targetLng + 180) * Math.PI) / 180 + Math.PI / 2
+    const xRot = (27 * Math.PI) / 180
+    return { x: xRot, y: yRot }
+  }, [])
+
+  useEffect(() => {
+    if (root.current) {
+      root.current.rotation.set(initialRot.x, initialRot.y, 0)
+    }
+  }, [initialRot])
 
   useFrame((state, dt) => {
+    if (!root.current) return
     if (animated) {
-      phaseRef.current = (phaseRef.current + dt / CYCLE) % 1
+      root.current.rotation.y += dt * 0.045
     }
     const t = state.clock.elapsedTime
-    const cam = state.camera
-    const angle = Math.sin(t * 0.18) * 0.06
-    const radius = 8.2
-    cam.position.x = Math.sin(angle) * radius + Math.cos(angle) * 0.2
-    cam.position.z = Math.cos(angle) * radius
-    cam.position.y = 6 + Math.sin(t * 0.4) * 0.08
-    cam.lookAt(0, 0.6, 0)
+    // Gentle camera bob for life
+    state.camera.position.y = Math.sin(t * 0.35) * 0.06
+    state.camera.lookAt(0, 0, 0)
   })
 
   return (
     <>
-      <ambientLight intensity={0.55} />
+      {/* Lighting */}
+      <ambientLight intensity={0.35} color="#a9c2db" />
       <directionalLight
-        position={[5, 8, 4]}
-        intensity={1.4}
-        color="#fff1d6"
-        castShadow
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
+        position={[3, 2.4, 3]}
+        intensity={1.1}
+        color={COLOR.rim}
       />
-      <directionalLight position={[-5, 4, -3]} intensity={0.35} color="#cfe6d6" />
-      <Building
-        position={DONOR_POS}
-        bodyColor={COLOR.donor}
-        roofColor={COLOR.donorRoof}
-        accent="donor"
-      />
-      <Building
-        position={NGO_POS}
-        bodyColor={COLOR.ngo}
-        roofColor={COLOR.ngoRoof}
-        accent="ngo"
-      />
-      <Ground />
-      <BikeTicker phaseRef={phaseRef} />
-      <ContactShadows
-        position={[0, 0.01, 0]}
-        opacity={0.35}
-        scale={12}
-        blur={2.4}
-        far={4}
-      />
+      <directionalLight position={[-4, -1, -2]} intensity={0.25} color="#5b8fbe" />
+      <pointLight position={[0, 0, 3]} intensity={0.4} color="#ffe9c8" />
+
+      <group ref={root}>
+        <Globe />
+
+        {CITIES.map((c, i) => (
+          <CityDot
+            key={c.name}
+            position={cityPositions[i]}
+            role={c.role}
+            pulsePhase={i * 0.37}
+          />
+        ))}
+
+        {ROUTES.map(([a, b, phase], i) => (
+          <Arc
+            key={`${a}-${b}-${i}`}
+            from={cityPositions[a]}
+            to={cityPositions[b]}
+            phaseOffset={phase}
+            cycle={4.5}
+          />
+        ))}
+      </group>
     </>
   )
 }
 
-function BikeTicker({ phaseRef }: { phaseRef: React.MutableRefObject<number> }) {
-  const [, setTick] = useState(0)
-  useFrame(() => setTick((n) => (n + 1) % 1_000_000))
-  return <Bike phase={phaseRef.current} />
-}
+/* ─────────────────────────  Wrapper  ───────────────────────── */
 
-function Fallback() {
+function Backdrop() {
   return (
     <div
-      className="flex h-full w-full items-center justify-center rounded-2xl border border-[var(--color-line)] bg-gradient-to-br from-[var(--color-canvas-2)] to-[var(--color-canvas-3)]"
       aria-hidden="true"
-    >
-      <div className="text-[12px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
-        Loading scene…
-      </div>
-    </div>
+      className="pointer-events-none absolute inset-0 -z-10"
+      style={{
+        background:
+          'radial-gradient(ellipse at 60% 45%, rgba(255, 217, 168, 0.18) 0%, rgba(127, 184, 255, 0.08) 35%, transparent 70%)',
+      }}
+    />
   )
 }
 
@@ -312,25 +416,24 @@ export function IsometricHandoff() {
   const [mounted, setMounted] = useState(false)
   const reduced = useReducedMotion()
   useEffect(() => setMounted(true), [])
-
   const dpr = useMemo<[number, number]>(() => [1, 2], [])
 
   if (!mounted) {
-    return <div className="aspect-[5/6] w-full" aria-hidden="true" />
+    return <div className="aspect-square w-full" aria-hidden="true" />
   }
 
   return (
     <div
-      className="aspect-[5/6] w-full"
+      className="relative aspect-square w-full"
       role="img"
-      aria-label="Animated scene: a courier picks up surplus food from a restaurant and delivers it to an NGO shelter."
+      aria-label="Animated globe of Nepal showing surplus food being routed from donor cities to receiver NGOs along glowing arcs."
     >
+      <Backdrop />
       <Suspense fallback={null}>
         <Canvas
-          shadows
           dpr={dpr}
-          camera={{ position: [6, 6, 6], fov: 35 }}
-          gl={{ antialias: true, alpha: true }}
+          camera={{ position: [0, 0, 4.4], fov: 38 }}
+          gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
         >
           <Scene animated={!reduced} />
         </Canvas>
@@ -338,3 +441,5 @@ export function IsometricHandoff() {
     </div>
   )
 }
+
+export const ConnectionGlobe = IsometricHandoff
