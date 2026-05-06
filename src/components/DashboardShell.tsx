@@ -4,6 +4,8 @@ import {
   BookOpen,
   Building2,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   ClipboardList,
   Clock,
   Flag,
@@ -106,6 +108,8 @@ function navForRole(role: string | null | undefined): NavItem[] {
   }
 }
 
+const COLLAPSE_KEY = 'foodsetu:sidebar-collapsed'
+
 export function DashboardShell({
   title,
   roleLabel,
@@ -116,6 +120,23 @@ export function DashboardShell({
   const router = useRouter()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+
+  // Hydrate collapsed state from localStorage (client-only).
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    setCollapsed(window.localStorage.getItem(COLLAPSE_KEY) === '1')
+  }, [])
+
+  function toggleCollapsed() {
+    setCollapsed((prev) => {
+      const next = !prev
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(COLLAPSE_KEY, next ? '1' : '0')
+      }
+      return next
+    })
+  }
 
   // Auto-close mobile drawer when route changes.
   useEffect(() => {
@@ -130,11 +151,37 @@ export function DashboardShell({
 
   const status = (organization?.verificationStatus ?? null) as VerificationStatus | null
   const navItems = navForRole(user.role)
+  const sidebarWidth = collapsed ? 'w-16' : 'w-64'
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white">
-        <div className="flex items-center gap-3 px-4 py-3 md:px-6">
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Desktop sidebar — full height, flush with the navbar (no gap) */}
+      <aside
+        className={`sticky top-0 hidden h-screen ${sidebarWidth} shrink-0 flex-col border-r border-gray-200 bg-white transition-[width] duration-200 md:flex`}
+      >
+        <div className="flex h-14 items-center gap-2.5 border-b border-gray-200 px-4">
+          <Link to="/" className="flex min-w-0 items-center gap-2.5">
+            <BowlMascot className="h-7 w-7 shrink-0" />
+            {collapsed ? null : (
+              <span className="truncate text-[15px] font-semibold tracking-tight text-[var(--color-ink)]">
+                FoodSetu
+              </span>
+            )}
+          </Link>
+        </div>
+        <SidebarNav items={navItems} pathname={pathname} collapsed={collapsed} />
+        <SidebarFooter
+          user={user}
+          roleLabel={roleLabel}
+          onSignOut={handleSignOut}
+          collapsed={collapsed}
+        />
+      </aside>
+
+      {/* Right column: navbar + main */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-gray-200 bg-white px-4 md:px-6">
+          {/* Mobile menu */}
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
@@ -143,15 +190,28 @@ export function DashboardShell({
           >
             <Menu className="h-5 w-5" />
           </button>
-          <Link to="/" className="flex items-center gap-2.5">
+          {/* Desktop collapse toggle */}
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            className="hidden h-9 w-9 items-center justify-center squircle text-gray-700 hover:bg-gray-100 md:inline-flex"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? (
+              <ChevronRight className="h-5 w-5" />
+            ) : (
+              <ChevronLeft className="h-5 w-5" />
+            )}
+          </button>
+          {/* Mobile-only logo */}
+          <Link to="/" className="flex items-center gap-2.5 md:hidden">
             <BowlMascot className="h-7 w-7" />
             <span className="text-[15px] font-semibold tracking-tight text-[var(--color-ink)]">
               FoodSetu
             </span>
           </Link>
           <div className="ml-auto flex items-center gap-3">
-            {/* User identity + sign out are mobile-only here; on desktop they
-                live in the sidebar footer. */}
             <div className="hidden text-right sm:block md:hidden">
               <div className="text-sm font-medium text-gray-900">
                 {user.name ?? user.email}
@@ -167,21 +227,8 @@ export function DashboardShell({
               <span className="hidden sm:inline">Sign out</span>
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="flex">
-        {/* Desktop sidebar */}
-        <aside className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-64 shrink-0 flex-col border-r border-gray-200 bg-white md:flex">
-          <SidebarNav items={navItems} pathname={pathname} />
-          <SidebarFooter
-            user={user}
-            roleLabel={roleLabel}
-            onSignOut={handleSignOut}
-          />
-        </aside>
-
-        {/* Main content */}
         <main className="min-w-0 flex-1 px-4 py-8 md:px-8">
           <div className="mx-auto max-w-6xl">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
@@ -230,7 +277,7 @@ export function DashboardShell({
             className="absolute inset-0 bg-black/40"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col border-r border-gray-200 bg-white shadow-xl">
+          <div className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col border-r border-gray-200 bg-white">
             <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
               <Link
                 to="/"
@@ -277,14 +324,16 @@ function SidebarNav({
   items,
   pathname,
   onNavigate,
+  collapsed = false,
 }: {
   items: NavItem[]
   pathname: string
   onNavigate?: () => void
+  collapsed?: boolean
 }) {
   if (items.length === 0) return <div className="flex-1" />
   return (
-    <nav className="flex-1 overflow-y-auto px-3 py-4">
+    <nav className={`flex-1 overflow-y-auto py-4 ${collapsed ? 'px-2' : 'px-3'}`}>
       <ul className="space-y-0.5">
         {items.map((item) => {
           const active = isActive(pathname, item)
@@ -294,8 +343,11 @@ function SidebarNav({
               <Link
                 to={item.to}
                 onClick={onNavigate}
-                className={`group flex items-center gap-2.5 squircle px-3 py-2 text-sm font-medium transition-colors ${
-                  item.indent ? 'ml-5' : ''
+                title={collapsed ? item.label : undefined}
+                className={`group flex items-center gap-2.5 squircle text-sm font-medium transition-colors ${
+                  collapsed
+                    ? 'justify-center px-0 py-2'
+                    : `px-3 py-2 ${item.indent ? 'ml-5' : ''}`
                 } ${
                   active
                     ? 'bg-gray-900 text-white'
@@ -307,7 +359,7 @@ function SidebarNav({
                     active ? 'text-white' : 'text-gray-500 group-hover:text-gray-900'
                   }`}
                 />
-                <span className="truncate">{item.label}</span>
+                {collapsed ? null : <span className="truncate">{item.label}</span>}
               </Link>
             </li>
           )
@@ -321,11 +373,28 @@ function SidebarFooter({
   user,
   roleLabel,
   onSignOut,
+  collapsed = false,
 }: {
   user: Props['user']
   roleLabel: string
   onSignOut: () => void
+  collapsed?: boolean
 }) {
+  if (collapsed) {
+    return (
+      <div className="border-t border-gray-200 p-2">
+        <button
+          type="button"
+          onClick={onSignOut}
+          title="Sign out"
+          aria-label="Sign out"
+          className="flex w-full items-center justify-center squircle px-0 py-2 text-gray-700 hover:bg-gray-100"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
+      </div>
+    )
+  }
   return (
     <div className="border-t border-gray-200 p-4">
       <div className="mb-3 min-w-0">

@@ -146,7 +146,7 @@ function NewReportPage() {
           Back
         </button>
 
-        <div className="squircle border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="squircle border border-gray-200 bg-white p-6">
           <div className="flex items-start gap-3">
             <Flag className="mt-0.5 h-5 w-5 text-red-600" />
             <div>

@@ -92,7 +92,7 @@ function MyReportsPage() {
           {reports.map((r) => (
             <li
               key={r.id}
-              className="squircle border border-gray-200 bg-white p-4 shadow-sm"
+              className="squircle border border-gray-200 bg-white p-4"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">

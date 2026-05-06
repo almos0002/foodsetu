@@ -87,7 +87,7 @@ export function AdminTable<T, TFilter extends string>({
                     onClick={() => onFilterChange?.(f.value)}
                     className={`inline-flex items-center gap-1.5 squircle px-3 py-1.5 text-sm font-medium transition-colors ${
                       active
-                        ? 'bg-[var(--color-canvas)] text-[var(--color-ink)] shadow-sm'
+                        ? 'bg-[var(--color-canvas)] text-[var(--color-ink)]'
                         : 'text-[var(--color-ink-2)] hover:text-[var(--color-ink)]'
                     }`}
                   >

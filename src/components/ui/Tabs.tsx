@@ -41,7 +41,7 @@ export function Tabs<TValue extends string>({
             className={cn(
               'inline-flex items-center gap-1.5 squircle px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ink)]',
               active
-                ? 'bg-[var(--color-canvas)] text-[var(--color-ink)] shadow-sm'
+                ? 'bg-[var(--color-canvas)] text-[var(--color-ink)]'
                 : 'text-[var(--color-ink-2)] hover:text-[var(--color-ink)]',
             )}
           >
