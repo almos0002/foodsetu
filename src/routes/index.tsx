@@ -322,7 +322,7 @@ function HeroPanel() {
     <div className="relative">
       {/* Main image card */}
       <div className="relative overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)]">
-        <div className="aspect-[5/6] w-full overflow-hidden">
+        <div className="h-[520px] w-full overflow-hidden">
           <img
             src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&auto=format&fit=crop&q=80"
             alt="Freshly cooked surplus meal ready for pickup"
@@ -576,7 +576,7 @@ function PublicCard({ listing }: { listing: PublicListingRow }) {
       to="/listings"
       className="group block overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)] transition-all hover:border-[var(--color-line-strong)]"
     >
-      <div className="relative aspect-[5/4] overflow-hidden bg-[var(--color-canvas-3)]">
+      <div className="relative h-48 w-full overflow-hidden bg-[var(--color-canvas-3)]">
         <img
           src={listing.imageUrl ?? FALLBACK_IMG}
           alt={listing.title}
