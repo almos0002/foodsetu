@@ -195,9 +195,21 @@ function Hero() {
       <div className="grid-bg-3d pointer-events-none" aria-hidden="true">
         <div className="grid-bg-3d-floor" />
       </div>
-      {/* Animated delivery network — sits behind the hero text */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <DeliveryNetwork />
+      {/* Animated delivery network — sits behind the hero text, in 3D perspective */}
+      <div
+        className="pointer-events-none absolute inset-x-[6%] bottom-[-4%] top-[18%]"
+        style={{ perspective: '1400px', perspectiveOrigin: '50% 0%' }}
+        aria-hidden="true"
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            transform: 'rotateX(46deg)',
+            transformOrigin: '50% 100%',
+          }}
+        >
+          <DeliveryNetwork />
+        </div>
       </div>
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,var(--color-accent-soft)_0%,transparent_60%)] opacity-60"
@@ -205,7 +217,7 @@ function Hero() {
       />
       {/* Soft halo masking the network behind the central text so it stays readable */}
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_60%_at_center,var(--color-canvas)_0%,rgba(255,255,255,0.85)_45%,transparent_85%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_55%_at_50%_45%,var(--color-canvas)_0%,rgba(255,255,255,0.88)_50%,transparent_85%)]"
         aria-hidden="true"
       />
 
@@ -275,17 +287,18 @@ type NetNode = {
 }
 
 // Coordinates are snapped to a 100-unit grid so paths line up with the
-// background grid lines. viewBox is 1600 × 800.
+// background grid lines. viewBox is 1600 × 800. Nodes are inset from the
+// edges so they don't kiss the screen border.
 const NET_NODES: NetNode[] = [
-  { id: 'r1', x: 100, y: 100, kind: 'restaurant', label: 'Bhojan Griha' },
-  { id: 'r2', x: 1500, y: 100, kind: 'restaurant', label: 'Thakali Kitchen' },
-  { id: 'r3', x: 200, y: 700, kind: 'restaurant', label: 'Himalayan Java' },
-  { id: 'r4', x: 1400, y: 700, kind: 'restaurant', label: 'Roadhouse' },
-  { id: 'n1', x: 100, y: 400, kind: 'ngo', label: 'Sarvanam Trust' },
-  { id: 'n2', x: 1500, y: 400, kind: 'ngo', label: 'Karuna Nepal' },
-  { id: 'n3', x: 700, y: 100, kind: 'ngo', label: 'CARE Nepal' },
-  { id: 'a1', x: 900, y: 700, kind: 'animal', label: 'KAT Centre' },
-  { id: 'a2', x: 300, y: 400, kind: 'animal', label: 'Project Mukti' },
+  { id: 'r1', x: 300, y: 200, kind: 'restaurant', label: 'Bhojan Griha' },
+  { id: 'r2', x: 1300, y: 200, kind: 'restaurant', label: 'Thakali Kitchen' },
+  { id: 'r3', x: 300, y: 600, kind: 'restaurant', label: 'Himalayan Java' },
+  { id: 'r4', x: 1300, y: 600, kind: 'restaurant', label: 'Roadhouse' },
+  { id: 'n1', x: 600, y: 600, kind: 'ngo', label: 'Sarvanam Trust' },
+  { id: 'n2', x: 1000, y: 600, kind: 'ngo', label: 'Karuna Nepal' },
+  { id: 'n3', x: 800, y: 200, kind: 'ngo', label: 'CARE Nepal' },
+  { id: 'a1', x: 500, y: 400, kind: 'animal', label: 'KAT Centre' },
+  { id: 'a2', x: 1100, y: 400, kind: 'animal', label: 'Project Mukti' },
 ]
 
 // `corner: 'h'` routes horizontal-then-vertical (corner at bx,ay).
@@ -329,15 +342,24 @@ function nodeColor(kind: NetNode['kind']) {
   return '#7c3aed'
 }
 
+function nodeIcon(kind: NetNode['kind']) {
+  if (kind === 'restaurant')
+    return <Utensils className="h-3 w-3" strokeWidth={2.4} />
+  if (kind === 'ngo')
+    return <HeartHandshake className="h-3 w-3" strokeWidth={2.4} />
+  return <ShieldCheck className="h-3 w-3" strokeWidth={2.4} />
+}
+
 function DeliveryNetwork() {
   const byId = Object.fromEntries(NET_NODES.map((n) => [n.id, n]))
   return (
-    <svg
-      viewBox="0 0 1600 800"
-      preserveAspectRatio="xMidYMid slice"
-      className="absolute inset-0 h-full w-full"
-      aria-hidden="true"
-    >
+    <div className="relative h-full w-full">
+      <svg
+        viewBox="0 0 1600 800"
+        preserveAspectRatio="xMidYMid meet"
+        className="absolute inset-0 h-full w-full"
+        aria-hidden="true"
+      >
       <defs>
         <radialGradient id="pulseGrad" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="1" />
@@ -428,7 +450,34 @@ function DeliveryNetwork() {
           </g>
         )
       })}
-    </svg>
+      </svg>
+
+      {/* Partner name labels — pinned to each node, sit on the tilted floor */}
+      <div className="absolute inset-0">
+        {NET_NODES.map((n) => {
+          const color = nodeColor(n.kind)
+          return (
+            <div
+              key={n.id}
+              className="absolute -translate-x-1/2"
+              style={{
+                left: `${(n.x / 1600) * 100}%`,
+                top: `${(n.y / 800) * 100}%`,
+              }}
+            >
+              <div
+                className="mt-3 flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--color-line)] bg-[var(--color-paper)]/95 px-2.5 py-1 text-[11px] font-medium text-[var(--color-ink)] shadow-[0_2px_6px_rgba(0,0,0,0.06)] backdrop-blur"
+              >
+                <span style={{ color }} className="inline-flex items-center">
+                  {nodeIcon(n.kind)}
+                </span>
+                <span>{n.label}</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
