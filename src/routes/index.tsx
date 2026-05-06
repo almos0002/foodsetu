@@ -191,7 +191,7 @@ function NavBar({
 function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-[var(--color-line)]">
-      {/* Subtle grid backdrop, only on this section */}
+      {/* Soft grid backdrop — faint, only on this section */}
       <div
         className="grid-bg pointer-events-none absolute inset-0 opacity-[0.55]"
         aria-hidden="true"
@@ -254,258 +254,11 @@ function Hero() {
           </div>
 
           <div className="lg:col-span-5">
-            <NetworkPanel />
+            <HeroPanel />
           </div>
         </div>
       </div>
     </section>
-  )
-}
-
-/* ───────────────────────── Network panel (right column) ──────────────── */
-
-function NetworkPanel() {
-  return (
-    <div
-      className="relative aspect-[5/4] w-full"
-      style={{ perspective: '1300px', perspectiveOrigin: '50% 30%' }}
-    >
-      <div
-        className="absolute inset-0"
-        style={{
-          transform: 'rotateX(28deg) rotateZ(-2deg)',
-          transformOrigin: '50% 60%',
-        }}
-      >
-        <DeliveryNetwork />
-      </div>
-
-      {/* Legend (no card chrome) */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full pt-4">
-        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] font-medium text-[var(--color-ink-2)]">
-          <span className="inline-flex items-center gap-1.5">
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ background: 'var(--color-accent)' }}
-            />
-            Restaurants
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#2563eb]" />
-            NGOs
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#7c3aed]" />
-            Animal rescues
-          </span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ───────────────────────── Delivery network ──────────────────────────── */
-
-type NetNode = {
-  id: string
-  x: number
-  y: number
-  kind: 'restaurant' | 'ngo' | 'animal'
-  label: string
-}
-
-// Coordinates are snapped to a 100-unit grid so paths line up with the
-// background grid lines. viewBox is 1600 × 800. Nodes are inset from the
-// edges so they don't kiss the screen border.
-const NET_NODES: NetNode[] = [
-  { id: 'r1', x: 300, y: 200, kind: 'restaurant', label: 'Bhojan Griha' },
-  { id: 'r2', x: 1300, y: 200, kind: 'restaurant', label: 'Thakali Kitchen' },
-  { id: 'r3', x: 300, y: 600, kind: 'restaurant', label: 'Himalayan Java' },
-  { id: 'r4', x: 1300, y: 600, kind: 'restaurant', label: 'Roadhouse' },
-  { id: 'n1', x: 600, y: 600, kind: 'ngo', label: 'Sarvanam Trust' },
-  { id: 'n2', x: 1000, y: 600, kind: 'ngo', label: 'Karuna Nepal' },
-  { id: 'n3', x: 800, y: 200, kind: 'ngo', label: 'CARE Nepal' },
-  { id: 'a1', x: 500, y: 400, kind: 'animal', label: 'KAT Centre' },
-  { id: 'a2', x: 1100, y: 400, kind: 'animal', label: 'Project Mukti' },
-]
-
-// `corner: 'h'` routes horizontal-then-vertical (corner at bx,ay).
-// `corner: 'v'` routes vertical-then-horizontal (corner at ax,by).
-const NET_EDGES: {
-  from: string
-  to: string
-  delay: number
-  corner: 'h' | 'v'
-}[] = [
-  { from: 'r1', to: 'n3', delay: 0.0, corner: 'h' },
-  { from: 'r1', to: 'a2', delay: 1.2, corner: 'v' },
-  { from: 'r2', to: 'n3', delay: 0.6, corner: 'h' },
-  { from: 'r2', to: 'n2', delay: 2.0, corner: 'v' },
-  { from: 'r3', to: 'n1', delay: 0.4, corner: 'v' },
-  { from: 'r3', to: 'a1', delay: 1.8, corner: 'h' },
-  { from: 'r4', to: 'n2', delay: 1.0, corner: 'v' },
-  { from: 'r4', to: 'a1', delay: 2.4, corner: 'h' },
-  { from: 'n1', to: 'a2', delay: 0.8, corner: 'h' },
-  { from: 'n3', to: 'a1', delay: 1.5, corner: 'v' },
-]
-
-function manhattanPath(
-  ax: number,
-  ay: number,
-  bx: number,
-  by: number,
-  corner: 'h' | 'v',
-): string {
-  if (corner === 'h') {
-    // horizontal first, then vertical — corner at (bx, ay)
-    return `M ${ax} ${ay} L ${bx} ${ay} L ${bx} ${by}`
-  }
-  // vertical first, then horizontal — corner at (ax, by)
-  return `M ${ax} ${ay} L ${ax} ${by} L ${bx} ${by}`
-}
-
-function nodeColor(kind: NetNode['kind']) {
-  if (kind === 'restaurant') return 'var(--color-accent)'
-  if (kind === 'ngo') return '#2563eb'
-  return '#7c3aed'
-}
-
-function nodeIcon(kind: NetNode['kind']) {
-  if (kind === 'restaurant')
-    return <Utensils className="h-3 w-3" strokeWidth={2.4} />
-  if (kind === 'ngo')
-    return <HeartHandshake className="h-3 w-3" strokeWidth={2.4} />
-  return <ShieldCheck className="h-3 w-3" strokeWidth={2.4} />
-}
-
-function DeliveryNetwork() {
-  const byId = Object.fromEntries(NET_NODES.map((n) => [n.id, n]))
-  return (
-    <div className="relative h-full w-full">
-      <svg
-        viewBox="0 0 1600 800"
-        preserveAspectRatio="xMidYMid meet"
-        className="absolute inset-0 h-full w-full"
-        aria-hidden="true"
-      >
-      <defs>
-        <radialGradient id="pulseGrad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="1" />
-          <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-
-      {/* Edges — Manhattan paths that hug the grid lines */}
-      {NET_EDGES.map((e, i) => {
-        const a = byId[e.from]
-        const b = byId[e.to]
-        if (!a || !b) return null
-        const d = manhattanPath(a.x, a.y, b.x, b.y, e.corner)
-        return (
-          <g key={`${e.from}-${e.to}-${i}`}>
-            <path
-              d={d}
-              stroke="var(--color-line-strong)"
-              strokeWidth="1.25"
-              strokeDasharray="4 6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-              opacity="0.55"
-            />
-            {/* Traveling pulse dot */}
-            <circle r="5" fill="var(--color-accent)">
-              <animateMotion
-                path={d}
-                dur="3.2s"
-                begin={`${e.delay}s`}
-                repeatCount="indefinite"
-                rotate="auto"
-              />
-              <animate
-                attributeName="opacity"
-                values="0;1;1;0"
-                keyTimes="0;0.08;0.92;1"
-                dur="3.2s"
-                begin={`${e.delay}s`}
-                repeatCount="indefinite"
-              />
-            </circle>
-            {/* Soft glow trailing the dot */}
-            <circle r="11" fill="url(#pulseGrad)" opacity="0.5">
-              <animateMotion
-                path={d}
-                dur="3.2s"
-                begin={`${e.delay}s`}
-                repeatCount="indefinite"
-              />
-              <animate
-                attributeName="opacity"
-                values="0;0.45;0.45;0"
-                keyTimes="0;0.08;0.92;1"
-                dur="3.2s"
-                begin={`${e.delay}s`}
-                repeatCount="indefinite"
-              />
-            </circle>
-          </g>
-        )
-      })}
-
-      {/* Nodes */}
-      {NET_NODES.map((n, i) => {
-        const color = nodeColor(n.kind)
-        return (
-          <g key={n.id}>
-            <circle
-              cx={n.x}
-              cy={n.y}
-              r="18"
-              fill={color}
-              opacity="0.18"
-              className="node-ring"
-              style={{ animationDelay: `${(i % 5) * 0.45}s` }}
-            />
-            <circle
-              cx={n.x}
-              cy={n.y}
-              r="11"
-              fill="var(--color-paper)"
-              stroke={color}
-              strokeWidth="2.5"
-            />
-            <circle cx={n.x} cy={n.y} r="3.5" fill={color} />
-          </g>
-        )
-      })}
-      </svg>
-
-      {/* Partner name labels — pinned to each node, sit on the tilted floor */}
-      <div className="absolute inset-0">
-        {NET_NODES.map((n) => {
-          const color = nodeColor(n.kind)
-          return (
-            <div
-              key={n.id}
-              className="absolute -translate-x-1/2"
-              style={{
-                left: `${(n.x / 1600) * 100}%`,
-                top: `${(n.y / 800) * 100}%`,
-              }}
-            >
-              <div
-                className="mt-3 flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--color-line)] bg-[var(--color-paper)]/95 px-2.5 py-1 text-[11px] font-medium text-[var(--color-ink)] shadow-[0_2px_6px_rgba(0,0,0,0.06)] backdrop-blur"
-              >
-                <span style={{ color }} className="inline-flex items-center">
-                  {nodeIcon(n.kind)}
-                </span>
-                <span>{n.label}</span>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
   )
 }
 
@@ -561,6 +314,73 @@ function RotatingWord() {
         </span>
       ))}
     </span>
+  )
+}
+
+function HeroPanel() {
+  return (
+    <div className="relative">
+      {/* Main image card */}
+      <div className="relative overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)]">
+        <div className="aspect-[5/6] w-full overflow-hidden">
+          <img
+            src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&auto=format&fit=crop&q=80"
+            alt="Freshly cooked surplus meal ready for pickup"
+            className="h-full w-full object-cover"
+          />
+        </div>
+
+        {/* Bottom info bar inside the card */}
+        <div className="absolute inset-x-3 bottom-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)]/95 p-3 backdrop-blur">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--color-accent)]">
+                <span className="live-dot" />
+                Available now
+              </div>
+              <div className="mt-1 truncate text-[14px] font-semibold">
+                28 portions · Daal bhat
+              </div>
+              <div className="mt-0.5 flex items-center gap-2 text-[11px] text-[var(--color-ink-3)] numeric">
+                <MapPin className="h-3 w-3" />
+                Thamel
+                <span className="h-2.5 w-px bg-[var(--color-line)]" />
+                <Clock className="h-3 w-3" />
+                Pickup by 9:30 PM
+              </div>
+            </div>
+            <button
+              type="button"
+              className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md bg-[var(--color-ink)] px-2.5 text-[11px] font-medium text-white"
+            >
+              Claim
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating stat — top-right */}
+      <div className="absolute -right-3 -top-4 hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 sm:block">
+        <div className="text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
+          Avg. handoff
+        </div>
+        <div className="mt-1 text-[20px] font-semibold leading-none numeric">
+          7 min
+        </div>
+      </div>
+
+      {/* Floating stat — bottom-left */}
+      <div className="absolute -bottom-4 -left-3 hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 sm:block">
+        <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
+          <ShieldCheck className="h-3 w-3 text-[var(--color-accent)]" />
+          This week
+        </div>
+        <div className="mt-1 text-[20px] font-semibold leading-none numeric">
+          1,284 meals
+        </div>
+      </div>
+    </div>
   )
 }
 
