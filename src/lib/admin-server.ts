@@ -153,6 +153,71 @@ export const listUsersForAdminFn = createServerFn({ method: 'GET' }).handler(
   },
 )
 
+function validateDeleteUserInput(value: unknown): { id: string } {
+  if (!value || typeof value !== 'object') throw new Error('Invalid input')
+  const v = value as Record<string, unknown>
+  if (typeof v.id !== 'string' || !v.id) throw new Error('id required')
+  return { id: v.id }
+}
+
+export const deleteUserFn = createServerFn({ method: 'POST' })
+  .inputValidator(validateDeleteUserInput)
+  .handler(async ({ data }) => {
+    const admin = await requireAdmin()
+    if (admin.id === data.id) {
+      throw new Error('You cannot delete your own admin account')
+    }
+    const target = await pool.query(
+      `SELECT role FROM "user" WHERE id = $1`,
+      [data.id],
+    )
+    if (target.rowCount === 0) throw new Error('User not found')
+    if (target.rows[0].role === 'ADMIN') {
+      throw new Error('Other admins cannot be deleted')
+    }
+    const result = await pool.query(`DELETE FROM "user" WHERE id = $1`, [
+      data.id,
+    ])
+    return { ok: true as const, deleted: result.rowCount ?? 0 }
+  })
+
+const ASSIGNABLE_ROLES = new Set(['RESTAURANT', 'NGO', 'ANIMAL_RESCUE'])
+
+function validateSetUserRoleInput(value: unknown): {
+  id: string
+  role: string
+} {
+  if (!value || typeof value !== 'object') throw new Error('Invalid input')
+  const v = value as Record<string, unknown>
+  if (typeof v.id !== 'string' || !v.id) throw new Error('id required')
+  if (typeof v.role !== 'string' || !ASSIGNABLE_ROLES.has(v.role)) {
+    throw new Error('Invalid role')
+  }
+  return { id: v.id, role: v.role }
+}
+
+export const setUserRoleFn = createServerFn({ method: 'POST' })
+  .inputValidator(validateSetUserRoleInput)
+  .handler(async ({ data }) => {
+    const admin = await requireAdmin()
+    if (admin.id === data.id) {
+      throw new Error('You cannot change your own role')
+    }
+    const target = await pool.query(
+      `SELECT role FROM "user" WHERE id = $1`,
+      [data.id],
+    )
+    if (target.rowCount === 0) throw new Error('User not found')
+    if (target.rows[0].role === 'ADMIN') {
+      throw new Error('Admin roles cannot be changed here')
+    }
+    await pool.query(
+      `UPDATE "user" SET role = $1, "updatedAt" = NOW() WHERE id = $2`,
+      [data.role, data.id],
+    )
+    return { ok: true as const }
+  })
+
 // ---------------------------------------------------------------------------
 // Listings (admin view)
 // ---------------------------------------------------------------------------

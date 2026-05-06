@@ -1,11 +1,17 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import { CheckCircle2, ShieldCheck, XCircle } from 'lucide-react'
+import { CheckCircle2, ShieldCheck, Trash2, XCircle } from 'lucide-react'
 import { AdminShell } from '../../../components/admin/AdminShell'
 import { AdminTable } from '../../../components/admin/AdminTable'
 import type { Column } from '../../../components/admin/AdminTable'
 import { StatusPill } from '../../../components/admin/StatusPill'
-import { listUsersForAdminFn } from '../../../lib/admin-server'
+import { Alert } from '../../../components/ui/Alert'
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog'
+import {
+  deleteUserFn,
+  listUsersForAdminFn,
+  setUserRoleFn,
+} from '../../../lib/admin-server'
 import type { AdminUserRow } from '../../../lib/admin-server'
 import {
   ROLE_LABELS,
@@ -37,12 +43,19 @@ const ROLE_TONE: Record<Role, BadgeTone> = {
   ANIMAL_RESCUE: 'teal',
 }
 
+const ASSIGNABLE_ROLES: Role[] = ['RESTAURANT', 'NGO', 'ANIMAL_RESCUE']
+
 type RoleFilter = 'ALL' | Role
 
 function AdminUsers() {
+  const router = useRouter()
   const { users } = Route.useLoaderData()
   const { user } = Route.useRouteContext()
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL')
+  const [confirmRow, setConfirmRow] = useState<AdminUserRow | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   const filtered =
     roleFilter === 'ALL' ? users : users.filter((u) => u.role === roleFilter)
@@ -64,6 +77,38 @@ function AdminUsers() {
     })),
   ]
 
+  async function handleDelete(row: AdminUserRow) {
+    setError(null)
+    setSuccess(null)
+    setBusyId(row.id)
+    try {
+      await deleteUserFn({ data: { id: row.id } })
+      setSuccess(`Deleted ${row.email ?? row.name ?? 'user'}`)
+      setConfirmRow(null)
+      router.invalidate()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete user')
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  async function handleRoleChange(row: AdminUserRow, role: Role) {
+    if (row.role === role) return
+    setError(null)
+    setSuccess(null)
+    setBusyId(row.id)
+    try {
+      await setUserRoleFn({ data: { id: row.id, role } })
+      setSuccess(`Updated role for ${row.email ?? row.name ?? 'user'}`)
+      router.invalidate()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update role')
+    } finally {
+      setBusyId(null)
+    }
+  }
+
   const columns: Column<AdminUserRow>[] = [
     {
       key: 'user',
@@ -80,11 +125,29 @@ function AdminUsers() {
       header: 'Role',
       render: (u) => {
         const r = u.role as Role | null
+        const isAdmin = r === 'ADMIN'
+        const isSelf = u.id === user.id
+        if (isAdmin || isSelf) {
+          return (
+            <StatusPill
+              label={r ? ROLE_LABELS[r] : '—'}
+              tone={r ? ROLE_TONE[r] : 'gray'}
+            />
+          )
+        }
         return (
-          <StatusPill
-            label={r ? ROLE_LABELS[r] : '—'}
-            tone={r ? ROLE_TONE[r] : 'gray'}
-          />
+          <select
+            className="squircle border border-[var(--color-line)] bg-[var(--color-canvas)] px-2 py-1 text-xs text-[var(--color-ink)] focus:border-[var(--color-ink)] focus:outline-none disabled:opacity-50"
+            value={r ?? ''}
+            disabled={busyId === u.id}
+            onChange={(e) => handleRoleChange(u, e.target.value as Role)}
+          >
+            {ASSIGNABLE_ROLES.map((opt) => (
+              <option key={opt} value={opt}>
+                {ROLE_LABELS[opt]}
+              </option>
+            ))}
+          </select>
         )
       },
     },
@@ -145,6 +208,29 @@ function AdminUsers() {
         </span>
       ),
     },
+    {
+      key: 'actions',
+      header: '',
+      render: (u) => {
+        const isAdmin = u.role === 'ADMIN'
+        const isSelf = u.id === user.id
+        if (isAdmin || isSelf) {
+          return <span className="text-xs text-gray-400">—</span>
+        }
+        return (
+          <button
+            type="button"
+            onClick={() => setConfirmRow(u)}
+            disabled={busyId === u.id}
+            className="inline-flex items-center gap-1 squircle border border-[var(--color-line)] px-2 py-1 text-xs text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] disabled:opacity-50"
+            aria-label={`Delete ${u.email ?? u.name ?? 'user'}`}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete
+          </button>
+        )
+      },
+    },
   ]
 
   return (
@@ -153,6 +239,16 @@ function AdminUsers() {
         <ShieldCheck className="h-4 w-4 text-orange-600" />
         Roles are server-managed; admins are not self-assigned.
       </div>
+      {error ? (
+        <div className="mb-4">
+          <Alert tone="error">{error}</Alert>
+        </div>
+      ) : null}
+      {success ? (
+        <div className="mb-4">
+          <Alert tone="success">{success}</Alert>
+        </div>
+      ) : null}
       <AdminTable
         rows={filtered}
         columns={columns}
@@ -163,6 +259,29 @@ function AdminUsers() {
         filterValue={roleFilter}
         onFilterChange={setRoleFilter}
         emptyLabel="No users yet."
+      />
+      <ConfirmDialog
+        open={confirmRow != null}
+        title="Delete this user?"
+        description={
+          confirmRow ? (
+            <>
+              Permanently delete{' '}
+              <strong>{confirmRow.name ?? confirmRow.email ?? 'this user'}</strong>{' '}
+              ({confirmRow.email}). Their sessions, accounts and organization
+              memberships will be removed. Listings, claims and reports they
+              created will remain. This cannot be undone.
+            </>
+          ) : (
+            ''
+          )
+        }
+        confirmLabel="Delete user"
+        cancelLabel="Keep user"
+        destructive
+        busy={confirmRow != null && busyId === confirmRow.id}
+        onConfirm={() => confirmRow && handleDelete(confirmRow)}
+        onCancel={() => setConfirmRow(null)}
       />
     </AdminShell>
   )
