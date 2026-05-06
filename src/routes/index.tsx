@@ -216,9 +216,11 @@ function Hero() {
               <span className="text-[var(--color-ink-3)]">not the bin.</span>
             </h1>
             <p className="mt-7 max-w-lg text-[17px] leading-[1.55] text-[var(--color-ink-2)]">
-              FoodSetu — <em>setu</em> means <em>bridge</em> in Sanskrit — links
-              verified hotels, restaurants, and bakeries with NGOs and animal
-              rescues, so surplus food reaches the communities that need it most.
+              FoodSetu — &ldquo;
+              <span className="font-semibold text-[var(--color-ink)]">Setu</span>
+              &rdquo; means bridge in Sanskrit — turns surplus food into a bridge
+              of care, connecting verified food businesses with NGOs, shelters,
+              and animal rescue groups.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-2.5">
