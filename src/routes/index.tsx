@@ -190,89 +190,106 @@ function NavBar({
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden border-b border-[var(--color-line)] min-h-[760px]">
-      {/* 3D perspective grid floor — receding into the distance */}
-      <div className="grid-bg-3d pointer-events-none" aria-hidden="true">
-        <div className="grid-bg-3d-floor" />
-      </div>
-      {/* Animated delivery network — sits behind the hero text, in 3D perspective */}
+    <section className="relative overflow-hidden border-b border-[var(--color-line)]">
+      {/* Subtle grid backdrop, only on this section */}
       <div
-        className="pointer-events-none absolute inset-x-[6%] bottom-[-4%] top-[18%]"
-        style={{ perspective: '1400px', perspectiveOrigin: '50% 0%' }}
-        aria-hidden="true"
-      >
-        <div
-          className="absolute inset-0"
-          style={{
-            transform: 'rotateX(46deg)',
-            transformOrigin: '50% 100%',
-          }}
-        >
-          <DeliveryNetwork />
-        </div>
-      </div>
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,var(--color-accent-soft)_0%,transparent_60%)] opacity-60"
+        className="grid-bg pointer-events-none absolute inset-0 opacity-[0.55]"
         aria-hidden="true"
       />
-      {/* Soft halo masking the network behind the central text so it stays readable */}
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_55%_at_50%_45%,var(--color-canvas)_0%,rgba(255,255,255,0.88)_50%,transparent_85%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(ellipse_at_top,var(--color-accent-soft)_0%,transparent_55%)] opacity-50"
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-[920px] px-5 pb-16 pt-16 text-center sm:px-8 sm:pb-24 sm:pt-24">
-        <div className="flex justify-center">
-          <LiveBadge />
-        </div>
-        <p className="mt-6 text-[13px] font-medium uppercase tracking-[0.18em] text-[var(--color-accent)]">
-          Nepal&apos;s free surplus food network
-        </p>
-        <h1 className="mt-3 font-display text-[clamp(2.4rem,5.6vw,4.5rem)] leading-[1.05]">
-          Surplus food,
-          <br />
-          matched in <RotatingWord />
-          <br />
-          <span className="text-[var(--color-ink-3)]">not the bin.</span>
-        </h1>
-        <p className="mx-auto mt-7 max-w-xl text-[17px] leading-[1.55] text-[var(--color-ink-2)]">
-          FoodSetu connects restaurants and bakeries with verified NGOs
-          and animal rescues. We handle the OTP handoff, paperwork, and
-          audit trail — so good food finds the right hands, fast.
-        </p>
+      <div className="relative mx-auto max-w-[1200px] px-5 pb-20 pt-16 sm:px-8 sm:pb-28 sm:pt-24">
+        <div className="grid gap-14 lg:grid-cols-12 lg:items-center lg:gap-16">
+          <div className="lg:col-span-7">
+            <LiveBadge />
+            <p className="mt-6 text-[13px] font-medium uppercase tracking-[0.18em] text-[var(--color-accent)]">
+              Nepal&apos;s free surplus food network
+            </p>
+            <h1 className="mt-3 font-display text-[clamp(2.4rem,5.6vw,4.25rem)] leading-[1.05]">
+              Surplus food,
+              <br />
+              matched in <RotatingWord />
+              <br />
+              <span className="text-[var(--color-ink-3)]">not the bin.</span>
+            </h1>
+            <p className="mt-7 max-w-lg text-[17px] leading-[1.55] text-[var(--color-ink-2)]">
+              FoodSetu connects restaurants and bakeries with verified NGOs
+              and animal rescues. We handle the OTP handoff, paperwork, and
+              audit trail — so good food finds the right hands, fast.
+            </p>
 
-        <div className="mt-9 flex flex-wrap items-center justify-center gap-2.5">
-          <Link
-            to="/register"
-            className="group inline-flex h-12 items-center gap-2 rounded-md bg-[var(--color-ink)] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
-          >
-            Start in 60 seconds
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-          <Link
-            to="/listings"
-            className="inline-flex h-12 items-center gap-2 rounded-md border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-5 text-[14px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-canvas-2)]"
-          >
-            Browse live listings
-          </Link>
-        </div>
+            <div className="mt-9 flex flex-wrap items-center gap-2.5">
+              <Link
+                to="/register"
+                className="group inline-flex h-12 items-center gap-2 rounded-md bg-[var(--color-ink)] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[var(--color-accent)]"
+              >
+                Start in 60 seconds
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                to="/listings"
+                className="inline-flex h-12 items-center gap-2 rounded-md border border-[var(--color-line-strong)] bg-[var(--color-paper)] px-5 text-[14px] font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-canvas-2)]"
+              >
+                Browse live listings
+              </Link>
+            </div>
 
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-[var(--color-ink-2)]">
-          <span className="inline-flex items-center gap-1.5">
-            <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
-            Verified partners only
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
-            Free, forever
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
-            No card required
-          </span>
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-[var(--color-ink-2)]">
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
+                Verified partners only
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
+                Free, forever
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-[var(--color-accent)]" />
+                No card required
+              </span>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5">
+            <NetworkPanel />
+          </div>
         </div>
       </div>
     </section>
+  )
+}
+
+/* ───────────────────────── Network panel (right column) ──────────────── */
+
+function NetworkPanel() {
+  return (
+    <div className="relative aspect-[5/4] w-full">
+      <DeliveryNetwork />
+
+      {/* Legend (no card chrome) */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full pt-4">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] font-medium text-[var(--color-ink-2)]">
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              className="h-2 w-2 rounded-full"
+              style={{ background: 'var(--color-accent)' }}
+            />
+            Restaurants
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-[#2563eb]" />
+            NGOs
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-[#7c3aed]" />
+            Animal rescues
+          </span>
+        </div>
+      </div>
+    </div>
   )
 }
 
