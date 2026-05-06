@@ -336,39 +336,44 @@ type HeroNode = {
   Icon: LucideIcon
 }
 
+const VBW = 400
+const VBH = 500
+
 function HeroNetwork() {
-  // Coordinates in the 400×500 viewBox.
   const donors: HeroNode[] = [
-    { x: 75, y: 110, Icon: Croissant },
-    { x: 200, y: 70, Icon: Building2 },
-    { x: 325, y: 120, Icon: Coffee },
+    { x: 60, y: 105, Icon: Croissant },
+    { x: 160, y: 65, Icon: Building2 },
+    { x: 260, y: 65, Icon: Utensils },
+    { x: 345, y: 110, Icon: Coffee },
   ]
   const claimants: HeroNode[] = [
-    { x: 85, y: 390, Icon: HeartHandshake },
-    { x: 215, y: 430, Icon: HomeIcon },
-    { x: 320, y: 380, Icon: PawPrint },
+    { x: 60, y: 395, Icon: HeartHandshake },
+    { x: 160, y: 435, Icon: HomeIcon },
+    { x: 260, y: 435, Icon: Building2 },
+    { x: 345, y: 395, Icon: PawPrint },
   ]
-  // Routes the cycle walks through, one at a time.
+  // Each donor reaches multiple claimants; ordered so adjacent cycles
+  // travel different parts of the graph for variety.
   const routes = [
-    { from: 0, to: 0 },
-    { from: 1, to: 1 },
-    { from: 2, to: 2 },
-    { from: 1, to: 0 },
-    { from: 0, to: 2 },
-    { from: 2, to: 1 },
+    { from: 0, to: 0, bow: 28 },
+    { from: 1, to: 1, bow: -22 },
+    { from: 2, to: 2, bow: 22 },
+    { from: 3, to: 3, bow: -28 },
+    { from: 0, to: 2, bow: 36 },
+    { from: 1, to: 3, bow: -34 },
+    { from: 2, to: 0, bow: 30 },
+    { from: 3, to: 1, bow: -30 },
   ]
 
   const [active, setActive] = useState(0)
   useEffect(() => {
     const id = setInterval(
       () => setActive((i) => (i + 1) % routes.length),
-      2400,
+      2200,
     )
     return () => clearInterval(id)
   }, [routes.length])
 
-  // Quadratic bezier bowed perpendicular to the donor→claimant vector, so
-  // routes feel like organic flight paths instead of straight lines.
   const curve = (a: HeroNode, b: HeroNode, bow: number) => {
     const mx = (a.x + b.x) / 2
     const my = (a.y + b.y) / 2
@@ -383,143 +388,141 @@ function HeroNetwork() {
   const activeRoute = routes[active]
   const activeFromIdx = activeRoute.from
   const activeToIdx = activeRoute.to
+  const activeFromNode = donors[activeFromIdx]
+  const activeToNode = claimants[activeToIdx]
+  const activeD = curve(activeFromNode, activeToNode, activeRoute.bow)
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[var(--color-canvas)]">
-      {/* Soft grid backdrop, masked to fade at edges */}
+    <div className="relative h-full w-full overflow-hidden">
+      {/* Soft grid backdrop — masked to fade at edges */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 opacity-50"
+        className="absolute inset-0 opacity-45"
         style={{
           backgroundImage:
             'linear-gradient(var(--color-line) 1px, transparent 1px), linear-gradient(90deg, var(--color-line) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
+          backgroundSize: '34px 34px',
           maskImage:
-            'radial-gradient(ellipse at center, black 50%, transparent 90%)',
+            'radial-gradient(ellipse at center, black 55%, transparent 92%)',
           WebkitMaskImage:
-            'radial-gradient(ellipse at center, black 50%, transparent 90%)',
+            'radial-gradient(ellipse at center, black 55%, transparent 92%)',
         }}
       />
-      {/* Ambient glow tints */}
+      {/* Ambient color washes */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(ellipse_at_top,var(--color-accent-soft)_0%,transparent_75%)] opacity-70"
+        className="pointer-events-none absolute -top-10 left-1/2 h-64 w-[120%] -translate-x-1/2 rounded-[100%] bg-[radial-gradient(ellipse_at_center,var(--color-accent-soft)_0%,transparent_70%)] opacity-80"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-[radial-gradient(ellipse_at_bottom,var(--color-info-soft,rgba(59,130,246,0.15))_0%,transparent_75%)] opacity-50"
+        className="pointer-events-none absolute -bottom-10 left-1/2 h-64 w-[120%] -translate-x-1/2 rounded-[100%] bg-[radial-gradient(ellipse_at_center,rgba(16,129,76,0.10)_0%,transparent_70%)]"
       />
 
       <svg
-        viewBox="0 0 400 500"
+        viewBox={`0 0 ${VBW} ${VBH}`}
         preserveAspectRatio="xMidYMid meet"
         className="absolute inset-0 h-full w-full"
         aria-hidden="true"
       >
         <defs>
-          {/* Soft glow filter for the active path */}
           <filter id="hero-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2.5" result="b" />
+            <feGaussianBlur stdDeviation="3" result="b" />
             <feMerge>
               <feMergeNode in="b" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
+          <linearGradient id="hero-route-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0.55" />
+          </linearGradient>
         </defs>
 
-        {/* All routes drawn as faint dashed lines so the network is visible */}
+        {/* ALL routes drawn at full strength so the network feels alive */}
         {routes.map((r, i) => {
           const isActive = i === active
-          if (isActive) return null
           const a = donors[r.from]
           const b = claimants[r.to]
-          const d = curve(a, b, i % 2 === 0 ? 28 : -28)
+          const d = curve(a, b, r.bow)
+          if (isActive) return null
           return (
             <path
               key={`bg-${i}`}
               d={d}
               fill="none"
-              stroke="var(--color-line-strong)"
+              stroke="url(#hero-route-grad)"
               strokeWidth="1"
-              strokeDasharray="2 5"
-              opacity="0.35"
+              strokeLinecap="round"
+              strokeDasharray="3 5"
+              opacity="0.55"
             />
           )
         })}
 
-        {/* Active route — bold accent + traveling parcel */}
-        {(() => {
-          const a = donors[activeFromIdx]
-          const b = claimants[activeToIdx]
-          const bow = active % 2 === 0 ? 32 : -32
-          const d = curve(a, b, bow)
-          return (
-            <g key={`active-${active}`}>
-              {/* Glow underlay */}
-              <path
-                d={d}
-                fill="none"
-                stroke="var(--color-accent)"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-                opacity="0.25"
-                filter="url(#hero-glow)"
-              />
-              {/* Crisp foreground line that draws in */}
-              <path
-                d={d}
-                fill="none"
-                stroke="var(--color-accent)"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeDasharray="600"
-                strokeDashoffset="600"
-                style={{
-                  animation: 'hero-route-draw 2.2s ease-out forwards',
-                }}
-              />
-              {/* Traveling parcel */}
-              <circle r="5.5" fill="var(--color-accent)" filter="url(#hero-glow)">
-                <animateMotion
-                  dur="2.2s"
-                  begin="0s"
-                  fill="freeze"
-                  repeatCount="1"
-                  path={d}
-                  rotate="auto"
-                />
-              </circle>
-              {/* Comet tail */}
-              <circle r="3.2" fill="var(--color-accent)" opacity="0.55">
-                <animateMotion
-                  dur="2.2s"
-                  begin="0.12s"
-                  fill="freeze"
-                  repeatCount="1"
-                  path={d}
-                />
-              </circle>
-              <circle r="2" fill="var(--color-accent)" opacity="0.3">
-                <animateMotion
-                  dur="2.2s"
-                  begin="0.22s"
-                  fill="freeze"
-                  repeatCount="1"
-                  path={d}
-                />
-              </circle>
-            </g>
-          )
-        })()}
+        {/* Active route — solid, glowing, with parcel + comet tail */}
+        <g key={`active-${active}`}>
+          <path
+            d={activeD}
+            fill="none"
+            stroke="var(--color-accent)"
+            strokeWidth="4"
+            strokeLinecap="round"
+            opacity="0.28"
+            filter="url(#hero-glow)"
+          />
+          <path
+            d={activeD}
+            fill="none"
+            stroke="var(--color-accent)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="600"
+            strokeDashoffset="600"
+            style={{
+              animation: 'hero-route-draw 2s ease-out forwards',
+            }}
+          />
+          <circle r="6" fill="var(--color-accent)" filter="url(#hero-glow)">
+            <animateMotion
+              dur="2s"
+              begin="0s"
+              fill="freeze"
+              repeatCount="1"
+              path={activeD}
+              rotate="auto"
+            />
+          </circle>
+          <circle r="3.5" fill="var(--color-accent)" opacity="0.6">
+            <animateMotion
+              dur="2s"
+              begin="0.12s"
+              fill="freeze"
+              repeatCount="1"
+              path={activeD}
+            />
+          </circle>
+          <circle r="2.2" fill="var(--color-accent)" opacity="0.35">
+            <animateMotion
+              dur="2s"
+              begin="0.22s"
+              fill="freeze"
+              repeatCount="1"
+              path={activeD}
+            />
+          </circle>
+        </g>
+
+        {/* Pulse rings drawn in SVG so they're geometrically perfect */}
+        <PulseRing key={`pf-${active}`} cx={activeFromNode.x} cy={activeFromNode.y} />
+        <PulseRing key={`pt-${active}`} cx={activeToNode.x} cy={activeToNode.y} />
       </svg>
 
-      {/* Icon nodes (HTML so icons stay crisp at any size) */}
+      {/* Icon nodes (HTML for crisp lucide rendering) */}
       <div className="pointer-events-none absolute inset-0">
         {donors.map((p, i) => (
           <NodeIcon
             key={`d${i}`}
             node={p}
-            tone="donor"
             highlighted={i === activeFromIdx}
           />
         ))}
@@ -527,76 +530,95 @@ function HeroNetwork() {
           <NodeIcon
             key={`c${i}`}
             node={p}
-            tone="claim"
             highlighted={i === activeToIdx}
           />
         ))}
       </div>
 
-      {/* Local keyframes for the route draw + node pulse */}
       <style>{`
         @keyframes hero-route-draw {
           to { stroke-dashoffset: 0; }
         }
-        @keyframes hero-node-pulse {
-          0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.55; }
-          70%  { transform: translate(-50%, -50%) scale(2.1); opacity: 0;    }
-          100% { transform: translate(-50%, -50%) scale(2.1); opacity: 0;    }
-        }
         @keyframes hero-node-pop {
           0%   { transform: translate(-50%, -50%) scale(1);    }
-          40%  { transform: translate(-50%, -50%) scale(1.12); }
-          100% { transform: translate(-50%, -50%) scale(1);    }
+          40%  { transform: translate(-50%, -50%) scale(1.14); }
+          100% { transform: translate(-50%, -50%) scale(1.06); }
         }
       `}</style>
     </div>
   )
 }
 
+function PulseRing({ cx, cy }: { cx: number; cy: number }) {
+  return (
+    <g>
+      {[0, 0.45, 0.9].map((delay, i) => (
+        <circle
+          key={i}
+          cx={cx}
+          cy={cy}
+          r="14"
+          fill="none"
+          stroke="var(--color-accent)"
+          strokeWidth="1.5"
+          opacity="0"
+        >
+          <animate
+            attributeName="r"
+            values="14;34"
+            dur="1.5s"
+            begin={`${delay}s`}
+            repeatCount="indefinite"
+          />
+          <animate
+            attributeName="opacity"
+            values="0.55;0"
+            dur="1.5s"
+            begin={`${delay}s`}
+            repeatCount="indefinite"
+          />
+          <animate
+            attributeName="stroke-width"
+            values="1.8;0.4"
+            dur="1.5s"
+            begin={`${delay}s`}
+            repeatCount="indefinite"
+          />
+        </circle>
+      ))}
+    </g>
+  )
+}
+
 function NodeIcon({
   node,
-  tone,
   highlighted,
 }: {
   node: HeroNode
-  tone: 'donor' | 'claim'
   highlighted: boolean
 }) {
   const Icon = node.Icon
-  const accentVar =
-    tone === 'donor' ? 'var(--color-accent)' : 'var(--color-info)'
+  const accent = 'var(--color-accent)'
   return (
     <div
       className="absolute"
       style={{
-        left: `${(node.x / 400) * 100}%`,
-        top: `${(node.y / 500) * 100}%`,
+        left: `${(node.x / VBW) * 100}%`,
+        top: `${(node.y / VBH) * 100}%`,
       }}
     >
-      {/* Outward pulse ring — only on the active node */}
-      {highlighted ? (
-        <span
-          aria-hidden="true"
-          className="absolute left-1/2 top-1/2 h-12 w-12 rounded-full border-2"
-          style={{
-            borderColor: accentVar,
-            animation: 'hero-node-pulse 1.4s ease-out infinite',
-          }}
-        />
-      ) : null}
       <div
-        className="relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-500"
+        className="flex h-12 w-12 items-center justify-center rounded-full transition-all duration-500 ease-out"
         style={{
-          transform: 'translate(-50%, -50%)',
-          background: highlighted
-            ? accentVar
-            : 'var(--color-paper)',
+          transform: highlighted
+            ? 'translate(-50%, -50%) scale(1.08)'
+            : 'translate(-50%, -50%) scale(1)',
+          background: highlighted ? accent : 'var(--color-paper)',
           color: highlighted ? 'var(--color-paper)' : 'var(--color-ink-2)',
           boxShadow: highlighted
-            ? `0 0 0 3px var(--color-paper), 0 8px 24px -6px ${accentVar}, 0 2px 6px rgba(0,0,0,0.08)`
-            : '0 0 0 1px var(--color-line), 0 1px 3px rgba(0,0,0,0.06)',
-          opacity: highlighted ? 1 : 0.62,
-          animation: highlighted ? 'hero-node-pop 0.5s ease-out' : undefined,
+            ? `0 0 0 4px var(--color-paper), 0 10px 28px -6px ${accent}, 0 2px 6px rgba(0,0,0,0.08)`
+            : '0 0 0 1px var(--color-line), 0 1px 3px rgba(0,0,0,0.05)',
+          opacity: highlighted ? 1 : 0.78,
         }}
       >
         <Icon className="h-5 w-5" strokeWidth={1.8} />
@@ -608,61 +630,8 @@ function NodeIcon({
 function HeroPanel() {
   return (
     <div className="relative">
-      {/* Main visual card */}
-      <div className="relative overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)]">
-        <div className="aspect-[5/6] w-full overflow-hidden">
-          <HeroNetwork />
-        </div>
-
-        {/* Bottom info bar inside the card */}
-        <div className="absolute inset-x-3 bottom-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)]/95 p-3 backdrop-blur">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--color-accent)]">
-                <span className="live-dot" />
-                Available now
-              </div>
-              <div className="mt-1 truncate text-[14px] font-semibold">
-                28 portions · Daal bhat
-              </div>
-              <div className="mt-0.5 flex items-center gap-2 text-[11px] text-[var(--color-ink-3)] numeric">
-                <MapPin className="h-3 w-3" />
-                Thamel
-                <span className="h-2.5 w-px bg-[var(--color-line)]" />
-                <Clock className="h-3 w-3" />
-                Pickup by 9:30 PM
-              </div>
-            </div>
-            <button
-              type="button"
-              className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md bg-[var(--color-ink)] px-2.5 text-[11px] font-medium text-white"
-            >
-              Claim
-              <ArrowRight className="h-3 w-3" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Floating stat — top-right */}
-      <div className="absolute -right-3 -top-4 hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 sm:block">
-        <div className="text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
-          Avg. handoff
-        </div>
-        <div className="mt-1 text-[20px] font-semibold leading-none numeric">
-          7 min
-        </div>
-      </div>
-
-      {/* Floating stat — bottom-left */}
-      <div className="absolute -bottom-4 -left-3 hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 sm:block">
-        <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-[var(--color-ink-3)]">
-          <ShieldCheck className="h-3 w-3 text-[var(--color-accent)]" />
-          This week
-        </div>
-        <div className="mt-1 text-[20px] font-semibold leading-none numeric">
-          1,284 meals
-        </div>
+      <div className="aspect-[5/6] w-full">
+        <HeroNetwork />
       </div>
     </div>
   )
