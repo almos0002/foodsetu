@@ -27,6 +27,7 @@ import { Route as AuthedAnimalNearbyFoodRouteImport } from './routes/_authed/ani
 import { Route as AuthedAnimalMyClaimsRouteImport } from './routes/_authed/animal/my-claims'
 import { Route as AuthedAnimalDashboardRouteImport } from './routes/_authed/animal/dashboard'
 import { Route as AuthedAdminUsersRouteImport } from './routes/_authed/admin/users'
+import { Route as AuthedAdminSettingsRouteImport } from './routes/_authed/admin/settings'
 import { Route as AuthedAdminReportsRouteImport } from './routes/_authed/admin/reports'
 import { Route as AuthedAdminOrganizationsRouteImport } from './routes/_authed/admin/organizations'
 import { Route as AuthedAdminListingsRouteImport } from './routes/_authed/admin/listings'
@@ -132,6 +133,11 @@ const AuthedAdminUsersRoute = AuthedAdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedAdminSettingsRoute = AuthedAdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedAdminReportsRoute = AuthedAdminReportsRouteImport.update({
   id: '/admin/reports',
   path: '/admin/reports',
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/admin/listings': typeof AuthedAdminListingsRoute
   '/admin/organizations': typeof AuthedAdminOrganizationsRoute
   '/admin/reports': typeof AuthedAdminReportsRoute
+  '/admin/settings': typeof AuthedAdminSettingsRoute
   '/admin/users': typeof AuthedAdminUsersRoute
   '/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/animal/my-claims': typeof AuthedAnimalMyClaimsRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/admin/listings': typeof AuthedAdminListingsRoute
   '/admin/organizations': typeof AuthedAdminOrganizationsRoute
   '/admin/reports': typeof AuthedAdminReportsRoute
+  '/admin/settings': typeof AuthedAdminSettingsRoute
   '/admin/users': typeof AuthedAdminUsersRoute
   '/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/animal/my-claims': typeof AuthedAnimalMyClaimsRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/_authed/admin/listings': typeof AuthedAdminListingsRoute
   '/_authed/admin/organizations': typeof AuthedAdminOrganizationsRoute
   '/_authed/admin/reports': typeof AuthedAdminReportsRoute
+  '/_authed/admin/settings': typeof AuthedAdminSettingsRoute
   '/_authed/admin/users': typeof AuthedAdminUsersRoute
   '/_authed/animal/dashboard': typeof AuthedAnimalDashboardRoute
   '/_authed/animal/my-claims': typeof AuthedAnimalMyClaimsRoute
@@ -308,6 +317,7 @@ export interface FileRouteTypes {
     | '/admin/listings'
     | '/admin/organizations'
     | '/admin/reports'
+    | '/admin/settings'
     | '/admin/users'
     | '/animal/dashboard'
     | '/animal/my-claims'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/admin/listings'
     | '/admin/organizations'
     | '/admin/reports'
+    | '/admin/settings'
     | '/admin/users'
     | '/animal/dashboard'
     | '/animal/my-claims'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/_authed/admin/listings'
     | '/_authed/admin/organizations'
     | '/_authed/admin/reports'
+    | '/_authed/admin/settings'
     | '/_authed/admin/users'
     | '/_authed/animal/dashboard'
     | '/_authed/animal/my-claims'
@@ -529,6 +541,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAdminUsersRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/admin/settings': {
+      id: '/_authed/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthedAdminSettingsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/admin/reports': {
       id: '/_authed/admin/reports'
       path: '/admin/reports'
@@ -623,6 +642,7 @@ interface AuthedRouteChildren {
   AuthedAdminListingsRoute: typeof AuthedAdminListingsRoute
   AuthedAdminOrganizationsRoute: typeof AuthedAdminOrganizationsRoute
   AuthedAdminReportsRoute: typeof AuthedAdminReportsRoute
+  AuthedAdminSettingsRoute: typeof AuthedAdminSettingsRoute
   AuthedAdminUsersRoute: typeof AuthedAdminUsersRoute
   AuthedAnimalDashboardRoute: typeof AuthedAnimalDashboardRoute
   AuthedAnimalMyClaimsRoute: typeof AuthedAnimalMyClaimsRoute
@@ -650,6 +670,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedAdminListingsRoute: AuthedAdminListingsRoute,
   AuthedAdminOrganizationsRoute: AuthedAdminOrganizationsRoute,
   AuthedAdminReportsRoute: AuthedAdminReportsRoute,
+  AuthedAdminSettingsRoute: AuthedAdminSettingsRoute,
   AuthedAdminUsersRoute: AuthedAdminUsersRoute,
   AuthedAnimalDashboardRoute: AuthedAnimalDashboardRoute,
   AuthedAnimalMyClaimsRoute: AuthedAnimalMyClaimsRoute,
